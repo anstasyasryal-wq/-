@@ -30,7 +30,7 @@ export interface CategoryInfo {
   };
 }
 
-export type QuizMode = 'home' | 'solo' | 'team' | 'speed' | 'study' | 'leaderboard' | 'oasis';
+export type QuizMode = 'home' | 'solo' | 'team' | 'speed' | 'study' | 'leaderboard' | 'oasis' | 'creative';
 
 export interface ParticipantProfile {
   name: string;

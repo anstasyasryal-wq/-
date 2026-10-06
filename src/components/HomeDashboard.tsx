@@ -2,6 +2,7 @@ import React from 'react';
 import { QuizMode } from '../types';
 import { CATEGORIES } from '../data/questions';
 import { DailySpiritualVerse } from './DailySpiritualVerse';
+import wiseVirginsIcon from '../assets/images/wise_virgins_icon_1791299280946.jpg';
 import { 
   User, 
   Users, 
@@ -14,17 +15,21 @@ import {
   Flame, 
   HeartHandshake,
   Compass,
-  IdCard
+  IdCard,
+  Lightbulb,
+  Maximize2
 } from 'lucide-react';
 
 interface HomeDashboardProps {
   onSelectMode: (mode: QuizMode) => void;
+  onOpenWiseVirginsIcon: () => void;
   totalQuestionsCount: number;
   totalCompletedCount: number;
 }
 
 export const HomeDashboard: React.FC<HomeDashboardProps> = ({
   onSelectMode,
+  onOpenWiseVirginsIcon,
   totalQuestionsCount,
   totalCompletedCount,
 }) => {
@@ -82,6 +87,14 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               <Users className="w-5 h-5 text-amber-400" />
               <span>المسابقة الجماعية للفرق</span>
             </button>
+
+            <button
+              onClick={onOpenWiseVirginsIcon}
+              className="px-5 py-3.5 rounded-xl bg-amber-950/80 hover:bg-amber-900 text-amber-200 font-bold text-sm sm:text-base border border-amber-600/50 shadow-md transition-all flex items-center gap-2"
+            >
+              <Sparkles className="w-5 h-5 text-amber-300" />
+              <span>أيقونة العذارى الحكيمات</span>
+            </button>
           </div>
         </div>
 
@@ -104,6 +117,56 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
               {totalCompletedCount} متسابقة
             </span>
             <span>مسجلة في لوحة الشرف</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Wise Virgins Icon Feature Card */}
+      <div 
+        onClick={onOpenWiseVirginsIcon}
+        className="rounded-3xl bg-gradient-to-r from-stone-900 via-amber-950 to-stone-900 text-stone-100 border border-amber-700/60 p-6 sm:p-8 shadow-xl cursor-pointer hover:border-amber-500 transition-all group overflow-hidden relative"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center relative z-10">
+          <div className="md:col-span-4 flex justify-center">
+            <div className="relative rounded-2xl overflow-hidden border-2 border-amber-500/80 shadow-2xl max-w-[260px] group-hover:scale-105 transition-transform duration-300">
+              <img
+                src={wiseVirginsIcon}
+                alt="أيقونة العذارى الحكيمات"
+                className="w-full h-auto object-cover"
+              />
+              <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <span className="px-3 py-1.5 rounded-lg bg-stone-900/90 text-amber-200 text-xs font-bold flex items-center gap-1.5">
+                  <Maximize2 className="w-3.5 h-3.5" />
+                  <span>تكبير الأيقونة</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="md:col-span-8 text-right space-y-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-900/70 border border-amber-600/40 text-amber-300 text-xs font-bold">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>أيقونة التكريس والبتولية الكنسية</span>
+            </div>
+
+            <h3 className="font-spiritual text-2xl sm:text-3xl font-bold text-amber-100">
+              أيقونة العذارى الحكيمات ومصابيح الزيت المتقدة
+            </h3>
+
+            <p className="font-spiritual text-base text-amber-200/90 italic">
+              «أَمَّا الْحَكِيمَاتُ فَأَخَذْنَ زَيْتاً فِي آنِيَتِهِنَّ مَعَ مَصَابِيحِهِنَّ... هُوَذَا الْعَرِيسُ مُقْبِلٌ، فَاخْرُجْنَ لِلِقَائِهِ» (متى 25)
+            </p>
+
+            <p className="text-xs sm:text-sm text-stone-300 leading-relaxed font-sans pt-1">
+              أيقونة قبطية تجسد سر السهر الروحي والاستنارة الدائمة بالصلاة والمحبة الخفية. اضغطي هنا لتأمل اللاهوت الكنسي للأيقونة وتحميلها بدقة عالية.
+            </p>
+
+            <div className="pt-2">
+              <span className="inline-flex items-center gap-2 text-xs font-bold text-amber-300 group-hover:text-amber-100 transition-colors">
+                <span>عرض الأيقونة والشرح اللاهوتي الكامل</span>
+                <ChevronLeft className="w-4 h-4" />
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -282,6 +345,39 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
 
           <div className="shrink-0 flex items-center gap-2 px-6 py-3 rounded-xl bg-amber-700 hover:bg-amber-600 text-white font-bold text-sm shadow-md transition-colors">
             <span>دخول الواحة الروحية</span>
+            <ChevronLeft className="w-4 h-4" />
+          </div>
+        </div>
+      </div>
+
+      {/* Special Feature: Creative Challenges Lab */}
+      <div 
+        onClick={() => onSelectMode('creative')}
+        className="rounded-3xl bg-gradient-to-r from-stone-900 via-amber-950 to-stone-900 text-stone-100 p-6 sm:p-10 shadow-lg border border-amber-800/60 cursor-pointer hover:shadow-xl transition-all relative overflow-hidden group"
+      >
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
+          <div className="flex items-start gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-amber-700/80 border border-amber-500/50 flex items-center justify-center text-amber-200 shadow-inner group-hover:scale-105 transition-transform shrink-0">
+              <Lightbulb className="w-8 h-8" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-800/60 text-amber-300 border border-amber-600/40">
+                  تحديات نوعية متقدمة
+                </span>
+                <span className="text-xs text-stone-400 font-sans">أنماط مبتكرة</span>
+              </div>
+              <h3 className="font-spiritual text-2xl sm:text-3xl font-bold text-amber-100 mb-2">
+                مختبر المسابقات الإبداعية
+              </h3>
+              <p className="text-xs sm:text-sm text-stone-300 max-w-2xl leading-relaxed font-sans">
+                اختبري معلوماتكِ في <strong>«مَن قائل العبارة؟»</strong> لأمهات وآباء الرهبنة، و <strong>«الترتيب الزمني للأحداث الكنسية»</strong>، وتدربي على <strong>«مواقف الإفراز والرعاية الواقعية»</strong> في خدمة بيوت التكريس.
+              </p>
+            </div>
+          </div>
+
+          <div className="shrink-0 flex items-center gap-2 px-6 py-3 rounded-xl bg-amber-700 hover:bg-amber-600 text-white font-bold text-sm shadow-md transition-colors">
+            <span>بدء المسابقات الإبداعية</span>
             <ChevronLeft className="w-4 h-4" />
           </div>
         </div>

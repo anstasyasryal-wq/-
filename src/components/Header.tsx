@@ -11,7 +11,8 @@ import {
   VolumeX, 
   PlusCircle,
   Home,
-  Compass
+  Compass,
+  Lightbulb
 } from 'lucide-react';
 import { soundManager } from '../utils/audio';
 
@@ -122,6 +123,18 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
 
             <button
+              onClick={() => onSelectMode('creative')}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                currentMode === 'creative'
+                  ? 'bg-amber-800/80 text-amber-100 shadow-sm'
+                  : 'text-stone-300 hover:text-white hover:bg-stone-800/50'
+              }`}
+            >
+              <Lightbulb className="w-4 h-4 text-amber-300" />
+              <span>المسابقات الإبداعية</span>
+            </button>
+
+            <button
               onClick={() => onSelectMode('speed')}
               className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                 currentMode === 'speed'
@@ -218,6 +231,14 @@ export const Header: React.FC<HeaderProps> = ({
             }`}
           >
             الواحة والفضائل
+          </button>
+          <button
+            onClick={() => onSelectMode('creative')}
+            className={`px-2.5 py-1.5 text-xs font-medium rounded-md whitespace-nowrap ${
+              currentMode === 'creative' ? 'bg-amber-800 text-amber-100' : 'text-stone-400'
+            }`}
+          >
+            المسابقات الإبداعية
           </button>
           <button
             onClick={() => onSelectMode('speed')}

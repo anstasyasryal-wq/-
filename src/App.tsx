@@ -22,6 +22,8 @@ import { Leaderboard } from './components/Leaderboard';
 import { CertificateModal } from './components/CertificateModal';
 import { CustomQuestionModal } from './components/CustomQuestionModal';
 import { MonasticOasis } from './components/MonasticOasis';
+import { CreativeLab } from './components/CreativeLab';
+import { WiseVirginsModal } from './components/WiseVirginsModal';
 
 export default function App() {
   const [currentMode, setCurrentMode] = useState<QuizMode>('home');
@@ -30,6 +32,7 @@ export default function App() {
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [selectedCertificateResult, setSelectedCertificateResult] = useState<SoloQuizResult | null>(null);
   const [showAddQuestionModal, setShowAddQuestionModal] = useState<boolean>(false);
+  const [showWiseVirginsModal, setShowWiseVirginsModal] = useState<boolean>(false);
 
   // Initialize data on mount
   useEffect(() => {
@@ -86,6 +89,7 @@ export default function App() {
               setCurrentMode(mode);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
+            onOpenWiseVirginsIcon={() => setShowWiseVirginsModal(true)}
             totalQuestionsCount={questionsPool.length}
             totalCompletedCount={leaderboardResults.length}
           />
@@ -108,6 +112,12 @@ export default function App() {
 
         {currentMode === 'oasis' && (
           <MonasticOasis
+            onBackToHome={() => setCurrentMode('home')}
+          />
+        )}
+
+        {currentMode === 'creative' && (
+          <CreativeLab
             onBackToHome={() => setCurrentMode('home')}
           />
         )}
@@ -141,6 +151,13 @@ export default function App() {
         <CertificateModal
           result={selectedCertificateResult}
           onClose={() => setSelectedCertificateResult(null)}
+        />
+      )}
+
+      {/* Wise Virgins Coptic Icon Modal */}
+      {showWiseVirginsModal && (
+        <WiseVirginsModal
+          onClose={() => setShowWiseVirginsModal(false)}
         />
       )}
 
