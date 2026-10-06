@@ -24,6 +24,7 @@ import { CustomQuestionModal } from './components/CustomQuestionModal';
 import { MonasticOasis } from './components/MonasticOasis';
 import { CreativeLab } from './components/CreativeLab';
 import { WiseVirginsModal } from './components/WiseVirginsModal';
+import { ShareModal } from './components/ShareModal';
 
 export default function App() {
   const [currentMode, setCurrentMode] = useState<QuizMode>('home');
@@ -33,6 +34,7 @@ export default function App() {
   const [selectedCertificateResult, setSelectedCertificateResult] = useState<SoloQuizResult | null>(null);
   const [showAddQuestionModal, setShowAddQuestionModal] = useState<boolean>(false);
   const [showWiseVirginsModal, setShowWiseVirginsModal] = useState<boolean>(false);
+  const [showShareModal, setShowShareModal] = useState<boolean>(false);
 
   // Initialize data on mount
   useEffect(() => {
@@ -77,6 +79,7 @@ export default function App() {
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         onOpenAddQuestion={() => setShowAddQuestionModal(true)}
+        onOpenShareModal={() => setShowShareModal(true)}
         isMuted={isMuted}
         onToggleMute={handleToggleMute}
       />
@@ -158,6 +161,13 @@ export default function App() {
       {showWiseVirginsModal && (
         <WiseVirginsModal
           onClose={() => setShowWiseVirginsModal(false)}
+        />
+      )}
+
+      {/* Share Competition Modal */}
+      {showShareModal && (
+        <ShareModal
+          onClose={() => setShowShareModal(false)}
         />
       )}
 

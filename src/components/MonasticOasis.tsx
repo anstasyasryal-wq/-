@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MONASTIC_VIRTUES, MonasticVirtue } from '../data/monasticVirtues';
 import { COPTIC_TERMS, CopticTerm } from '../data/copticDictionary';
+import { DESERT_MOTHERS, DesertMother } from '../data/desertMothers';
 import { soundManager } from '../utils/audio';
 import confetti from 'canvas-confetti';
 import { 
@@ -15,7 +16,10 @@ import {
   HelpCircle, 
   Award,
   Heart,
-  ChevronLeft
+  ChevronLeft,
+  CircleDot,
+  Flame,
+  Volume2
 } from 'lucide-react';
 
 interface MonasticOasisProps {
@@ -23,13 +27,22 @@ interface MonasticOasisProps {
 }
 
 export const MonasticOasis: React.FC<MonasticOasisProps> = ({ onBackToHome }) => {
-  const [activeTab, setActiveTab] = useState<'virtues' | 'coptic' | 'badge'>('virtues');
+  const [activeTab, setActiveTab] = useState<'virtues' | 'coptic' | 'badge' | 'rosary' | 'mothers'>('virtues');
 
   // Virtues Wheel State
   const [selectedVirtue, setSelectedVirtue] = useState<MonasticVirtue>(MONASTIC_VIRTUES[0]);
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotationDegrees, setRotationDegrees] = useState(0);
   const [completedVirtuesToday, setCompletedVirtuesToday] = useState<string[]>([]);
+
+  // Rosary / Jesus Prayer Rope State
+  const [rosaryPrayer, setRosaryPrayer] = useState('يا ربي يسوع المسيح، ارحمني أنا الخاطئ');
+  const [rosaryTarget, setRosaryTarget] = useState<number>(33);
+  const [rosaryCurrentCount, setRosaryCurrentCount] = useState<number>(0);
+  const [rosaryCompletedRopes, setRosaryCompletedRopes] = useState<number>(0);
+
+  // Desert Mothers State
+  const [selectedMother, setSelectedMother] = useState<DesertMother>(DESERT_MOTHERS[0]);
 
   // Coptic Dictionary State
   const [copticSearch, setCopticSearch] = useState('');
@@ -55,6 +68,24 @@ export const MonasticOasis: React.FC<MonasticOasisProps> = ({ onBackToHome }) =>
       // ignore
     }
   }, []);
+
+  // Rosary / Jesus Prayer Rope Handlers
+  const handleTapRosaryBead = () => {
+    soundManager.playTick();
+    const nextCount = rosaryCurrentCount + 1;
+    if (nextCount >= rosaryTarget) {
+      soundManager.playVictory();
+      confetti({ particleCount: 60, spread: 60, origin: { y: 0.6 } });
+      setRosaryCurrentCount(0);
+      setRosaryCompletedRopes((prev) => prev + 1);
+    } else {
+      setRosaryCurrentCount(nextCount);
+    }
+  };
+
+  const handleResetRosary = () => {
+    setRosaryCurrentCount(0);
+  };
 
   // Spin Wheel Action
   const handleSpinWheel = () => {
@@ -184,6 +215,32 @@ export const MonasticOasis: React.FC<MonasticOasisProps> = ({ onBackToHome }) =>
           >
             <RotateCw className="w-4 h-4" />
             <span>قرعة فضائل البرية اليومية</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('rosary')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${
+              activeTab === 'rosary'
+                ? 'bg-amber-800 text-amber-50 shadow-xs'
+                : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+            }`}
+          >
+            <CircleDot className="w-4 h-4 text-amber-300" />
+            <span>مسبحة صلاة يسوع السهمية</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('mothers')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${
+              activeTab === 'mothers'
+                ? 'bg-amber-800 text-amber-50 shadow-xs'
+                : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+            }`}
+          >
+            <Sparkles className="w-4 h-4 text-amber-300" />
+            <span>معرض أمهات التكريس والبرية</span>
           </button>
 
           <button
@@ -631,6 +688,223 @@ export const MonasticOasis: React.FC<MonasticOasisProps> = ({ onBackToHome }) =>
               <div className="mt-6 pt-4 border-t border-amber-200 flex items-center justify-between text-[11px] text-stone-500">
                 <span>معتمد للعام الكنسي الحالي</span>
                 <span className="font-bold text-amber-800 font-spiritual">خاتم بيت التكريس</span>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      )}
+
+      {/* ======================================================= */}
+      {/* TAB 4: SACRED JESUS PRAYER ROSARY / CHOTKI */}
+      {/* ======================================================= */}
+      {activeTab === 'rosary' && (
+        <div className="max-w-3xl mx-auto bg-white rounded-3xl border border-amber-300/80 shadow-md p-6 sm:p-10 text-center relative overflow-hidden">
+          
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-amber-100 text-amber-900 border border-amber-300 mb-3 shadow-inner">
+            <CircleDot className="w-7 h-7 text-amber-800" />
+          </div>
+
+          <h2 className="font-spiritual text-2xl sm:text-3xl font-bold text-stone-900 mb-1">
+            مسبحة صلاة يسوع السهمية (Chotki)
+          </h2>
+          <p className="text-xs text-stone-500 mb-6 font-sans">
+            رفيقة المكرسة في صلاة القلاية والسهر والخدمة الصامتة
+          </p>
+
+          {/* Prayer Choice Select */}
+          <div className="mb-6 max-w-lg mx-auto">
+            <label className="block text-xs font-bold text-stone-700 mb-1.5 text-right">
+              اختر صيغة الصلاة السهمية:
+            </label>
+            <select
+              value={rosaryPrayer}
+              onChange={(e) => setRosaryPrayer(e.target.value)}
+              className="w-full px-4 py-2.5 rounded-xl border border-stone-300 bg-white font-spiritual text-base text-stone-900 outline-none focus:border-amber-700"
+            >
+              <option value="يا ربي يسوع المسيح، ارحمني أنا الخاطئ">
+                «يا ربي يسوع المسيح، ارحمني أنا الخاطئ» (صلاة يسوع الأساسية)
+              </option>
+              <option value="يا ربي يسوع المسيح، أعني وبارك تكريسي">
+                «يا ربي يسوع المسيح، أعني وبارك تكريسي» (طلبة المعونة)
+              </option>
+              <option value="يا ربي يسوع المسيح، نقِّ قلبي وفكري">
+                «يا ربي يسوع المسيح، نقِّ قلبي وفكري» (طلبة النقاوة)
+              </option>
+              <option value="المجد لك يا ربي ومخلصي يسوع المسيح">
+                «المجد لك يا ربي ومخلصي يسوع المسيح» (تسبيح وشكر)
+              </option>
+            </select>
+          </div>
+
+          {/* Rosary Target Beads Selector */}
+          <div className="flex items-center justify-center gap-2 mb-8">
+            <span className="text-xs text-stone-600 font-sans ml-2">عدد الحبات:</span>
+            {[33, 50, 100].map((count) => (
+              <button
+                key={count}
+                type="button"
+                onClick={() => { setRosaryTarget(count); setRosaryCurrentCount(0); }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
+                  rosaryTarget === count
+                    ? 'bg-amber-800 text-amber-50 border-amber-800'
+                    : 'bg-stone-100 text-stone-700 border-stone-200'
+                }`}
+              >
+                {count} حبة {count === 33 && '(عمر الفادي)'}
+              </button>
+            ))}
+          </div>
+
+          {/* Interactive Rosary Center Visual */}
+          <div className="relative my-8 flex items-center justify-center">
+            
+            {/* The Big Tappable Bead Circle */}
+            <button
+              type="button"
+              onClick={handleTapRosaryBead}
+              className="w-48 h-48 sm:w-56 sm:h-56 rounded-full bg-gradient-to-br from-amber-700 via-amber-800 to-amber-950 text-white shadow-2xl hover:scale-105 active:scale-95 transition-all flex flex-col items-center justify-center border-4 border-amber-400/80 group focus:outline-none"
+              title="اضغطي هنا بعد كل صلاة"
+            >
+              {/* Cross Icon */}
+              <svg viewBox="0 0 24 24" className="w-10 h-10 fill-amber-200 mb-2 group-hover:scale-110 transition-transform">
+                <path d="M11 2h2v7h7v2h-7v11h-2V11H4V9h7V2z" />
+                <circle cx="12" cy="10" r="1.5" fill="none" stroke="currentColor" strokeWidth="1" />
+              </svg>
+
+              <span className="font-spiritual text-3xl font-bold tracking-wider">
+                {rosaryCurrentCount} / {rosaryTarget}
+              </span>
+
+              <span className="text-[11px] text-amber-200/90 font-sans mt-1">
+                اضغطي لتسبيحة
+              </span>
+            </button>
+
+          </div>
+
+          {/* Current Prayer Text Display */}
+          <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200 max-w-md mx-auto my-6">
+            <p className="font-spiritual text-xl sm:text-2xl font-bold text-amber-950">
+              «{rosaryPrayer}»
+            </p>
+          </div>
+
+          {/* Actions Bar */}
+          <div className="flex items-center justify-center gap-4 text-xs font-sans">
+            <button
+              type="button"
+              onClick={handleResetRosary}
+              className="px-4 py-2 rounded-xl border border-stone-300 text-stone-600 hover:bg-stone-100 font-bold"
+            >
+              تصفير العداد
+            </button>
+
+            <div className="p-2 px-4 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold">
+              المسابح المكتملة اليوم: {rosaryCompletedRopes}
+            </div>
+          </div>
+
+        </div>
+      )}
+
+      {/* ======================================================= */}
+      {/* TAB 5: DESERT MOTHERS SANCTUARY */}
+      {/* ======================================================= */}
+      {activeTab === 'mothers' && (
+        <div className="space-y-8">
+          
+          <div className="text-center max-w-2xl mx-auto mb-6">
+            <h2 className="font-spiritual text-2xl sm:text-3xl font-bold text-stone-900 mb-1">
+              معرض وسير أمهات التكريس والبرية
+            </h2>
+            <p className="text-xs text-stone-500 font-sans">
+              سلسلة نورانية من أمهات الرهبنة ورائدات التكريس في تاريخ الكنيسة القبطية الأرثوذكسية
+            </p>
+          </div>
+
+          {/* Mothers Selector Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+            {DESERT_MOTHERS.map((mother) => (
+              <button
+                key={mother.id}
+                type="button"
+                onClick={() => setSelectedMother(mother)}
+                className={`p-3.5 rounded-2xl border text-center transition-all flex flex-col items-center gap-1.5 ${
+                  selectedMother.id === mother.id
+                    ? 'border-amber-700 bg-amber-50 ring-2 ring-amber-700/30 shadow-sm'
+                    : 'border-stone-200 bg-white hover:border-amber-300'
+                }`}
+              >
+                <span className="text-2xl p-2 rounded-xl bg-stone-50 border border-stone-200">
+                  {mother.avatarIcon}
+                </span>
+                <span className="font-spiritual text-sm font-bold text-stone-900 block truncate w-full">
+                  {mother.name}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {/* Detailed Selected Mother Sanctuary Card */}
+          <div className="bg-white rounded-3xl border border-amber-300/80 shadow-md p-6 sm:p-10 relative overflow-hidden">
+            
+            <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-6 pb-6 border-b border-stone-100">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-2xl bg-amber-100 border-2 border-amber-700 flex items-center justify-center text-3xl shadow-inner shrink-0">
+                  {selectedMother.avatarIcon}
+                </div>
+                <div>
+                  <h3 className="font-spiritual text-2xl sm:text-3xl font-bold text-stone-900">
+                    {selectedMother.name}
+                  </h3>
+                  <p className="text-xs text-amber-800 font-bold font-spiritual mt-0.5">
+                    {selectedMother.title}
+                  </p>
+                  <p className="text-xs text-stone-400 font-sans">
+                    {selectedMother.century}
+                  </p>
+                </div>
+              </div>
+
+              <div className="px-3.5 py-1.5 rounded-xl bg-stone-100 text-stone-600 text-xs font-sans">
+                {selectedMother.commemorationDate}
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              
+              {/* Biography */}
+              <div>
+                <h4 className="font-spiritual text-lg font-bold text-stone-900 mb-2 flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-amber-800" />
+                  <span>الجهاد النسكي وسيرة التكريس:</span>
+                </h4>
+                <p className="font-spiritual text-base text-stone-700 leading-relaxed bg-stone-50/70 p-4 rounded-2xl border border-stone-200">
+                  {selectedMother.biography}
+                </p>
+              </div>
+
+              {/* Golden Saying */}
+              <div className="p-5 rounded-2xl bg-amber-50 border-r-4 border-amber-800 border border-amber-200">
+                <span className="text-xs font-bold text-amber-950 block mb-1">
+                  قول ذهبي من بستان الرهبان:
+                </span>
+                <p className="font-spiritual text-xl font-bold text-amber-950 leading-relaxed">
+                  {selectedMother.goldenSaying}
+                </p>
+              </div>
+
+              {/* Practical Lesson for Today's Consecrated Sister */}
+              <div className="p-5 rounded-2xl bg-emerald-50/80 border border-emerald-200">
+                <span className="text-xs font-bold text-emerald-950 block mb-1">
+                  درس روحي وعملي لمكرسة وخادمة اليوم:
+                </span>
+                <p className="font-spiritual text-base text-emerald-900 leading-relaxed">
+                  {selectedMother.practicalLesson}
+                </p>
               </div>
 
             </div>

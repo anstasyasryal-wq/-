@@ -71,6 +71,8 @@ export interface Team {
   id: string;
   name: string;
   patronSaint: string;
+  consecrationHouse?: string;
+  members?: string;
   score: number;
   color: string;
   avatar: string;

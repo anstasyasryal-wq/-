@@ -12,7 +12,8 @@ import {
   PlusCircle,
   Home,
   Compass,
-  Lightbulb
+  Lightbulb,
+  Share2
 } from 'lucide-react';
 import { soundManager } from '../utils/audio';
 
@@ -20,6 +21,7 @@ interface HeaderProps {
   currentMode: QuizMode;
   onSelectMode: (mode: QuizMode) => void;
   onOpenAddQuestion: () => void;
+  onOpenShareModal: () => void;
   isMuted: boolean;
   onToggleMute: () => void;
 }
@@ -28,6 +30,7 @@ export const Header: React.FC<HeaderProps> = ({
   currentMode,
   onSelectMode,
   onOpenAddQuestion,
+  onOpenShareModal,
   isMuted,
   onToggleMute,
 }) => {
@@ -171,8 +174,17 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           </nav>
 
-          {/* Quick Actions (Sound + Add Question) */}
+          {/* Quick Actions (Share + Add Question + Sound) */}
           <div className="flex items-center gap-2">
+            <button
+              onClick={onOpenShareModal}
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-amber-800 hover:bg-amber-700 text-white shadow-xs transition-colors"
+              title="مشاركة رابط المسابقة"
+            >
+              <Share2 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">مشاركة الرابط</span>
+            </button>
+
             <button
               onClick={onOpenAddQuestion}
               className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-stone-800 hover:bg-stone-700 text-amber-200 border border-stone-700 transition-colors"
