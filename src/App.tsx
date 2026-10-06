@@ -4,198 +4,186 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Question, QuizMode, SoloQuizResult } from './types';
-import { 
-  getStoredQuestions, 
-  saveCustomQuestion, 
-  getLeaderboardResults 
-} from './utils/storage';
-import { soundManager } from './utils/audio';
-
+import { User, AppView, Stage, Announcement } from './types';
+import {
+  getCurrentUser,
+  setCurrentUser as persistCurrentUser,
+  getStoredStages,
+  getStoredAnnouncements,
+} from './utils/competitionEngine';
 import { Header } from './components/Header';
-import { HomeDashboard } from './components/HomeDashboard';
-import { SoloQuiz } from './components/SoloQuiz';
-import { TeamQuiz } from './components/TeamQuiz';
-import { SpeedChallenge } from './components/SpeedChallenge';
-import { StudyBank } from './components/StudyBank';
-import { Leaderboard } from './components/Leaderboard';
-import { CertificateModal } from './components/CertificateModal';
-import { CustomQuestionModal } from './components/CustomQuestionModal';
-import { MonasticOasis } from './components/MonasticOasis';
-import { CreativeLab } from './components/CreativeLab';
-import { WiseVirginsModal } from './components/WiseVirginsModal';
-import { ShareModal } from './components/ShareModal';
+import { HomeView } from './components/HomeView';
+import { StagePlayer } from './components/StagePlayer';
+import { LeaderboardView } from './components/LeaderboardView';
+import { SupervisorDashboard } from './components/SupervisorDashboard';
+import { FinalCeremonyView } from './components/FinalCeremonyView';
+import { ParticipantsListView } from './components/ParticipantsListView';
+import { CompetitionsHubView } from './components/CompetitionsHubView';
+import { RegistrationModal } from './components/RegistrationModal';
+import { RulesModal } from './components/RulesModal';
 
 export default function App() {
-  const [currentMode, setCurrentMode] = useState<QuizMode>('home');
-  const [questionsPool, setQuestionsPool] = useState<Question[]>([]);
-  const [leaderboardResults, setLeaderboardResults] = useState<SoloQuizResult[]>([]);
-  const [isMuted, setIsMuted] = useState<boolean>(false);
-  const [selectedCertificateResult, setSelectedCertificateResult] = useState<SoloQuizResult | null>(null);
-  const [showAddQuestionModal, setShowAddQuestionModal] = useState<boolean>(false);
-  const [showWiseVirginsModal, setShowWiseVirginsModal] = useState<boolean>(false);
-  const [showShareModal, setShowShareModal] = useState<boolean>(false);
+  const [currentView, setCurrentView] = useState<AppView>('home');
+  const [currentUser, setCurrentUserState] = useState<User | null>(null);
+  const [activeStageId, setActiveStageId] = useState<number>(1);
+  const [stages, setStages] = useState<Stage[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
 
-  // Initialize data on mount
+  // Modals
+  const [showRegistrationModal, setShowRegistrationModal] = useState<boolean>(false);
+  const [showRulesModal, setShowRulesModal] = useState<boolean>(false);
+
   useEffect(() => {
-    setQuestionsPool(getStoredQuestions());
-    setLeaderboardResults(getLeaderboardResults());
-    setIsMuted(soundManager.getIsMuted());
+    const user = getCurrentUser();
+    setCurrentUserState(user);
+    setStages(getStoredStages());
+    setAnnouncements(getStoredAnnouncements());
   }, []);
 
-  const handleToggleMute = () => {
-    const newState = soundManager.toggleMute();
-    setIsMuted(newState);
+  const handleUserUpdated = (user: User) => {
+    setCurrentUserState(user);
+    persistCurrentUser(user);
+    setStages(getStoredStages());
   };
 
-  const handleSaveQuestion = (newQ: Omit<Question, 'id' | 'isCustom'>) => {
-    const saved = saveCustomQuestion(newQ);
-    setQuestionsPool((prev) => [saved, ...prev]);
+  const handleStartStage = (stageId: number) => {
+    if (!currentUser) {
+      setActiveStageId(stageId);
+      setShowRegistrationModal(true);
+      return;
+    }
+    setActiveStageId(stageId);
+    setCurrentView('stage_player');
   };
 
-  const handleImportQuestions = (imported: Question[]) => {
-    setQuestionsPool((prev) => [...imported, ...prev]);
-  };
+  const handleFinishStage = (nextStageId?: number) => {
+    // Refresh user from storage
+    const updated = getCurrentUser();
+    if (updated) setCurrentUserState(updated);
 
-  const handleOpenCertificate = (result: SoloQuizResult) => {
-    setSelectedCertificateResult(result);
-  };
-
-  const handleClearHistory = () => {
-    if (window.confirm('هل أنتِ متأكدة من رغبتكِ في مسح سجل لوحة الشرف؟')) {
-      localStorage.removeItem('mokarasa_leaderboard_history');
-      setLeaderboardResults([]);
+    if (nextStageId && nextStageId <= 5) {
+      setActiveStageId(nextStageId);
+      setCurrentView('stage_player');
+    } else if (nextStageId === 6) {
+      setCurrentView('final_ceremony');
+    } else {
+      setCurrentView('leaderboard');
     }
   };
 
   return (
-    <div className="min-h-screen bg-amber-50/25 text-stone-900 flex flex-col font-sans selection:bg-amber-200 selection:text-amber-950">
-      
-      {/* Universal Header */}
-      <Header
-        currentMode={currentMode}
-        onSelectMode={(mode) => {
-          setCurrentMode(mode);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
-        onOpenAddQuestion={() => setShowAddQuestionModal(true)}
-        onOpenShareModal={() => setShowShareModal(true)}
-        isMuted={isMuted}
-        onToggleMute={handleToggleMute}
+    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-amber-200 selection:text-amber-900 flex flex-col justify-between">
+      <div>
+        {/* Navigation Header */}
+        <Header
+          currentView={currentView}
+          currentUser={currentUser}
+          onNavigate={(view) => setCurrentView(view)}
+          onOpenLogin={() => setShowRegistrationModal(true)}
+          onOpenRules={() => setShowRulesModal(true)}
+        />
+
+        {/* Main Content Area */}
+        <main className="max-w-6xl mx-auto px-4 py-6">
+          {currentView === 'home' && (
+            <HomeView
+              currentUser={currentUser}
+              stages={stages}
+              announcements={announcements}
+              onStartStage={handleStartStage}
+              onOpenLogin={() => setShowRegistrationModal(true)}
+              onOpenMyRank={() => setCurrentView('leaderboard')}
+              onOpenRules={() => setShowRulesModal(true)}
+              onNavigateToLeaderboard={() => setCurrentView('leaderboard')}
+              onNavigateToDioceses={() => setCurrentView('dioceses')}
+              onNavigateToSupervisor={() => setCurrentView('supervisor')}
+              onNavigateToParticipants={() => setCurrentView('participants')}
+              onNavigateToCompetitions={() => setCurrentView('competitions_hub')}
+            />
+          )}
+
+          {currentView === 'participants' && (
+            <ParticipantsListView
+              onOpenRegister={() => setShowRegistrationModal(true)}
+              onStartStage={handleStartStage}
+              onBackToHome={() => setCurrentView('home')}
+            />
+          )}
+
+          {currentView === 'competitions_hub' && (
+            <CompetitionsHubView
+              onStartStage={handleStartStage}
+              onBackToHome={() => setCurrentView('home')}
+            />
+          )}
+
+          {currentView === 'stage_player' && currentUser && (
+            <StagePlayer
+              stageId={activeStageId}
+              currentUser={currentUser}
+              onFinishStage={handleFinishStage}
+              onBackToHome={() => setCurrentView('home')}
+              onOpenLeaderboard={() => setCurrentView('leaderboard')}
+            />
+          )}
+
+          {currentView === 'leaderboard' && (
+            <LeaderboardView
+              currentUser={currentUser}
+              onOpenRegister={() => setShowRegistrationModal(true)}
+              onStartStage={handleStartStage}
+            />
+          )}
+
+          {currentView === 'dioceses' && (
+            <LeaderboardView
+              currentUser={currentUser}
+              onOpenRegister={() => setShowRegistrationModal(true)}
+              onStartStage={handleStartStage}
+            />
+          )}
+
+          {currentView === 'supervisor' && (
+            <SupervisorDashboard
+              onTestStageAsAdmin={(stgId) => {
+                setActiveStageId(stgId);
+                setCurrentView('stage_player');
+              }}
+            />
+          )}
+
+          {currentView === 'final_ceremony' && (
+            <FinalCeremonyView
+              onBackToHome={() => setCurrentView('home')}
+              onOpenLeaderboard={() => setCurrentView('leaderboard')}
+            />
+          )}
+        </main>
+      </div>
+
+      {/* Modals */}
+      <RegistrationModal
+        isOpen={showRegistrationModal}
+        onClose={() => setShowRegistrationModal(false)}
+        onSuccess={handleUserUpdated}
       />
 
-      {/* Main Content Area */}
-      <main className="flex-1 pb-16">
-        {currentMode === 'home' && (
-          <HomeDashboard
-            onSelectMode={(mode) => {
-              setCurrentMode(mode);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            onOpenWiseVirginsIcon={() => setShowWiseVirginsModal(true)}
-            totalQuestionsCount={questionsPool.length}
-            totalCompletedCount={leaderboardResults.length}
-          />
-        )}
+      <RulesModal
+        isOpen={showRulesModal}
+        onClose={() => setShowRulesModal(false)}
+      />
 
-        {currentMode === 'solo' && (
-          <SoloQuiz
-            questionsPool={questionsPool}
-            onOpenCertificate={handleOpenCertificate}
-            onBackToHome={() => setCurrentMode('home')}
-          />
-        )}
-
-        {currentMode === 'team' && (
-          <TeamQuiz
-            questionsPool={questionsPool}
-            onBackToHome={() => setCurrentMode('home')}
-          />
-        )}
-
-        {currentMode === 'oasis' && (
-          <MonasticOasis
-            onBackToHome={() => setCurrentMode('home')}
-          />
-        )}
-
-        {currentMode === 'creative' && (
-          <CreativeLab
-            onBackToHome={() => setCurrentMode('home')}
-          />
-        )}
-
-        {currentMode === 'speed' && (
-          <SpeedChallenge
-            questionsPool={questionsPool}
-            onBackToHome={() => setCurrentMode('home')}
-          />
-        )}
-
-        {currentMode === 'study' && (
-          <StudyBank
-            questions={questionsPool}
-            onBackToHome={() => setCurrentMode('home')}
-          />
-        )}
-
-        {currentMode === 'leaderboard' && (
-          <Leaderboard
-            results={leaderboardResults}
-            onOpenCertificate={handleOpenCertificate}
-            onClearHistory={handleClearHistory}
-            onBackToHome={() => setCurrentMode('home')}
-          />
-        )}
-      </main>
-
-      {/* Printable Certificate Modal */}
-      {selectedCertificateResult && (
-        <CertificateModal
-          result={selectedCertificateResult}
-          onClose={() => setSelectedCertificateResult(null)}
-        />
-      )}
-
-      {/* Wise Virgins Coptic Icon Modal */}
-      {showWiseVirginsModal && (
-        <WiseVirginsModal
-          onClose={() => setShowWiseVirginsModal(false)}
-        />
-      )}
-
-      {/* Share Competition Modal */}
-      {showShareModal && (
-        <ShareModal
-          onClose={() => setShowShareModal(false)}
-        />
-      )}
-
-      {/* Custom Questions & Import/Export Modal */}
-      {showAddQuestionModal && (
-        <CustomQuestionModal
-          onClose={() => setShowAddQuestionModal(false)}
-          onSaveQuestion={handleSaveQuestion}
-          allQuestions={questionsPool}
-          onImportQuestions={handleImportQuestions}
-        />
-      )}
-
-      {/* Footer */}
-      <footer className="bg-stone-900 text-stone-400 py-8 border-t border-amber-900/40 text-xs text-center font-sans">
-        <div className="max-w-7xl mx-auto px-4 space-y-2">
-          <p className="font-spiritual text-stone-300 text-base">
-            مسابقة المكرسة المثالية | «فَاخْتَارَتْ مَرْيَمُ النَّصِيبَ الصَّالِحَ الَّذِي لَنْ يُنْزَعَ مِنْهَا»
+      {/* Minimal Reverent Footer */}
+      <footer className="border-t border-slate-200 bg-white/60 py-6 text-center text-xs text-slate-500">
+        <div className="max-w-6xl mx-auto px-4 space-y-1">
+          <p className="font-spiritual font-bold text-slate-700">
+            مسابقة «المكرَّسة المثالية» • منصة التميز المعرفي والروحي والكنسي
           </p>
-          <p>
-            معدة ومخصصة لخدمة بيوت التكريس، الشمامسة، والخدام في الكنيسة القبطية الأرثوذكسية
-          </p>
-          <p className="text-stone-500 text-[11px] pt-1">
-            العلوم الدينية واللاهوتية · سير وفضائل آباء وأمهات الرهبنة · اللغة القبطية والتراث الكنسي
+          <p className="text-[11px] text-slate-400">
+            «كُنْ أَمِيناً إِلَى الْمَوْتِ فَسَأُعْطِيكَ إِكْلِيلَ الْحَيَاةِ» (رؤيا 2: 10)
           </p>
         </div>
       </footer>
-
     </div>
   );
 }

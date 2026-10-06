@@ -730,7 +730,7 @@ export const SoloQuiz: React.FC<SoloQuizProps> = ({
             </h3>
             <div className="space-y-2.5">
               {CATEGORIES.map((cat) => {
-                const b = completedResult.categoryBreakdown[cat.id];
+                const b = completedResult.categoryBreakdown?.[cat.id];
                 if (!b || b.total === 0) return null;
                 const catPct = Math.round((b.correct / b.total) * 100);
 

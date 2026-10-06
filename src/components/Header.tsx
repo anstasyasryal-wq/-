@@ -1,285 +1,200 @@
-import React from 'react';
-import { QuizMode } from '../types';
-import { 
-  Award, 
-  Users, 
-  User, 
-  Zap, 
-  BookOpen, 
-  Trophy, 
-  Volume2, 
-  VolumeX, 
-  PlusCircle,
-  Home,
-  Compass,
-  Lightbulb,
-  Share2
-} from 'lucide-react';
+import React, { useState } from 'react';
+import { User, AppView } from '../types';
 import { soundManager } from '../utils/audio';
+import {
+  Trophy,
+  Volume2,
+  VolumeX,
+  User as UserIcon,
+  Shield,
+  Layers,
+  BookOpen,
+  Home,
+  Menu,
+  X,
+  Sparkles,
+  Users,
+} from 'lucide-react';
 
 interface HeaderProps {
-  currentMode: QuizMode;
-  onSelectMode: (mode: QuizMode) => void;
-  onOpenAddQuestion: () => void;
-  onOpenShareModal: () => void;
-  isMuted: boolean;
-  onToggleMute: () => void;
+  currentView: AppView;
+  currentUser: User | null;
+  onNavigate: (view: AppView) => void;
+  onOpenLogin: () => void;
+  onOpenRules: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  currentMode,
-  onSelectMode,
-  onOpenAddQuestion,
-  onOpenShareModal,
-  isMuted,
-  onToggleMute,
+  currentView,
+  currentUser,
+  onNavigate,
+  onOpenLogin,
+  onOpenRules,
 }) => {
+  const [isMuted, setIsMuted] = useState(soundManager.getIsMuted());
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const toggleSound = () => {
+    const nextState = soundManager.toggleMute();
+    setIsMuted(nextState);
+  };
+
+  const navLinks = [
+    { view: 'home' as AppView, label: 'الرئيسية', icon: Home },
+    { view: 'participants' as AppView, label: 'من سجل؟ (المشاركات)', icon: Users },
+    { view: 'competitions_hub' as AppView, label: 'الاختبارات والمسابقات', icon: Sparkles },
+    { view: 'leaderboard' as AppView, label: 'الترتيب العام', icon: Trophy },
+    { view: 'dioceses' as AppView, label: 'الإيبارشيات', icon: Layers },
+    { view: 'supervisor' as AppView, label: 'لوحة المشرفة', icon: Shield },
+  ];
+
   return (
-    <header className="sticky top-0 z-40 bg-stone-900/95 text-stone-100 backdrop-blur-md border-b border-amber-900/40 shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
-          
-          {/* Logo & Spiritual Title */}
-          <button 
-            onClick={() => onSelectMode('home')}
-            className="flex items-center gap-3.5 text-right group focus:outline-none"
-            aria-label="الصفحة الرئيسية للمسابقة"
-          >
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-600 via-amber-700 to-amber-950 flex items-center justify-center shadow-md border border-amber-500/30 group-hover:scale-105 transition-transform">
-              {/* Coptic / Christian Cross SVG Emblem */}
-              <svg 
-                viewBox="0 0 24 24" 
-                className="w-7 h-7 text-amber-100 fill-current" 
-                aria-hidden="true"
-              >
-                <path d="M11 2h2v7h7v2h-7v11h-2V11H4V9h7V2z" />
-                <circle cx="12" cy="10" r="1.5" fill="none" stroke="currentColor" strokeWidth="1" />
-                <circle cx="6" cy="10" r="1" />
-                <circle cx="18" cy="10" r="1" />
-                <circle cx="12" cy="4" r="1" />
-                <circle cx="12" cy="18" r="1" />
-              </svg>
+    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-amber-200/80 shadow-xs">
+      <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+        {/* Brand */}
+        <div
+          onClick={() => onNavigate('home')}
+          className="flex items-center gap-2.5 cursor-pointer group select-none text-right"
+        >
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-600 to-amber-400 text-white flex items-center justify-center shadow-md shadow-amber-600/20 group-hover:scale-105 transition">
+            <Trophy className="w-5 h-5 text-indigo-950 fill-amber-100" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-spiritual font-black text-base sm:text-lg text-indigo-950 tracking-wide">
+                المكرَّسة المثالية
+              </span>
+              <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                <span>🟢 مفتوحة</span>
+              </span>
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-spiritual text-2xl font-bold tracking-wide text-amber-200">
-                  مسابقة المكرسة المثالية
+            <p className="text-[10px] text-amber-700 font-medium hidden sm:block">
+              مسابقة المعرفة والذكاء والتحدي
+            </p>
+          </div>
+        </div>
+
+        {/* Desktop Nav */}
+        <nav className="hidden md:flex items-center gap-1">
+          {navLinks.map((item) => {
+            const Icon = item.icon;
+            const isActive = currentView === item.view;
+            return (
+              <button
+                key={item.view}
+                onClick={() => onNavigate(item.view)}
+                className={`py-2 px-3 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                  isActive
+                    ? 'bg-amber-100/70 text-indigo-950 border border-amber-300'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5 text-amber-700" />
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+
+          <button
+            onClick={onOpenRules}
+            className="py-2 px-3 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition flex items-center gap-1.5 cursor-pointer"
+          >
+            <BookOpen className="w-3.5 h-3.5 text-sky-700" />
+            <span>قواعد المسابقة</span>
+          </button>
+        </nav>
+
+        {/* Right Actions: Sound & User Profile */}
+        <div className="flex items-center gap-2">
+          {/* Sound Toggle */}
+          <button
+            onClick={toggleSound}
+            title={isMuted ? 'تشغيل المؤثرات الصوتية' : 'كتم الصوت'}
+            className="p-2 rounded-xl border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition cursor-pointer"
+          >
+            {isMuted ? (
+              <VolumeX className="w-4 h-4 text-slate-400" />
+            ) : (
+              <Volume2 className="w-4 h-4 text-amber-600" />
+            )}
+          </button>
+
+          {/* User Profile Pill */}
+          {currentUser ? (
+            <button
+              onClick={onOpenLogin}
+              className="py-1.5 px-3 rounded-xl bg-amber-50 border border-amber-300 text-right hover:bg-amber-100 transition cursor-pointer flex items-center gap-2"
+            >
+              <div className="w-7 h-7 rounded-lg bg-amber-600 text-white flex items-center justify-center text-xs font-bold font-mono">
+                {currentUser.role === 'supervisor' ? '👑' : '🕊️'}
+              </div>
+              <div className="hidden sm:block text-right">
+                <span className="block text-xs font-bold text-slate-900 line-clamp-1 max-w-[110px]">
+                  {currentUser.name}
                 </span>
-                <span className="hidden md:inline-block text-[11px] font-sans px-2 py-0.5 rounded bg-amber-950/80 text-amber-300 border border-amber-700/50">
-                  إصدار بيوت التكريس والخدام
+                <span className="block text-[10px] text-amber-800 font-mono">
+                  {currentUser.code}
                 </span>
               </div>
-              <p className="text-xs text-stone-400 font-sans hidden sm:block">
-                مسابقة إلكترونية في العلوم الدينية والثقافية والرهبانية
-              </p>
-            </div>
-          </button>
-
-          {/* Navigation Controls */}
-          <nav className="hidden lg:flex items-center gap-1.5 bg-stone-950/60 p-1.5 rounded-xl border border-stone-800" aria-label="أقسام التطبيق">
-            <button
-              onClick={() => onSelectMode('home')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                currentMode === 'home'
-                  ? 'bg-amber-800/80 text-amber-100 shadow-sm'
-                  : 'text-stone-300 hover:text-white hover:bg-stone-800/50'
-              }`}
-            >
-              <Home className="w-4 h-4" />
-              <span>الرئيسية</span>
             </button>
-
+          ) : (
             <button
-              onClick={() => onSelectMode('solo')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                currentMode === 'solo'
-                  ? 'bg-amber-800/80 text-amber-100 shadow-sm'
-                  : 'text-stone-300 hover:text-white hover:bg-stone-800/50'
-              }`}
+              onClick={onOpenLogin}
+              className="py-2 px-3.5 rounded-xl bg-indigo-900 hover:bg-indigo-800 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5 cursor-pointer"
             >
-              <User className="w-4 h-4" />
-              <span>المسابقة الفردية</span>
+              <UserIcon className="w-3.5 h-3.5" />
+              <span>دخول / تسجيل</span>
             </button>
+          )}
 
-            <button
-              onClick={() => onSelectMode('team')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                currentMode === 'team'
-                  ? 'bg-amber-800/80 text-amber-100 shadow-sm'
-                  : 'text-stone-300 hover:text-white hover:bg-stone-800/50'
-              }`}
-            >
-              <Users className="w-4 h-4" />
-              <span>المسابقة الجماعية</span>
-            </button>
-
-            <button
-              onClick={() => onSelectMode('oasis')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                currentMode === 'oasis'
-                  ? 'bg-amber-800/80 text-amber-100 shadow-sm'
-                  : 'text-stone-300 hover:text-white hover:bg-stone-800/50'
-              }`}
-            >
-              <Compass className="w-4 h-4 text-amber-300" />
-              <span>واحة الفضائل والتراث</span>
-            </button>
-
-            <button
-              onClick={() => onSelectMode('creative')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                currentMode === 'creative'
-                  ? 'bg-amber-800/80 text-amber-100 shadow-sm'
-                  : 'text-stone-300 hover:text-white hover:bg-stone-800/50'
-              }`}
-            >
-              <Lightbulb className="w-4 h-4 text-amber-300" />
-              <span>المسابقات الإبداعية</span>
-            </button>
-
-            <button
-              onClick={() => onSelectMode('speed')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                currentMode === 'speed'
-                  ? 'bg-amber-800/80 text-amber-100 shadow-sm'
-                  : 'text-stone-300 hover:text-white hover:bg-stone-800/50'
-              }`}
-            >
-              <Zap className="w-4 h-4" />
-              <span>سرعة البرية</span>
-            </button>
-
-            <button
-              onClick={() => onSelectMode('study')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                currentMode === 'study'
-                  ? 'bg-amber-800/80 text-amber-100 shadow-sm'
-                  : 'text-stone-300 hover:text-white hover:bg-stone-800/50'
-              }`}
-            >
-              <BookOpen className="w-4 h-4" />
-              <span>بنك الاستذكار</span>
-            </button>
-
-            <button
-              onClick={() => onSelectMode('leaderboard')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                currentMode === 'leaderboard'
-                  ? 'bg-amber-800/80 text-amber-100 shadow-sm'
-                  : 'text-stone-300 hover:text-white hover:bg-stone-800/50'
-              }`}
-            >
-              <Trophy className="w-4 h-4" />
-              <span>لوحة الشرف</span>
-            </button>
-          </nav>
-
-          {/* Quick Actions (Share + Add Question + Sound) */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={onOpenShareModal}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-amber-800 hover:bg-amber-700 text-white shadow-xs transition-colors"
-              title="مشاركة رابط المسابقة"
-            >
-              <Share2 className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">مشاركة الرابط</span>
-            </button>
-
-            <button
-              onClick={onOpenAddQuestion}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-stone-800 hover:bg-stone-700 text-amber-200 border border-stone-700 transition-colors"
-              title="إضافة سؤال جديد للمسابقة"
-            >
-              <PlusCircle className="w-4 h-4 text-amber-400" />
-              <span className="hidden sm:inline">إضافة سؤال</span>
-            </button>
-
-            <button
-              onClick={onToggleMute}
-              className={`p-2.5 rounded-lg border transition-colors ${
-                isMuted
-                  ? 'bg-stone-800/80 text-stone-500 border-stone-700'
-                  : 'bg-stone-800 text-amber-300 border-amber-800/60 hover:bg-stone-700'
-              }`}
-              title={isMuted ? 'تشغيل المؤثرات الصوتية الروحية' : 'كتم المؤثرات الصوتية'}
-              aria-label={isMuted ? 'تشغيل الصوت' : 'كتم الصوت'}
-            >
-              {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-            </button>
-          </div>
-
-        </div>
-
-        {/* Mobile Navigation bar */}
-        <div className="lg:hidden flex items-center justify-around py-2.5 border-t border-stone-800 overflow-x-auto gap-1">
+          {/* Mobile Menu Button */}
           <button
-            onClick={() => onSelectMode('home')}
-            className={`px-2.5 py-1.5 text-xs font-medium rounded-md whitespace-nowrap ${
-              currentMode === 'home' ? 'bg-amber-800 text-amber-100' : 'text-stone-400'
-            }`}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition"
           >
-            الرئيسية
-          </button>
-          <button
-            onClick={() => onSelectMode('solo')}
-            className={`px-2.5 py-1.5 text-xs font-medium rounded-md whitespace-nowrap ${
-              currentMode === 'solo' ? 'bg-amber-800 text-amber-100' : 'text-stone-400'
-            }`}
-          >
-            الفردية
-          </button>
-          <button
-            onClick={() => onSelectMode('team')}
-            className={`px-2.5 py-1.5 text-xs font-medium rounded-md whitespace-nowrap ${
-              currentMode === 'team' ? 'bg-amber-800 text-amber-100' : 'text-stone-400'
-            }`}
-          >
-            الجماعية
-          </button>
-          <button
-            onClick={() => onSelectMode('oasis')}
-            className={`px-2.5 py-1.5 text-xs font-medium rounded-md whitespace-nowrap ${
-              currentMode === 'oasis' ? 'bg-amber-800 text-amber-100' : 'text-stone-400'
-            }`}
-          >
-            الواحة والفضائل
-          </button>
-          <button
-            onClick={() => onSelectMode('creative')}
-            className={`px-2.5 py-1.5 text-xs font-medium rounded-md whitespace-nowrap ${
-              currentMode === 'creative' ? 'bg-amber-800 text-amber-100' : 'text-stone-400'
-            }`}
-          >
-            المسابقات الإبداعية
-          </button>
-          <button
-            onClick={() => onSelectMode('speed')}
-            className={`px-2.5 py-1.5 text-xs font-medium rounded-md whitespace-nowrap ${
-              currentMode === 'speed' ? 'bg-amber-800 text-amber-100' : 'text-stone-400'
-            }`}
-          >
-            سرعة البرية
-          </button>
-          <button
-            onClick={() => onSelectMode('study')}
-            className={`px-2.5 py-1.5 text-xs font-medium rounded-md whitespace-nowrap ${
-              currentMode === 'study' ? 'bg-amber-800 text-amber-100' : 'text-stone-400'
-            }`}
-          >
-            الاستذكار
-          </button>
-          <button
-            onClick={() => onSelectMode('leaderboard')}
-            className={`px-2.5 py-1.5 text-xs font-medium rounded-md whitespace-nowrap ${
-              currentMode === 'leaderboard' ? 'bg-amber-800 text-amber-100' : 'text-stone-400'
-            }`}
-          >
-            الشرف
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
-
       </div>
+
+      {/* Mobile Drawer */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t border-slate-200 bg-white p-4 space-y-2 text-right animate-fade-in">
+          {navLinks.map((item) => {
+            const Icon = item.icon;
+            const isActive = currentView === item.view;
+            return (
+              <button
+                key={item.view}
+                onClick={() => {
+                  onNavigate(item.view);
+                  setMobileMenuOpen(false);
+                }}
+                className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-between ${
+                  isActive
+                    ? 'bg-amber-100 text-indigo-950 font-black'
+                    : 'text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                <span>{item.label}</span>
+                <Icon className="w-4 h-4 text-amber-700" />
+              </button>
+            );
+          })}
+
+          <button
+            onClick={() => {
+              onOpenRules();
+              setMobileMenuOpen(false);
+            }}
+            className="w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center justify-between"
+          >
+            <span>📜 قواعد المسابقة</span>
+            <BookOpen className="w-4 h-4 text-sky-700" />
+          </button>
+        </div>
+      )}
     </header>
   );
 };
-
