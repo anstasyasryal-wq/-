@@ -1,0 +1,9 @@
+{
+  "name": "مسابقة المكرسة المثالية",
+  "description": "منصة مسابقات إلكترونية فردية وجماعية في العلوم الدينية والثقافية والرهبانية لبيوت التكريس والخدام",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
+
