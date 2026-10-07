@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, DioceseRanking } from '../types';
 import {
   getStoredUsers,
   sortParticipantsByTieBreaker,
   getDiocesesRankings,
 } from '../utils/competitionEngine';
+import { subscribeToCloudLeaderboard } from '../utils/firebaseService';
 import {
   Trophy,
   Medal,
@@ -31,8 +32,18 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
   onStartStage,
 }) => {
   const [tab, setTab] = useState<'general' | 'personal' | 'dioceses'>('general');
+  const [cloudUsers, setCloudUsers] = useState<User[]>([]);
 
-  const allUsers = getStoredUsers().filter((u) => u.role === 'participant');
+  useEffect(() => {
+    const unsub = subscribeToCloudLeaderboard((users) => {
+      if (users && users.length > 0) {
+        setCloudUsers(users);
+      }
+    });
+    return () => unsub();
+  }, []);
+
+  const allUsers = cloudUsers.length > 0 ? cloudUsers : getStoredUsers().filter((u) => u.role === 'participant');
   const sortedParticipants = sortParticipantsByTieBreaker(allUsers);
   const diocesesRankings = getDiocesesRankings();
 

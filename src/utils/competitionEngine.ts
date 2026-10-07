@@ -252,24 +252,31 @@ export function getQuestionsForStage(stageId: number): Question[] {
  */
 export function sortParticipantsByTieBreaker(participants: User[]): User[] {
   return [...participants].sort((a, b) => {
-    // 1. Total points
+    // 1. Total points (higher is better)
     if (b.totalPoints !== a.totalPoints) {
       return b.totalPoints - a.totalPoints;
     }
-    // 2. Correct answers
+    // 2. Correct answers (higher is better)
     if (b.correctAnswersCount !== a.correctAnswersCount) {
       return b.correctAnswersCount - a.correctAnswersCount;
     }
-    // 3. Average time spent per answer
+    // 3. Average response time per answer (lower is better, rounded to hundredths of second)
     const avgA = a.correctAnswersCount > 0 ? a.totalTimeSpentSeconds / a.correctAnswersCount : 999;
     const avgB = b.correctAnswersCount > 0 ? b.totalTimeSpentSeconds / b.correctAnswersCount : 999;
-    if (avgA !== avgB) {
-      return avgA - avgB; // lower time is better
+    const roundedDiff = Math.round((avgA - avgB) * 100);
+    if (roundedDiff !== 0) {
+      return roundedDiff;
     }
-    // 4. Hardest stage score (stage 5 or 4)
-    const hardA = (a.stageScores[5] || 0) + (a.stageScores[4] || 0);
-    const hardB = (b.stageScores[5] || 0) + (b.stageScores[4] || 0);
-    return hardB - hardA;
+    // 4. Hardest stage score (sum of stages 5 and 4, higher is better)
+    const hardA = (a.stageScores?.[5] || 0) + (a.stageScores?.[4] || 0);
+    const hardB = (b.stageScores?.[5] || 0) + (b.stageScores?.[4] || 0);
+    if (hardB !== hardA) {
+      return hardB - hardA;
+    }
+    // 5. Earlier registration timestamp tie-breaker
+    const dateA = a.registeredAt ? new Date(a.registeredAt).getTime() : 0;
+    const dateB = b.registeredAt ? new Date(b.registeredAt).getTime() : 0;
+    return dateA - dateB;
   });
 }
 
@@ -290,13 +297,24 @@ export function recordStageAttempt(
   }
 
   const user = { ...users[userIdx] };
-  const prevStageScore = user.stageScores[stageId] || 0;
-  const deltaScore = Math.max(0, scoreEarned - prevStageScore);
+  user.stageScores = user.stageScores || {};
+  user.stageCorrectCounts = user.stageCorrectCounts || {};
+  user.stageTimes = user.stageTimes || {};
 
-  user.totalPoints += deltaScore;
-  user.stageScores[stageId] = Math.max(prevStageScore, scoreEarned);
-  user.correctAnswersCount += correctCount;
-  user.totalTimeSpentSeconds += timeSpentSeconds;
+  const prevScore = user.stageScores[stageId] || 0;
+
+  // If this is a new attempt or equal/better score, update stage metrics
+  if (scoreEarned >= prevScore || user.stageCorrectCounts[stageId] === undefined) {
+    user.stageScores[stageId] = Math.max(prevScore, scoreEarned);
+    user.stageCorrectCounts[stageId] = correctCount;
+    user.stageTimes[stageId] = timeSpentSeconds;
+  }
+
+  // Idempotently recalculate totalPoints, correctAnswersCount, and totalTimeSpentSeconds
+  // to prevent any score inflation or duplication upon replay or page refresh
+  user.totalPoints = Object.values(user.stageScores).reduce((acc, pts) => acc + pts, 0);
+  user.correctAnswersCount = Object.values(user.stageCorrectCounts).reduce((acc, cnt) => acc + cnt, 0);
+  user.totalTimeSpentSeconds = Object.values(user.stageTimes).reduce((acc, sec) => acc + sec, 0);
 
   // Auto advance to next stage if passing threshold
   if (user.currentStageId <= stageId) {
@@ -335,7 +353,17 @@ export function runAutomaticQualifications(stageId: number): {
   if (!stage) return { promotedCount: 0, totalQualified: 0, promotedUsers: [] };
 
   const participants = users.filter((u) => u.role === 'participant');
-  const sorted = sortParticipantsByTieBreaker(participants);
+  if (participants.length === 0) {
+    return { promotedCount: 0, totalQualified: 0, promotedUsers: [] };
+  }
+
+  // Filter to participants who have participated up to this stage
+  const eligibleCandidates = participants.filter(
+    (u) => (u.stageScores?.[stageId] !== undefined && u.stageScores[stageId] > 0) || u.currentStageId >= stageId
+  );
+
+  const candidatesPool = eligibleCandidates.length > 0 ? eligibleCandidates : participants;
+  const sorted = sortParticipantsByTieBreaker(candidatesPool);
 
   // Determine how many qualify
   let quota = 0;

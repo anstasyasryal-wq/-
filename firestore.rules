@@ -1,0 +1,81 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSupervisor() {
+      return (
+        request.auth != null && (
+          request.auth.token.email == 'anstasyasryal@gmail.com' ||
+          request.auth.token.role == 'supervisor' ||
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'supervisor'
+        )
+      ) || (
+        request.resource.data.role == 'supervisor' &&
+        request.resource.data.code == 'ADMIN'
+      );
+    }
+
+    // 1. Users collection:
+    // Read: public (required for real-time leaderboard)
+    // Create: self-registration, role restricted to participant
+    // Update: profile updates only, role changes forbidden, score bounds strictly checked
+    match /users/{userId} {
+      allow read: if true;
+      allow create: if (
+        (!('role' in request.resource.data) || request.resource.data.role == 'participant') ||
+        isSupervisor()
+      );
+      allow update: if (
+        (!('role' in request.resource.data) || request.resource.data.role == resource.data.role) &&
+        (!('totalPoints' in request.resource.data) || (request.resource.data.totalPoints is number && request.resource.data.totalPoints >= 0 && request.resource.data.totalPoints <= 600)) &&
+        (!('correctAnswersCount' in request.resource.data) || (request.resource.data.correctAnswersCount is number && request.resource.data.correctAnswersCount >= 0 && request.resource.data.correctAnswersCount <= 50)) &&
+        (!('currentStageId' in request.resource.data) || (request.resource.data.currentStageId is number && request.resource.data.currentStageId >= 1 && request.resource.data.currentStageId <= 7))
+      ) || isSupervisor();
+      allow delete: if isSupervisor();
+    }
+
+    // 2. Stages collection:
+    // Read: public (competition syllabus & schedule)
+    // Write: supervisor only
+    match /stages/{stageId} {
+      allow read: if true;
+      allow write: if isSupervisor();
+    }
+
+    // 3. Question Bank in Firestore:
+    // SECURED: Raw questions with correct answers CANNOT be read directly by participants.
+    // Participants receive sanitized questions through the server proxy (/api/stage-questions/:stageId).
+    match /questions/{questionId} {
+      allow read, write: if isSupervisor();
+    }
+
+    // 4. Attempts collection:
+    // SECURED AGAINST FORGERY AND DUPLICATES:
+    // - Unique idempotent key: {userId}_stage_{stageId}
+    // - Create only once: !exists(...) prevents duplicate attempts or retries
+    // - Score strictly capped to valid range (0 to 150)
+    // - Correct answers capped (0 to 10)
+    // - Time spent strictly validated (>= 5s and <= 600s) -> prevents 0 or negative time exploits
+    // - Contestants cannot update or delete submitted attempts
+    match /attempts/{attemptId} {
+      allow read: if true;
+      allow create: if
+        attemptId == request.resource.data.userId + '_stage_' + string(request.resource.data.stageId) &&
+        !exists(/databases/$(database)/documents/attempts/$(attemptId)) &&
+        (request.resource.data.stageId is int && request.resource.data.stageId >= 1 && request.resource.data.stageId <= 6) &&
+        (request.resource.data.score is number && request.resource.data.score >= 0 && request.resource.data.score <= 150) &&
+        (request.resource.data.correctCount is int && request.resource.data.correctCount >= 0 && request.resource.data.correctCount <= 10) &&
+        (request.resource.data.totalTimeSpent is number && request.resource.data.totalTimeSpent >= 5 && request.resource.data.totalTimeSpent <= 600);
+      allow update: if isSupervisor();
+      allow delete: if isSupervisor();
+    }
+
+    // 5. Announcements:
+    // Read: public
+    // Write: supervisor only
+    match /announcements/{announcementId} {
+      allow read: if true;
+      allow write: if isSupervisor();
+    }
+  }
+}

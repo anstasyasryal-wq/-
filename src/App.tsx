@@ -10,7 +10,15 @@ import {
   setCurrentUser as persistCurrentUser,
   getStoredStages,
   getStoredAnnouncements,
+  saveStages,
+  saveAnnouncements,
 } from './utils/competitionEngine';
+import {
+  seedCloudDatabaseIfEmpty,
+  subscribeToCloudStages,
+  subscribeToCloudAnnouncements,
+  syncUserToCloud,
+} from './utils/firebaseService';
 import { Header } from './components/Header';
 import { HomeView } from './components/HomeView';
 import { StagePlayer } from './components/StagePlayer';
@@ -23,9 +31,21 @@ import { RegistrationModal } from './components/RegistrationModal';
 import { RulesModal } from './components/RulesModal';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<AppView>('home');
+  const [currentView, setCurrentView] = useState<AppView>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('mokarasa_current_view') as AppView;
+      if (saved) return saved;
+    }
+    return 'home';
+  });
   const [currentUser, setCurrentUserState] = useState<User | null>(null);
-  const [activeStageId, setActiveStageId] = useState<number>(1);
+  const [activeStageId, setActiveStageId] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('mokarasa_active_stage_id');
+      if (saved) return parseInt(saved) || 1;
+    }
+    return 1;
+  });
   const [stages, setStages] = useState<Stage[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
 
@@ -38,22 +58,69 @@ export default function App() {
     setCurrentUserState(user);
     setStages(getStoredStages());
     setAnnouncements(getStoredAnnouncements());
+
+    // 1. Seed cloud database if not already seeded
+    seedCloudDatabaseIfEmpty().catch((err) => console.warn('Cloud seed error:', err));
+
+    // 2. Real-time subscription to cloud stages
+    const unsubStages = subscribeToCloudStages((cloudStages) => {
+      if (cloudStages && cloudStages.length > 0) {
+        setStages(cloudStages);
+        saveStages(cloudStages);
+      }
+    });
+
+    // 3. Real-time subscription to cloud announcements
+    const unsubAnnouncements = subscribeToCloudAnnouncements((cloudAnn) => {
+      if (cloudAnn && cloudAnn.length > 0) {
+        setAnnouncements(cloudAnn);
+        saveAnnouncements(cloudAnn);
+      }
+    });
+
+    return () => {
+      unsubStages();
+      unsubAnnouncements();
+    };
   }, []);
+
+  const handleNavigate = (view: AppView) => {
+    setCurrentView(view);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('mokarasa_current_view', view);
+    }
+  };
+
+  const handleSetActiveStage = (stageId: number) => {
+    setActiveStageId(stageId);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('mokarasa_active_stage_id', String(stageId));
+    }
+  };
 
   const handleUserUpdated = (user: User) => {
     setCurrentUserState(user);
     persistCurrentUser(user);
     setStages(getStoredStages());
+    syncUserToCloud(user).catch((err) => console.warn('User cloud sync error:', err));
   };
 
+  const [closedStageToast, setClosedStageToast] = useState<string | null>(null);
+
   const handleStartStage = (stageId: number) => {
+    const targetStage = stages.find((s) => s.id === stageId);
+    if (targetStage && targetStage.isOpen === false) {
+      setClosedStageToast(`تنبيه: مرحلة «${targetStage.title}» مغلقة حالياً بتوجيه المشرفة.`);
+      setTimeout(() => setClosedStageToast(null), 4000);
+      return;
+    }
     if (!currentUser) {
-      setActiveStageId(stageId);
+      handleSetActiveStage(stageId);
       setShowRegistrationModal(true);
       return;
     }
-    setActiveStageId(stageId);
-    setCurrentView('stage_player');
+    handleSetActiveStage(stageId);
+    handleNavigate('stage_player');
   };
 
   const handleFinishStage = (nextStageId?: number) => {
@@ -62,12 +129,12 @@ export default function App() {
     if (updated) setCurrentUserState(updated);
 
     if (nextStageId && nextStageId <= 5) {
-      setActiveStageId(nextStageId);
-      setCurrentView('stage_player');
+      handleSetActiveStage(nextStageId);
+      handleNavigate('stage_player');
     } else if (nextStageId === 6) {
-      setCurrentView('final_ceremony');
+      handleNavigate('final_ceremony');
     } else {
-      setCurrentView('leaderboard');
+      handleNavigate('leaderboard');
     }
   };
 
@@ -78,10 +145,25 @@ export default function App() {
         <Header
           currentView={currentView}
           currentUser={currentUser}
-          onNavigate={(view) => setCurrentView(view)}
+          onNavigate={(view) => handleNavigate(view)}
           onOpenLogin={() => setShowRegistrationModal(true)}
           onOpenRules={() => setShowRulesModal(true)}
         />
+
+        {/* Toast for closed stages */}
+        {closedStageToast && (
+          <div className="max-w-2xl mx-auto px-4 pt-3 animate-fade-in text-right">
+            <div className="bg-rose-50 border-2 border-rose-300 text-rose-800 px-4 py-3 rounded-2xl flex items-center justify-between shadow-sm">
+              <span className="text-xs font-bold">{closedStageToast}</span>
+              <button
+                onClick={() => setClosedStageToast(null)}
+                className="text-xs text-rose-600 hover:text-rose-900 font-bold px-2 py-1 rounded cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Main Content Area */}
         <main className="max-w-6xl mx-auto px-4 py-6">
@@ -92,13 +174,13 @@ export default function App() {
               announcements={announcements}
               onStartStage={handleStartStage}
               onOpenLogin={() => setShowRegistrationModal(true)}
-              onOpenMyRank={() => setCurrentView('leaderboard')}
+              onOpenMyRank={() => handleNavigate('leaderboard')}
               onOpenRules={() => setShowRulesModal(true)}
-              onNavigateToLeaderboard={() => setCurrentView('leaderboard')}
-              onNavigateToDioceses={() => setCurrentView('dioceses')}
-              onNavigateToSupervisor={() => setCurrentView('supervisor')}
-              onNavigateToParticipants={() => setCurrentView('participants')}
-              onNavigateToCompetitions={() => setCurrentView('competitions_hub')}
+              onNavigateToLeaderboard={() => handleNavigate('leaderboard')}
+              onNavigateToDioceses={() => handleNavigate('dioceses')}
+              onNavigateToSupervisor={() => handleNavigate('supervisor')}
+              onNavigateToParticipants={() => handleNavigate('participants')}
+              onNavigateToCompetitions={() => handleNavigate('competitions_hub')}
             />
           )}
 
@@ -106,14 +188,14 @@ export default function App() {
             <ParticipantsListView
               onOpenRegister={() => setShowRegistrationModal(true)}
               onStartStage={handleStartStage}
-              onBackToHome={() => setCurrentView('home')}
+              onBackToHome={() => handleNavigate('home')}
             />
           )}
 
           {currentView === 'competitions_hub' && (
             <CompetitionsHubView
               onStartStage={handleStartStage}
-              onBackToHome={() => setCurrentView('home')}
+              onBackToHome={() => handleNavigate('home')}
             />
           )}
 
@@ -122,8 +204,8 @@ export default function App() {
               stageId={activeStageId}
               currentUser={currentUser}
               onFinishStage={handleFinishStage}
-              onBackToHome={() => setCurrentView('home')}
-              onOpenLeaderboard={() => setCurrentView('leaderboard')}
+              onBackToHome={() => handleNavigate('home')}
+              onOpenLeaderboard={() => handleNavigate('leaderboard')}
             />
           )}
 
@@ -146,16 +228,16 @@ export default function App() {
           {currentView === 'supervisor' && (
             <SupervisorDashboard
               onTestStageAsAdmin={(stgId) => {
-                setActiveStageId(stgId);
-                setCurrentView('stage_player');
+                handleSetActiveStage(stgId);
+                handleNavigate('stage_player');
               }}
             />
           )}
 
           {currentView === 'final_ceremony' && (
             <FinalCeremonyView
-              onBackToHome={() => setCurrentView('home')}
-              onOpenLeaderboard={() => setCurrentView('leaderboard')}
+              onBackToHome={() => handleNavigate('home')}
+              onOpenLeaderboard={() => handleNavigate('leaderboard')}
             />
           )}
         </main>

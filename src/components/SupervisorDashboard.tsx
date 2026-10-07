@@ -10,6 +10,12 @@ import {
   saveAnnouncements,
   runAutomaticQualifications,
 } from '../utils/competitionEngine';
+import {
+  updateCloudStage,
+  saveCloudQuestion,
+  deleteCloudQuestion,
+  postCloudAnnouncement,
+} from '../utils/firebaseService';
 import { soundManager } from '../utils/audio';
 import {
   Users,
@@ -70,6 +76,8 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({
     const updated = stages.map((s) => (s.id === stageId ? { ...s, isOpen: !s.isOpen } : s));
     setStages(updated);
     saveStages(updated);
+    const target = updated.find((s) => s.id === stageId);
+    if (target) updateCloudStage(target).catch(console.warn);
     soundManager.playCorrect();
   };
 
@@ -85,7 +93,32 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({
     );
     setStages(updated);
     saveStages(updated);
+    const target = updated.find((s) => s.id === stageId);
+    if (target) updateCloudStage(target).catch(console.warn);
   };
+
+  // Change stage question time limit
+  const handleUpdateStageTime = (stageId: number, seconds: number) => {
+    const updated = stages.map((s) =>
+      s.id === stageId
+        ? {
+            ...s,
+            timePerQuestionSeconds: Math.max(5, seconds),
+          }
+        : s
+    );
+    setStages(updated);
+    saveStages(updated);
+    const target = updated.find((s) => s.id === stageId);
+    if (target) updateCloudStage(target).catch(console.warn);
+  };
+
+  // Question filtering state
+  const [questionFilterStage, setQuestionFilterStage] = useState<string>('all');
+  const [questionSearch, setQuestionSearch] = useState<string>('');
+
+  // Selected participant for details modal
+  const [selectedParticipantDetail, setSelectedParticipantDetail] = useState<User | null>(null);
 
   // Automatic Electronic Qualification Trigger
   const handleRunAutoQualification = (stageId: number) => {
@@ -121,8 +154,10 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({
     if (!editingQuestion || !editingQuestion.question?.trim()) return;
 
     let updatedQuestions: Question[] = [];
+    let savedTargetQuestion: Question | null = null;
     if (editingQuestion.id) {
       // Edit
+      savedTargetQuestion = editingQuestion as Question;
       updatedQuestions = questions.map((q) =>
         q.id === editingQuestion.id ? ({ ...q, ...editingQuestion } as Question) : q
       );
@@ -133,11 +168,15 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({
         id: `q-custom-${Date.now()}`,
         isCustom: true,
       } as Question;
+      savedTargetQuestion = newQ;
       updatedQuestions = [newQ, ...questions];
     }
 
     setQuestions(updatedQuestions);
     saveQuestions(updatedQuestions);
+    if (savedTargetQuestion) {
+      saveCloudQuestion(savedTargetQuestion).catch(console.warn);
+    }
     setShowQuestionModal(false);
     setEditingQuestion(null);
     soundManager.playCorrect();
@@ -148,6 +187,7 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({
       const filtered = questions.filter((q) => q.id !== id);
       setQuestions(filtered);
       saveQuestions(filtered);
+      deleteCloudQuestion(id).catch(console.warn);
       soundManager.playTick();
     }
   };
@@ -168,6 +208,7 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({
     const updated = [newAnn, ...announcements];
     setAnnouncements(updated);
     saveAnnouncements(updated);
+    postCloudAnnouncement(newAnn).catch(console.warn);
     setNewAnnTitle('');
     setNewAnnContent('');
     soundManager.playCorrect();
@@ -417,6 +458,14 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({
                     </span>
                   </div>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedParticipantDetail(u)}
+                  className="w-full mt-2 py-2 px-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-900 font-bold text-xs transition cursor-pointer flex items-center justify-center gap-1.5 border border-indigo-200"
+                >
+                  <span>🔍 استعراض نتائج المراحل وسجل الأداء</span>
+                </button>
               </div>
             ))}
           </div>
@@ -464,8 +513,20 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({
                     <span className="font-bold text-slate-800">{stg.totalQuestions} سؤالاً</span>
                   </div>
                   <div className="p-2 rounded-xl bg-slate-50">
-                    <span className="text-slate-500 block text-[10px]">زمن السؤال</span>
-                    <span className="font-bold text-slate-800">{stg.timePerQuestionSeconds} ثانية</span>
+                    <span className="text-slate-500 block text-[10px]">زمن السؤال (ثوانٍ)</span>
+                    <div className="flex items-center gap-1 justify-center mt-0.5">
+                      <input
+                        type="number"
+                        min="5"
+                        max="180"
+                        value={stg.timePerQuestionSeconds}
+                        onChange={(e) =>
+                          handleUpdateStageTime(stg.id, parseInt(e.target.value) || 20)
+                        }
+                        className="w-14 px-1.5 py-0.5 text-center font-bold font-mono rounded-lg border border-slate-300 text-xs bg-white"
+                      />
+                      <span className="text-[10px] text-slate-500">ث</span>
+                    </div>
                   </div>
                 </div>
 
@@ -496,9 +557,9 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({
       {/* ========================================================= */}
       {activeTab === 'questions' && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <span className="text-xs text-slate-500">
-              إجمالي الأسئلة المتاحة: <strong className="text-slate-800">{questions.length}</strong>
+              إجمالي الأسئلة في البنك: <strong className="text-slate-800">{questions.length}</strong> سؤالاً
             </span>
             <button
               onClick={handleOpenAddQuestion}
@@ -509,52 +570,124 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({
             </button>
           </div>
 
-          <div className="space-y-3">
-            {questions.slice(0, 15).map((q) => (
-              <div
-                key={q.id}
-                className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-start justify-between gap-3 text-right"
-              >
-                <div className="space-y-1 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-indigo-900 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full">
-                      المرحلة {q.stageId}
-                    </span>
-                    <span className="text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
-                      {q.category}
-                    </span>
-                    <span className="text-[10px] text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full">
-                      {q.points || 10} نقطة
-                    </span>
-                  </div>
-                  <h4 className="text-xs sm:text-sm font-bold text-slate-900 pt-1">
-                    {q.question}
-                  </h4>
-                  <p className="text-[11px] text-emerald-800 font-semibold">
-                    الإجابة الصحيحة: {q.options[q.correctIndex]}
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => {
-                      setEditingQuestion(q);
-                      setShowQuestionModal(true);
-                    }}
-                    className="p-1.5 text-slate-400 hover:text-indigo-600 rounded-lg hover:bg-slate-50 transition cursor-pointer"
-                  >
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteQuestion(q.id)}
-                    className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition cursor-pointer"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
+          {/* Search & Filter Bar */}
+          <div className="flex flex-col sm:flex-row items-center gap-2 bg-slate-50 p-2.5 rounded-2xl border border-slate-200">
+            <input
+              type="text"
+              placeholder="ابحثي في نص السؤال أو المرجع أو التصنيف..."
+              value={questionSearch}
+              onChange={(e) => setQuestionSearch(e.target.value)}
+              className="w-full sm:flex-1 py-1.5 px-3 rounded-xl bg-white border border-slate-200 text-xs text-right"
+            />
+            <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto">
+              {['all', '1', '2', '3', '4', '5', '6'].map((stg) => (
+                <button
+                  key={stg}
+                  type="button"
+                  onClick={() => setQuestionFilterStage(stg)}
+                  className={`py-1 px-2.5 rounded-lg text-xs font-bold transition whitespace-nowrap cursor-pointer ${
+                    questionFilterStage === stg
+                      ? 'bg-indigo-900 text-white'
+                      : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  {stg === 'all' ? 'جميع المراحل' : stg === '6' ? '👑 النهائي' : `مرحلة ${stg}`}
+                </button>
+              ))}
+            </div>
           </div>
+
+          {/* Question List */}
+          {(() => {
+            const filteredQuestions = questions.filter((q) => {
+              const matchesStage =
+                questionFilterStage === 'all' || String(q.stageId) === questionFilterStage;
+              const matchesSearch =
+                !questionSearch.trim() ||
+                q.question.toLowerCase().includes(questionSearch.toLowerCase()) ||
+                q.category.toLowerCase().includes(questionSearch.toLowerCase()) ||
+                (q.explanation && q.explanation.toLowerCase().includes(questionSearch.toLowerCase())) ||
+                (q.reference && q.reference.toLowerCase().includes(questionSearch.toLowerCase()));
+              return matchesStage && matchesSearch;
+            });
+
+            if (filteredQuestions.length === 0) {
+              return (
+                <div className="p-8 text-center bg-white rounded-2xl border border-slate-200 text-slate-500 text-xs">
+                  لا توجد أسئلة تطابق معايير البحث الحالية
+                </div>
+              );
+            }
+
+            return (
+              <div className="space-y-3">
+                <p className="text-[11px] text-slate-500">
+                  عرض {filteredQuestions.length} سؤالاً مطابقة:
+                </p>
+                {filteredQuestions.map((q) => (
+                  <div
+                    key={q.id}
+                    className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-start justify-between gap-3 text-right"
+                  >
+                    <div className="space-y-1 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-[10px] font-bold text-indigo-900 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full">
+                          المرحلة {q.stageId || 1}
+                        </span>
+                        <span className="text-[10px] text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">
+                          {q.category}
+                        </span>
+                        {q.subCategory && (
+                          <span className="text-[10px] text-slate-500 bg-slate-50 px-2 py-0.5 rounded-full border border-slate-200">
+                            {q.subCategory}
+                          </span>
+                        )}
+                        <span className="text-[10px] text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full">
+                          {q.points || 10} نقطة
+                        </span>
+                        {q.timeLimitSeconds && (
+                          <span className="text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                            ⏱️ {q.timeLimitSeconds} ث
+                          </span>
+                        )}
+                      </div>
+                      <h4 className="text-xs sm:text-sm font-bold text-slate-900 pt-1">
+                        {q.question}
+                      </h4>
+                      <p className="text-[11px] text-emerald-800 font-semibold">
+                        الإجابة الصحيحة: {q.options[q.correctIndex]}
+                      </p>
+                      {q.reference && (
+                        <p className="text-[10px] text-slate-400">
+                          المرجع: {q.reference}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => {
+                          setEditingQuestion(q);
+                          setShowQuestionModal(true);
+                        }}
+                        className="p-1.5 text-slate-400 hover:text-indigo-600 rounded-lg hover:bg-slate-50 transition cursor-pointer"
+                        title="تعديل السؤال"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteQuestion(q.id)}
+                        className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition cursor-pointer"
+                        title="حذف السؤال"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
         </div>
       )}
 
@@ -736,6 +869,138 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Participant Detailed Breakdown Modal */}
+      {selectedParticipantDetail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-indigo-950/70 p-4 backdrop-blur-sm overflow-y-auto">
+          <div className="relative w-full max-w-lg rounded-3xl bg-white shadow-2xl border border-amber-200 overflow-hidden my-auto text-right animate-fade-in">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-amber-700 via-amber-600 to-indigo-900 p-6 text-white text-right relative">
+              <button
+                type="button"
+                onClick={() => setSelectedParticipantDetail(null)}
+                className="absolute top-4 left-4 p-1.5 rounded-full bg-white/20 text-white hover:bg-white/30 transition cursor-pointer"
+              >
+                ✕
+              </button>
+              <div className="inline-flex px-2.5 py-0.5 rounded-full bg-white/20 text-[11px] font-bold mb-2">
+                كود المشاركة: {selectedParticipantDetail.code}
+              </div>
+              <h3 className="text-xl font-bold font-spiritual text-white">
+                {selectedParticipantDetail.name}
+              </h3>
+              <p className="text-xs text-amber-100 mt-0.5">
+                {selectedParticipantDetail.consecrationHouse} • {selectedParticipantDetail.diocese}
+              </p>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-4 max-h-[75vh] overflow-y-auto text-xs text-slate-700">
+              {/* Identity & ministry info */}
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold text-slate-500">الرتبة الكنسية:</span>
+                  <span className="font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded-md border border-amber-200">
+                    {selectedParticipantDetail.consecrationRank || 'مكرسة دائمة'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold text-slate-500">ميدان الخدمة:</span>
+                  <span className="font-bold text-indigo-950">
+                    {selectedParticipantDetail.ministryField || 'خدمة عامة وافتقاد'}
+                  </span>
+                </div>
+                {selectedParticipantDetail.patronSaint && (
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold text-slate-500">القديسة الشفيعة:</span>
+                    <span className="font-bold text-slate-800">
+                      {selectedParticipantDetail.patronSaint}
+                    </span>
+                  </div>
+                )}
+                {selectedParticipantDetail.consecrationVerse && (
+                  <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 font-spiritual font-bold text-amber-900 mt-2">
+                    {selectedParticipantDetail.consecrationVerse}
+                  </div>
+                )}
+              </div>
+
+              {/* General Performance KPI */}
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200">
+                  <span className="text-[10px] text-slate-500 block">إجمالي النقاط</span>
+                  <span className="text-xl font-black text-amber-900 font-mono">
+                    {selectedParticipantDetail.totalPoints}
+                  </span>
+                </div>
+                <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200">
+                  <span className="text-[10px] text-slate-500 block">الإجابات الصحيحة</span>
+                  <span className="text-xl font-black text-emerald-800 font-mono">
+                    {selectedParticipantDetail.correctAnswersCount}
+                  </span>
+                </div>
+                <div className="p-3 rounded-2xl bg-purple-50 border border-purple-200">
+                  <span className="text-[10px] text-slate-500 block">حالة التأهل</span>
+                  <span className="text-xs font-bold text-purple-900 block mt-1">
+                    {selectedParticipantDetail.isQualifiedForFinal
+                      ? '👑 مؤهلة للنهائي'
+                      : `مرحلة ${selectedParticipantDetail.currentStageId}`}
+                  </span>
+                </div>
+              </div>
+
+              {/* Stage Scores Breakdown */}
+              <div className="space-y-2 pt-2">
+                <h4 className="font-bold text-slate-900 text-sm">
+                  📊 درجات الجولات والمراحل المسجلة:
+                </h4>
+                <div className="space-y-1.5">
+                  {[1, 2, 3, 4, 5].map((stgId) => {
+                    const score = selectedParticipantDetail.stageScores[stgId];
+                    const stageNames = [
+                      '',
+                      'المرحلة 1: البداية التمهيدية',
+                      'المرحلة 2: الاكتشاف والربط',
+                      'المرحلة 3: التحدي السريع (Bonus)',
+                      'المرحلة 4: الحواس والألحان والصور',
+                      'المرحلة 5: التحدي الكبير الشامل',
+                    ];
+                    return (
+                      <div
+                        key={stgId}
+                        className="p-2.5 rounded-xl border flex items-center justify-between bg-white border-slate-200"
+                      >
+                        <span className="font-semibold text-slate-800">
+                          {stageNames[stgId]}
+                        </span>
+                        {score !== undefined ? (
+                          <span className="font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                            {score} نقطة
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">
+                            لم تُؤدَ بعد
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedParticipantDetail(null)}
+                  className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold transition cursor-pointer"
+                >
+                  إغلاق
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

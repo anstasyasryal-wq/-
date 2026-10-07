@@ -1,0 +1,117 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Participant or supervisor profile in the competition",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "code": { "type": "string" },
+        "consecrationHouse": { "type": "string" },
+        "diocese": { "type": "string" },
+        "governorate": { "type": "string" },
+        "role": { "type": "string", "enum": ["participant", "supervisor"] },
+        "currentStageId": { "type": "number" },
+        "isQualifiedForFinal": { "type": "boolean" },
+        "totalPoints": { "type": "number" },
+        "correctAnswersCount": { "type": "number" },
+        "totalTimeSpentSeconds": { "type": "number" },
+        "consecrationRank": { "type": "string" },
+        "ministryField": { "type": "string" },
+        "consecrationVerse": { "type": "string" },
+        "personalBio": { "type": "string" },
+        "patronSaint": { "type": "string" },
+        "registeredAt": { "type": "string" }
+      },
+      "required": ["id", "name", "code", "role", "totalPoints"]
+    },
+    "Stage": {
+      "title": "Stage",
+      "description": "A competition stage with operational status and rules",
+      "type": "object",
+      "properties": {
+        "id": { "type": "number" },
+        "number": { "type": "number" },
+        "title": { "type": "string" },
+        "subtitle": { "type": "string" },
+        "isOpen": { "type": "boolean" },
+        "totalQuestions": { "type": "number" },
+        "timePerQuestionSeconds": { "type": "number" },
+        "description": { "type": "string" }
+      },
+      "required": ["id", "title", "isOpen", "timePerQuestionSeconds"]
+    },
+    "Question": {
+      "title": "Question",
+      "description": "A theological or competition question",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "stageId": { "type": "number" },
+        "category": { "type": "string" },
+        "subCategory": { "type": "string" },
+        "questionType": { "type": "string" },
+        "difficulty": { "type": "string" },
+        "question": { "type": "string" },
+        "correctIndex": { "type": "number" },
+        "explanation": { "type": "string" },
+        "reference": { "type": "string" },
+        "hint": { "type": "string" },
+        "points": { "type": "number" },
+        "timeLimitSeconds": { "type": "number" }
+      },
+      "required": ["id", "question", "correctIndex", "stageId"]
+    },
+    "StageAttempt": {
+      "title": "StageAttempt",
+      "description": "An idempotent completed stage attempt by a participant",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "stageId": { "type": "number" },
+        "score": { "type": "number" },
+        "correctCount": { "type": "number" },
+        "totalTimeSpent": { "type": "number" },
+        "completedAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "stageId", "score"]
+    },
+    "Announcement": {
+      "title": "Announcement",
+      "description": "Public announcement broadcast by the supervisor",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "date": { "type": "string" },
+        "isUrgent": { "type": "boolean" }
+      },
+      "required": ["id", "title", "content", "date"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Registered participants and supervisor accounts"
+    },
+    "/stages/{stageId}": {
+      "schema": "Stage",
+      "description": "The 5 stages and Grand Final settings"
+    },
+    "/questions/{questionId}": {
+      "schema": "Question",
+      "description": "Competition question bank"
+    },
+    "/attempts/{attemptId}": {
+      "schema": "StageAttempt",
+      "description": "Verified idempotent stage attempts"
+    },
+    "/announcements/{announcementId}": {
+      "schema": "Announcement",
+      "description": "Competition news and directives"
+    }
+  }
+}

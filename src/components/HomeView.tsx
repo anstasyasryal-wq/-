@@ -357,7 +357,12 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 </div>
 
                 <div className="mt-4 pt-2">
-                  {isStageCompleted ? (
+                  {!stage.isOpen ? (
+                    <div className="w-full py-2.5 px-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 font-bold text-xs flex items-center justify-center gap-1.5 shadow-2xs">
+                      <Lock className="w-3.5 h-3.5 text-rose-600" />
+                      <span>المرحلة مغلقة حالياً بأمر المشرفة</span>
+                    </div>
+                  ) : isStageCompleted ? (
                     <button
                       onClick={() => onStartStage(stage.id)}
                       className="w-full py-2.5 px-3 rounded-xl bg-emerald-100 text-emerald-800 hover:bg-emerald-200 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"

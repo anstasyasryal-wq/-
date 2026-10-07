@@ -99,6 +99,8 @@ export interface User {
   correctAnswersCount: number;
   totalTimeSpentSeconds: number;
   stageScores: Record<number, number>; // stageId -> score
+  stageCorrectCounts?: Record<number, number>; // stageId -> correct answers
+  stageTimes?: Record<number, number>; // stageId -> total seconds
   avatar?: string;
   registeredAt: string;
   // Identity & Ministry profile

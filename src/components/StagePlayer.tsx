@@ -5,6 +5,7 @@ import {
   recordStageAttempt,
   getStoredStages,
 } from '../utils/competitionEngine';
+import { submitVerifiedStageAttempt } from '../utils/firebaseService';
 import { soundManager } from '../utils/audio';
 import confetti from 'canvas-confetti';
 import {
@@ -22,6 +23,7 @@ import {
   RotateCcw,
   Trophy,
   ChevronLeft,
+  Lock,
 } from 'lucide-react';
 
 interface StagePlayerProps {
@@ -63,19 +65,106 @@ export const StagePlayer: React.FC<StagePlayerProps> = ({
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const imageTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const sessionKey = `mokarasa_active_session_${currentUser.id}_${stageId}`;
 
-  // Load questions on mount
+  // Load questions and restore any in-progress session on mount
   useEffect(() => {
-    const list = getQuestionsForStage(stageId);
-    setQuestions(list);
-    setCurrentIndex(0);
-    setSelectedOption(null);
-    setIsAnswerSubmitted(false);
-    setAnswers([]);
-    setCurrentScore(0);
-    setIsFinished(false);
-    setTimeLeft(currentStage.timePerQuestionSeconds);
-  }, [stageId]);
+    let isCancelled = false;
+
+    async function loadQuestions() {
+      let list: Question[] = [];
+      try {
+        const resp = await fetch(`/api/stage-questions/${stageId}`);
+        if (resp.ok) {
+          const data = await resp.json();
+          if (data && Array.isArray(data.questions) && data.questions.length > 0) {
+            list = data.questions;
+          }
+        }
+      } catch {
+        // network fallback to local
+      }
+
+      if (list.length === 0) {
+        list = getQuestionsForStage(stageId);
+      }
+
+      if (isCancelled) return;
+      setQuestions(list);
+
+      // Attempt to restore in-progress session on page refresh
+      try {
+        const raw = sessionStorage.getItem(sessionKey);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (
+            parsed &&
+            typeof parsed.currentIndex === 'number' &&
+            parsed.currentIndex < list.length
+          ) {
+            setCurrentIndex(parsed.currentIndex);
+            setSelectedOption(parsed.selectedOption ?? null);
+            setIsAnswerSubmitted(parsed.isAnswerSubmitted ?? false);
+            setAnswers(parsed.answers || []);
+            setCurrentScore(parsed.currentScore || 0);
+            setTimeLeft(
+              parsed.timeLeft ||
+                (list[parsed.currentIndex]?.timeLimitSeconds || currentStage.timePerQuestionSeconds)
+            );
+            setIsFinished(false);
+            return;
+          }
+        }
+      } catch {
+        // ignore and fallback to clean state
+      }
+
+      setCurrentIndex(0);
+      setSelectedOption(null);
+      setIsAnswerSubmitted(false);
+      setAnswers([]);
+      setCurrentScore(0);
+      setIsFinished(false);
+      setTimeLeft(list[0]?.timeLimitSeconds || currentStage.timePerQuestionSeconds);
+    }
+
+    loadQuestions();
+    return () => {
+      isCancelled = true;
+    };
+  }, [stageId, currentUser.id]);
+
+  // Continuously save in-progress state to sessionStorage to prevent refresh tampering/loss
+  useEffect(() => {
+    if (questions.length === 0) return;
+    if (isFinished) {
+      sessionStorage.removeItem(sessionKey);
+      return;
+    }
+    const stateToSave = {
+      currentIndex,
+      selectedOption,
+      isAnswerSubmitted,
+      answers,
+      currentScore,
+      timeLeft,
+    };
+    try {
+      sessionStorage.setItem(sessionKey, JSON.stringify(stateToSave));
+    } catch {
+      // ignore
+    }
+  }, [
+    currentIndex,
+    selectedOption,
+    isAnswerSubmitted,
+    answers,
+    currentScore,
+    timeLeft,
+    isFinished,
+    sessionKey,
+    questions.length,
+  ]);
 
   const currentQ = questions[currentIndex] || null;
 
@@ -154,16 +243,66 @@ export const StagePlayer: React.FC<StagePlayerProps> = ({
     setAnswers((prev) => [...prev, record]);
   };
 
-  const handleSelectOption = (idx: number) => {
+  const isSubmittingRef = useRef(false);
+
+  const handleSelectOption = async (idx: number) => {
     if (isAnswerSubmitted || !currentQ) return;
     setSelectedOption(idx);
     setIsAnswerSubmitted(true);
 
-    const isCorrect = idx === currentQ.correctIndex;
     const timeLimit = currentQ.timeLimitSeconds || currentStage.timePerQuestionSeconds;
     const timeSpent = Math.max(1, timeLimit - timeLeft);
 
-    // Calculate Speed Bonus (especially prominent in Stage 3)
+    // Call server to securely verify answer without client holding answer key
+    try {
+      const resp = await fetch('/api/check-answer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          questionId: currentQ.id,
+          selectedOptionIndex: idx,
+          timeSpentSeconds: timeSpent,
+          stageId,
+        }),
+      });
+
+      if (resp.ok) {
+        const data = await resp.json();
+        const isCorrect = Boolean(data.isCorrect);
+        const earned = Number(data.pointsEarned) || 0;
+        const speedBonus = Number(data.speedBonusEarned) || 0;
+
+        // Reveal answer and explanation returned from server safely after submission
+        currentQ.correctIndex = data.correctIndex;
+        currentQ.explanation = data.explanation;
+        currentQ.reference = data.reference;
+
+        setCurrentScore((prev) => prev + earned);
+        setLastBonusEarned(speedBonus > 0 ? speedBonus : null);
+
+        if (isCorrect) {
+          soundManager.playCorrect();
+        } else {
+          soundManager.playWrong();
+        }
+
+        const record: UserAnswerRecord = {
+          questionId: currentQ.id,
+          selectedOptionIndex: idx,
+          isCorrect,
+          timeSpentSeconds: timeSpent,
+          pointsEarned: earned,
+          speedBonusEarned: speedBonus,
+        };
+        setAnswers((prev) => [...prev, record]);
+        return;
+      }
+    } catch {
+      // offline / fallback
+    }
+
+    // Local fallback if offline or network unavailable
+    const isCorrect = currentQ.correctIndex !== undefined ? idx === currentQ.correctIndex : false;
     let speedBonus = 0;
     if (isCorrect) {
       if (timeSpent <= 4) {
@@ -207,8 +346,15 @@ export const StagePlayer: React.FC<StagePlayerProps> = ({
     }
   };
 
-  const finishStage = () => {
+  const finishStage = async () => {
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
     setIsFinished(true);
+    try {
+      sessionStorage.removeItem(sessionKey);
+    } catch {
+      // ignore
+    }
     soundManager.playVictory();
 
     // Trigger confetti
@@ -222,18 +368,80 @@ export const StagePlayer: React.FC<StagePlayerProps> = ({
       // ignore
     }
 
-    const correctCount = answers.filter((a) => a.isCorrect).length;
-    const totalTimeSpent = answers.reduce((acc, a) => acc + a.timeSpentSeconds, 0);
+    let correctCount = answers.filter((a) => a.isCorrect).length;
+    let totalTimeSpent = Math.max(5, answers.reduce((acc, a) => acc + a.timeSpentSeconds, 0));
+    let finalCalculatedScore = currentScore;
 
-    const { newRank } = recordStageAttempt(
+    // Server-side authoritative verification to prevent client tampering
+    try {
+      const resp = await fetch('/api/verify-stage-attempt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: currentUser.id,
+          stageId,
+          answers,
+          clientTimestamp: Date.now(),
+        }),
+      });
+
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data && typeof data.serverCalculatedScore === 'number') {
+          finalCalculatedScore = data.serverCalculatedScore;
+          correctCount = data.correctCount;
+          totalTimeSpent = Math.max(5, data.totalTimeSpent);
+        }
+      }
+    } catch (err) {
+      console.warn('Server attempt verification offline fallback:', err);
+    }
+
+    const { newRank, user: updatedUser } = recordStageAttempt(
       currentUser.id,
       stageId,
-      currentScore,
+      finalCalculatedScore,
       correctCount,
       totalTimeSpent
     );
     setFinalRank(newRank);
+
+    // Concurrently persist and verify attempt on Cloud Firestore
+    submitVerifiedStageAttempt(
+      updatedUser,
+      stageId,
+      finalCalculatedScore,
+      correctCount,
+      totalTimeSpent,
+      answers
+    ).then((res) => {
+      if (res && res.newRank) {
+        setFinalRank(res.newRank);
+      }
+    }).catch((err) => {
+      console.warn('Cloud submit stage attempt error:', err);
+    });
   };
+
+  if (currentStage && currentStage.isOpen === false) {
+    return (
+      <div className="max-w-md mx-auto p-8 text-center bg-white rounded-3xl border border-rose-200 shadow-xl space-y-4 my-8 animate-fade-in text-right">
+        <div className="w-16 h-16 mx-auto rounded-full bg-rose-100 text-rose-700 flex items-center justify-center">
+          <Lock className="w-8 h-8" />
+        </div>
+        <h2 className="text-xl font-bold font-spiritual text-slate-900 text-center">المرحلة مغلقة حالياً</h2>
+        <p className="text-xs text-slate-600 leading-relaxed text-center">
+          هذه المرحلة مغلقة حالياً بتوجيه المشرفة. يرجى الانتظار حتى فتحها رسمياً لخوض الاختبار.
+        </p>
+        <button
+          onClick={onBackToHome}
+          className="w-full py-2.5 px-4 rounded-xl bg-indigo-950 text-white font-bold text-xs hover:bg-indigo-900 transition cursor-pointer"
+        >
+          العودة للرئيسية
+        </button>
+      </div>
+    );
+  }
 
   if (!currentQ && !isFinished) {
     return (
