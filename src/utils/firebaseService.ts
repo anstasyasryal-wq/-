@@ -173,8 +173,8 @@ export async function submitVerifiedStageAttempt(
       const userId = authUser ? authUser.uid : user.id;
       const attemptId = `${userId}_stage_${stageId}`;
       const safeTimeSpent = Math.max(5, Math.min(600, Number(timeSpentSeconds) || 5));
-      const safeScore = Math.max(0, Math.min(150, Number(clientScore) || 0));
-      const safeCorrect = Math.max(0, Math.min(10, Number(correctCount) || 0));
+      const safeScore = Math.max(0, Math.min(350, Number(clientScore) || 0));
+      const safeCorrect = Math.max(0, Math.min(25, Number(correctCount) || 0));
 
       // 1. Record Attempt Document (Write-once / Append-only)
       const attemptDocRef = doc(db, 'attempts', attemptId);

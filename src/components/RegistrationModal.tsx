@@ -98,26 +98,8 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
     } else {
       soundManager.playWrong();
       setErrorMessage(
-        'كود المشاركة غير مسجل. يمكنكِ التسجيل كحساب جديد أو إدخال كود تجريبي مثل MK-101 أو ADMIN'
+        'كود المشاركة غير مسجل. يرجى التأكد من كتابة الكود بشكل صحيح أو إنشاء حساب متسابقة جديدة.'
       );
-    }
-  };
-
-  const handleQuickDemoParticipant = () => {
-    const user = loginWithCode('MK-101');
-    if (user) {
-      soundManager.playCorrect();
-      onSuccess(user);
-      onClose();
-    }
-  };
-
-  const handleQuickDemoAdmin = () => {
-    const user = loginWithCode('ADMIN');
-    if (user) {
-      soundManager.playCorrect();
-      onSuccess(user);
-      onClose();
     }
   };
 
@@ -431,7 +413,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                       <input
                         type="text"
                         required
-                        placeholder="مثال: MK-101 أو كودك الشخصي"
+                        placeholder="أدخلي كود مشاركتكِ المعتمد (مثال: MK-... أو كود المشرفة)"
                         value={loginCode}
                         onChange={(e) => setLoginCode(e.target.value)}
                         className="w-full pr-10 pl-3 py-2.5 text-xs sm:text-sm rounded-xl border border-slate-300 focus:outline-none focus:border-amber-500 font-mono"
@@ -448,30 +430,6 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                   </button>
                 </form>
               )}
-
-              {/* Quick Demo Helpers */}
-              <div className="mt-5 pt-4 border-t border-slate-100 space-y-2">
-                <p className="text-[11px] text-center text-slate-500 font-semibold">
-                  للتجربة السريعة الفورية:
-                </p>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={handleQuickDemoParticipant}
-                    className="flex-1 py-1.5 px-2 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-lg text-xs font-medium transition cursor-pointer"
-                  >
-                    تجربة كمتسابقة (MK-101)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleQuickDemoAdmin}
-                    className="flex-1 py-1.5 px-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 rounded-lg text-xs font-medium transition flex items-center justify-center gap-1 cursor-pointer"
-                  >
-                    <Shield className="w-3.5 h-3.5" />
-                    <span>دخول المشرفة (ADMIN)</span>
-                  </button>
-                </div>
-              </div>
             </div>
           )}
         </div>

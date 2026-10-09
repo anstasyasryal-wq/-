@@ -24,16 +24,15 @@ const KEYS = {
 // 1. Storage Helpers
 // ==========================================
 export function getStoredUsers(): User[] {
-  if (typeof window === 'undefined') return MOCK_PARTICIPANTS;
+  if (typeof window === 'undefined') return [];
   try {
     const raw = localStorage.getItem(KEYS.USERS);
     if (!raw) {
-      localStorage.setItem(KEYS.USERS, JSON.stringify(MOCK_PARTICIPANTS));
-      return MOCK_PARTICIPANTS;
+      return [];
     }
     return JSON.parse(raw);
   } catch {
-    return MOCK_PARTICIPANTS;
+    return [];
   }
 }
 
@@ -50,10 +49,7 @@ export function getCurrentUser(): User | null {
   try {
     const raw = localStorage.getItem(KEYS.CURRENT_USER);
     if (raw) return JSON.parse(raw);
-    // Default to the first participant for demo, or null
-    const users = getStoredUsers();
-    const demo = users.find((u) => u.role === 'participant') || null;
-    return demo;
+    return null;
   } catch {
     return null;
   }
