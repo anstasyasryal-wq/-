@@ -263,7 +263,7 @@ export default function App() {
       <footer className="border-t border-slate-200 bg-white/60 py-6 text-center text-xs text-slate-500">
         <div className="max-w-6xl mx-auto px-4 space-y-1">
           <p className="font-spiritual font-bold text-slate-700">
-            مسابقة «المكرَّسة المثالية» • منصة التميز المعرفي والروحي والكنسي
+            منصة «حَسَبَ قَلْبِ اللهِ» (كاهن – مكرَّسة – راهب – راهبة) • مسيرة المراجعة والنمو الروحي والكنسي
           </p>
           <p className="text-[11px] text-slate-400">
             «كُنْ أَمِيناً إِلَى الْمَوْتِ فَسَأُعْطِيكَ إِكْلِيلَ الْحَيَاةِ» (رؤيا 2: 10)

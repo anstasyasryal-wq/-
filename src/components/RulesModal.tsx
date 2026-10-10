@@ -25,8 +25,8 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
               <Award className="w-7 h-7 text-amber-200" />
             </div>
             <div>
-              <h2 className="text-xl font-bold font-spiritual">📜 ميثاق وقواعد مسابقة «المكرَّسة المثالية»</h2>
-              <p className="text-xs text-amber-100 mt-0.5">الدليل الشامل للتقييم، النقاط، والمراحل والتصفيات</p>
+              <h2 className="text-xl font-bold font-spiritual">📜 ميثاق ومبادئ مسيرة «حَسَبَ قَلْبِ اللهِ»</h2>
+              <p className="text-xs text-amber-100 mt-0.5">«كاهن – مكرَّسة – راهب – راهبة» • الدليل الشامل للمراجعة والتقييم الروحي والكنسي</p>
             </div>
           </div>
         </div>
@@ -37,10 +37,10 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
           <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200 space-y-2">
             <h3 className="font-bold text-amber-900 flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-amber-700" />
-              <span>فلسفة المسابقة ورسالتها</span>
+              <span>فلسفة المسيرة ورسالتها الروحية</span>
             </h3>
             <p className="text-xs text-amber-800 leading-relaxed">
-              مسابقة «المكرَّسة المثالية» هي منصة إلكترونية كنسية راقية ومبهجة، صُممت خصيصاً لأخواتنا المكرسات والخادمات المتفرغات. تهدف المنصة إلى الجمع بين العمق الروحي والكتابي، والذكاء التحليلي وسرعة البديهة، دون أن تكون مجرد امتحان مدرسي نمطي.
+              مسيرة «حسب قلب الله» هي منصة كنسية للمراجعة الروحية والنمو الداخلي والتعمق في العلوم الكنسية والآبائية، صُممت خصيصاً للمكرسين والمكرسات في مختلف ميادين خدمتهم (كاهن – مكرَّسة – راهب – راهبة). الهدف ليس إصدار حكم على قداسة الشخص أو مقارنته بالآخرين، بل مساعدة كل مكرس على فحص قلبه الداخلي وأمانته أمام الله، وتحديد نقاط القوة ومجالات النمو العملي في التواضع، المحبة، والخدمة.
             </p>
           </div>
 
@@ -72,8 +72,8 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
                 <p className="text-slate-600">أصعب مرحلة شاملة قبل النهائي تجمع ألغازاً ومواقف وتحديات سرعة ومفاجأة.</p>
               </div>
               <div className="p-3 rounded-lg border border-amber-300 bg-amber-50/50 space-y-1 sm:col-span-2">
-                <span className="font-bold text-amber-900">👑 النهائي الكبير — المكرَّسة المثالية:</span>
-                <p className="text-slate-700">لأفضل المتأهلات فقط: 5 تحديات (المعرفة، الذكاء، السرعة، الاختيار، المفاجأة) لتتويج المراكز الأولى والجوائز المتخصصة.</p>
+                <span className="font-bold text-amber-900">👑 التقييم الختامي الشامل — حسب قلب الله:</span>
+                <p className="text-slate-700">للمشاركين والمشاركات: 5 أبعاد للمراجعة (المعرفة الكتابية، الحكمة والتمييز، اليقظة الروحية، القرارات الرعوية والرهبانية، وروح الخدمة الباذلة) لتحديد جوانب القوة وخطوات النمو الشخصي.</p>
               </div>
             </div>
           </div>
@@ -87,11 +87,11 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
             <ul className="space-y-2 text-xs text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-200">
               <li className="flex items-start gap-2">
                 <Zap className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-                <span><strong>نقاط الإجابة + بونص السرعة:</strong> تحصل المتسابقة على النقاط الأساسية لكل سؤال، بالإضافة إلى بونص إضافي إذا أجابت خلال الثواني الأولى.</span>
+                <span><strong>نقاط الإجابة + بونص السرعة:</strong> يحصل المشارك/المشاركة على النقاط الأساسية لكل سؤال، بالإضافة إلى بونص إضافي عند الإجابة خلال الثواني الأولى.</span>
               </li>
               <li className="flex items-start gap-2">
                 <Scale className="w-4 h-4 text-indigo-600 flex-shrink-0 mt-0.5" />
-                <span><strong>قواعد كسر التعادل الصارمة (دون قرعة):</strong> في حال تساوي النقاط، يتم الترتيب التلقائي وفق: 1) إجمالي النقاط ← 2) عدد الإجابات الصحيحة ← 3) متوسط زمن الإجابة (الأسرع يتقدم) ← 4) نتيجة الجولة الأصعب.</span>
+                <span><strong>قواعد كسر التعادل الموضوعية:</strong> في حال تساوي النقاط، يتم الترتيب التلقائي وفق: 1) إجمالي النقاط ← 2) عدد الإجابات الصحيحة ← 3) متوسط زمن الإجابة ← 4) نتيجة الجولة الأصعب.</span>
               </li>
               <li className="flex items-start gap-2">
                 <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
@@ -104,18 +104,18 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
           <div>
             <h3 className="font-bold text-slate-900 mb-3 flex items-center gap-2">
               <Trophy className="w-4 h-4 text-amber-700" />
-              <span>نظام التصفيات الإلكتروني والتأهل التلقائي</span>
+              <span>نظام التصفيات والمراحل التلقائي</span>
             </h3>
             <p className="text-xs text-slate-600 leading-relaxed">
-              يقوم النظام الإلكتروني بتحديد المتأهلات وفرز المراكز آلياً دون تدخل يدوي:
+              يقوم النظام بتحديد المتأهلين للمراحل التالية آلياً وفق معايير دقيقة:
               <br />
-              • المرحلة الأولى: يتأهل أفضل 30% من المشاركات.
+              • المرحلة الأولى: يتأهل أفضل 30% من المشاركين والمشاركات.
               <br />
               • المرحلة الثانية: يتأهل أفضل 15%.
               <br />
               • المرحلة الثالثة: يتأهل أفضل 5%.
               <br />
-              • المرحلة الرابعة والخامسة: يتأهل أفضل 10 متسابقات لخوض النهائي الكبير وتتويج «المكرسة المثالية».
+              • المرحلة الرابعة والخامسة: يتأهل أفضل 10 مشاركين لخوض التقييم الختامي وتكريم من هم «حسب قلب الله».
             </p>
           </div>
         </div>

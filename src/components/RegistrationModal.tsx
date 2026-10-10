@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, ConsecrationRank } from '../types';
+import { User, ConsecrationRank, ConsecrationVocation } from '../types';
 import { registerParticipant, loginWithCode } from '../utils/competitionEngine';
 import { soundManager } from '../utils/audio';
 import {
@@ -13,6 +13,7 @@ import {
   BookOpen,
   HeartHandshake,
   Cross,
+  Church,
 } from 'lucide-react';
 
 interface RegistrationModalProps {
@@ -28,6 +29,9 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<'register' | 'login'>('register');
 
+  // Vocation Selection
+  const [vocation, setVocation] = useState<ConsecrationVocation>('مكرسة');
+
   // Basic Info
   const [name, setName] = useState('');
   const [consecrationHouse, setConsecrationHouse] = useState('بيت بنات مريم للتكريس');
@@ -36,15 +40,15 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
   const [code, setCode] = useState('');
   const [pin, setPin] = useState('');
 
-  // Identity & Ministry Info (فقرة تعريف المكرسة وهويتها وخدمتها)
+  // Identity & Ministry Info (فقرة التعريف بالهوية والخدمة)
   const [consecrationRank, setConsecrationRank] = useState<ConsecrationRank>('مكرسة دائمة');
   const [ministryField, setMinistryField] = useState('خدمة المغتربات والجامعيات');
   const [consecrationVerse, setConsecrationVerse] = useState(
-    '«إِنَّمَا الْحَاجَةُ إِلَى وَاحِدٍ؛ فَاخْتَارَتْ مَرْيَمُ النَّصِيبَ الصَّالِحَ» (لو 10: 42)'
+    '«وَجَدْتُ دَاوُدَ بْنَ يَسَّى رَجُلاً حَسَبَ قَلْبِي، الَّذِي سَيَصْنَعُ كُلَّ مَشِيئَتِي» (أع 13: 22)'
   );
   const [patronSaint, setPatronSaint] = useState('القديسة مريم العذراء');
   const [personalBio, setPersonalBio] = useState(
-    'أكرس حياتي وحبي لخدمة المسيح وخلاص النفوس في الكنيسة، مع السهر على الصلاة والعمل الروحي.'
+    'أكرس حياتي لخدمة المسيح ومراجعة قلبي الداخلي والنمو الروحي في التواضع والأمانة.'
   );
 
   // Login Form
@@ -54,10 +58,39 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
 
   if (!isOpen) return null;
 
+  const handleVocationChange = (newVocation: ConsecrationVocation) => {
+    setVocation(newVocation);
+    if (newVocation === 'كاهن') {
+      setConsecrationRank('كاهن (قس)');
+      setConsecrationHouse('كنيسة السيدة العذراء والأنبا أنطونيوس');
+      setMinistryField('الرعاية الكنسية وسر الاعتراف والافتقاد');
+      setPatronSaint('القديس يوحنا فم الذهب');
+      setConsecrationVerse('«رَعَاهُمْ حَسَبَ كَمَالِ قَلْبِهِ، وَبِمَهَارَةِ يَدَيْهِ هَدَاهُمْ» (مز 78: 72)');
+    } else if (newVocation === 'راهب') {
+      setConsecrationRank('راهب متبتل');
+      setConsecrationHouse('دير القديس العظيم الأنبا أنطونيوس');
+      setMinistryField('الصلاة الدائمة والتسابيح والعمل النسكي في الدير');
+      setPatronSaint('الأنبا أنطونيوس والأنبا بولا');
+      setConsecrationVerse('«كَمَا يَشْتَاقُ الإِيَّلُ إِلَى جَدَاوِلِ الْمِيَاهِ، هكَذَا تَشْتَاقُ نَفْسِي إِلَيْكَ يَا اللهُ» (مز 42: 1)');
+    } else if (newVocation === 'راهبة') {
+      setConsecrationRank('راهبة مكرسة');
+      setConsecrationHouse('دير الشهيد العظيم مارجرجس للراهبات');
+      setMinistryField('حياة الصلاة والتأمل والعمل اليدوي الهادئ في الدير');
+      setPatronSaint('القديسة دميانة والأربعين عذراء');
+      setConsecrationVerse('«أَنَا لِحَبِيبِي وَحَبِيبِي لِي، الرَّاعِي بَيْنَ السَّوْسَنِ» (نش 6: 3)');
+    } else {
+      setConsecrationRank('مكرسة دائمة');
+      setConsecrationHouse('بيت بنات مريم للتكريس');
+      setMinistryField('خدمة المغتربات والجامعيات');
+      setPatronSaint('القديسة مريم العذراء');
+      setConsecrationVerse('«إِنَّمَا الْحَاجَةُ إِلَى وَاحِدٍ؛ فَاخْتَارَتْ مَرْيَمُ النَّصِيبَ الصَّالِحَ» (لو 10: 42)');
+    }
+  };
+
   const handleRegisterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
-      setErrorMessage('يرجى إدخال اسم المكرسة أو الخادمة');
+      setErrorMessage('يرجى إدخال الاسم المبارك');
       return;
     }
     setErrorMessage('');
@@ -66,6 +99,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
       soundManager.playVictory();
       const user = registerParticipant({
         name,
+        vocation,
         consecrationHouse,
         diocese,
         governorate,
@@ -98,7 +132,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
     } else {
       soundManager.playWrong();
       setErrorMessage(
-        'كود المشاركة غير مسجل. يرجى التأكد من كتابة الكود بشكل صحيح أو إنشاء حساب متسابقة جديدة.'
+        'كود المشاركة غير مسجل. يرجى التأكد من كتابة الكود بشكل صحيح أو تسجيل بطاقة التكريس لأول مرة.'
       );
     }
   };
@@ -115,11 +149,14 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
             <X className="w-5 h-5" />
           </button>
           <div className="inline-flex p-3 rounded-full bg-white/10 mb-2 border border-white/20">
-            <Award className="w-8 h-8 text-amber-200" />
+            <Cross className="w-8 h-8 text-amber-200" />
           </div>
-          <h2 className="text-xl font-bold font-spiritual tracking-wide">🏆 المكرَّسة المثالية</h2>
-          <p className="text-xs text-amber-100 mt-1">
-            تسجيل المتسابقة والتعريف بالهوية والخدمة الكنسية
+          <h2 className="text-xl sm:text-2xl font-bold font-spiritual tracking-wide">🕊️ حَسَبَ قَلْبِ اللهِ</h2>
+          <p className="text-xs text-amber-100 font-bold mt-1">
+            «كاهن – مكرَّسة – راهب – راهبة»
+          </p>
+          <p className="text-[11px] text-amber-200/90 mt-0.5">
+            تسجيل بطاقة التكريس والهوية لمسيرة المراجعة والنمو الروحي
           </p>
         </div>
 
@@ -131,9 +168,9 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                 <Sparkles className="w-8 h-8" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-bold text-slate-800">تم تسجيلكِ بنجاح مبارك!</h3>
+                <h3 className="text-xl font-bold text-slate-800">تم التسجيل بنعمة وبركة ربنا!</h3>
                 <p className="text-sm text-emerald-800 font-semibold bg-emerald-50 py-2 px-3 rounded-xl border border-emerald-200">
-                  «استعدي للجولة الأولى من المسابقة!»
+                  «أهلاً بكم في مسيرة حسب قلب الله للمراجعة والنمو الروحي»
                 </p>
 
                 {/* Identity Summary Card */}
@@ -141,11 +178,11 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                   <div className="flex justify-between items-center border-b border-amber-200 pb-2">
                     <span className="font-bold text-slate-800 text-sm">{showWelcomeSuccess.name}</span>
                     <span className="text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full font-bold text-[10px]">
-                      {showWelcomeSuccess.consecrationRank}
+                      {showWelcomeSuccess.vocation || 'مكرس/ة'} • {showWelcomeSuccess.consecrationRank}
                     </span>
                   </div>
                   <p>
-                    <span className="font-semibold text-slate-600">بيت التكريس والإيبارشية:</span>{' '}
+                    <span className="font-semibold text-slate-600">المقر والإيبارشية:</span>{' '}
                     <span className="text-slate-800">
                       {showWelcomeSuccess.consecrationHouse} ({showWelcomeSuccess.diocese})
                     </span>
@@ -195,7 +232,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                       : 'text-slate-500 hover:text-slate-800'
                   }`}
                 >
-                  تسجيل متسابقة وبطاقة الهوية
+                  تسجيل بطاقة التكريس والهوية
                 </button>
                 <button
                   type="button"
@@ -221,6 +258,30 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
 
               {activeTab === 'register' ? (
                 <form onSubmit={handleRegisterSubmit} className="space-y-4 text-right">
+                  {/* Category Selector: كاهن - مكرسة - راهب - راهبة */}
+                  <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200 space-y-2">
+                    <label className="block text-xs font-bold text-amber-950">
+                      فئة التكريس والخدمة: <span className="text-rose-500">*</span>
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {(['كاهن', 'مكرسة', 'راهب', 'راهبة'] as ConsecrationVocation[]).map((voc) => (
+                        <button
+                          key={voc}
+                          type="button"
+                          onClick={() => handleVocationChange(voc)}
+                          className={`py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border ${
+                            vocation === voc
+                              ? 'bg-indigo-900 text-white border-indigo-950 shadow-sm'
+                              : 'bg-white text-slate-700 border-slate-200 hover:bg-amber-100/50'
+                          }`}
+                        >
+                          <span>{voc === 'كاهن' ? '✝️' : voc === 'راهب' ? '⛪' : voc === 'راهبة' ? '🕯️' : '🕊️'}</span>
+                          <span>{voc}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                   {/* Section A: Basic Info */}
                   <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                     <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
@@ -229,12 +290,12 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
 
                     <div>
                       <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        اسم المكرسة / الخادمة <span className="text-rose-500">*</span>
+                        الاسم المبارك {vocation === 'كاهن' ? '(أبونا...)' : vocation === 'راهب' ? '(أبونا الراهب...)' : vocation === 'راهبة' ? '(أموني / تماف...)' : '(تاسوني...)'} <span className="text-rose-500">*</span>
                       </label>
                       <input
                         type="text"
                         required
-                        placeholder="مثال: تاسوني مارينا القبطية"
+                        placeholder={vocation === 'كاهن' ? 'مثال: أبونا بيشوي كامل' : vocation === 'راهب' ? 'مثال: الراهب بيجول المقاري' : vocation === 'راهبة' ? 'مثال: تماف إيريني' : 'مثال: تاسوني مارينا القبطية'}
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:border-amber-500"
@@ -244,11 +305,11 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <label className="block text-xs font-semibold text-slate-700 mb-1">
-                          اسم الدير / بيت التكريس
+                          {vocation === 'كاهن' ? 'اسم الكنيسة' : vocation === 'مكرسة' ? 'اسم الدير / بيت التكريس' : 'اسم الدير العامر'}
                         </label>
                         <input
                           type="text"
-                          placeholder="بيت بنات مريم للتكريس"
+                          placeholder={vocation === 'كاهن' ? 'كنيسة مارجرجس' : vocation === 'مكرسة' ? 'بيت بنات مريم للتكريس' : 'دير السيدة العذراء السريان'}
                           value={consecrationHouse}
                           onChange={(e) => setConsecrationHouse(e.target.value)}
                           className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:border-amber-500"
@@ -271,7 +332,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <label className="block text-xs font-semibold text-slate-700 mb-1">
-                          المحافظة
+                          المحافظة / الدولة
                         </label>
                         <input
                           type="text"
@@ -283,11 +344,11 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                       </div>
                       <div>
                         <label className="block text-xs font-semibold text-slate-700 mb-1">
-                          كود مشاركة اختياري
+                          كود مخصص (اختياري)
                         </label>
                         <input
                           type="text"
-                          placeholder="MK-XXX"
+                          placeholder="HQ-XXX"
                           value={code}
                           onChange={(e) => setCode(e.target.value)}
                           className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:border-amber-500 font-mono"
@@ -296,58 +357,72 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                     </div>
                   </div>
 
-                  {/* Section B: فقرة تعريف المكرسة وهويتها وخدمتها ورسالتها */}
+                  {/* Section B: الهوية التكريسية والرسالة */}
                   <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-3">
                     <h4 className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
                       <Sparkles className="w-4 h-4 text-amber-700" />
-                      <span>2️⃣ تعريف المكرسة بهويتها وخدمتها ورسالتها</span>
+                      <span>2️⃣ الهوية التكريسية وميدان الخدمة</span>
                     </h4>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <label className="block text-xs font-semibold text-slate-700 mb-1">
-                          رتبة التكريس الكنسية
+                          رتبة التكريس / الكهنوت
                         </label>
                         <select
                           value={consecrationRank}
                           onChange={(e) => setConsecrationRank(e.target.value as ConsecrationRank)}
                           className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:border-amber-500"
                         >
-                          <option value="مكرسة دائمة">مكرسة دائمة (صلوات التكريس)</option>
-                          <option value="مكرسة مبتدئة">مكرسة مبتدئة</option>
-                          <option value="مساعدة مكرسة">مساعدة مكرسة</option>
-                          <option value="شماسة مكرسة (دياكونيسا)">شماسة مكرسة (دياكونيسا)</option>
-                          <option value="خادمة متفرغة">خادمة متفرغة</option>
+                          {vocation === 'كاهن' ? (
+                            <>
+                              <option value="كاهن (قس)">كاهن (قس)</option>
+                              <option value="قمص">قمص</option>
+                            </>
+                          ) : vocation === 'راهب' ? (
+                            <>
+                              <option value="راهب متبتل">راهب متبتل</option>
+                              <option value="راهب كاهن (قس)">راهب قس</option>
+                              <option value="راهب قمص">راهب قمص</option>
+                              <option value="طالب رهبنة (مبتدئ)">طالب رهبنة (مبتدئ)</option>
+                            </>
+                          ) : vocation === 'راهبة' ? (
+                            <>
+                              <option value="راهبة مكرسة">راهبة مكرسة</option>
+                              <option value="طالبة رهبنة (مبتدئة)">طالبة رهبنة (مبتدئة)</option>
+                            </>
+                          ) : (
+                            <>
+                              <option value="مكرسة دائمة">مكرسة دائمة (صلوات التكريس)</option>
+                              <option value="مكرسة مبتدئة">مكرسة مبتدئة</option>
+                              <option value="مساعدة مكرسة">مساعدة مكرسة</option>
+                              <option value="شماسة مكرسة (دياكونيسا)">شماسة مكرسة (دياكونيسا)</option>
+                              <option value="خادمة متفرغة">خادمة متفرغة</option>
+                            </>
+                          )}
                         </select>
                       </div>
 
                       <div>
                         <label className="block text-xs font-semibold text-slate-700 mb-1">
-                          مجال وميدان الخدمة الرئيسي
+                          مجال وميدان الخدمة أو العمل النسكي
                         </label>
-                        <select
+                        <input
+                          type="text"
                           value={ministryField}
                           onChange={(e) => setMinistryField(e.target.value)}
                           className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:border-amber-500"
-                        >
-                          <option value="خدمة المغتربات والجامعيات">خدمة المغتربات والجامعيات</option>
-                          <option value="رعاية الأيتام والملاجئ">رعاية الأيتام والملاجئ</option>
-                          <option value="خدمة المرضى والمستشفيات">خدمة المرضى والمستشفيات</option>
-                          <option value="التعليم والمدارس القبطية">التعليم والمدارس القبطية</option>
-                          <option value="خدمة القرى والافتقاد الرعوي">خدمة القرى والافتقاد الرعوي</option>
-                          <option value="التوثيق والأيقونة والخياطة الكنسية">التوثيق والأيقونة والخياطة الكنسية</option>
-                          <option value="المكتبات والمخطوطات وإعداد القربان">المكتبات والمخطوطات وإعداد القربان</option>
-                        </select>
+                        />
                       </div>
                     </div>
 
                     <div>
                       <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        آية التكريس وشعار حياتكِ
+                        آية التكريس وشعار المسيرة أمام الله
                       </label>
                       <input
                         type="text"
-                        placeholder="«إِنَّمَا الْحَاجَةُ إِلَى وَاحِدٍ...»"
+                        placeholder="«وَجَدْتُ دَاوُدَ... رَجُلاً حَسَبَ قَلْبِي...»"
                         value={consecrationVerse}
                         onChange={(e) => setConsecrationVerse(e.target.value)}
                         className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:border-amber-500"
@@ -357,11 +432,11 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <label className="block text-xs font-semibold text-slate-700 mb-1">
-                          شفيعة التكريس
+                          شفيع التكريس أو الدير
                         </label>
                         <input
                           type="text"
-                          placeholder="مثال: القديسة مريم العذراء"
+                          placeholder="مثال: القديسة مريم العذراء / مارمرقس الرسول"
                           value={patronSaint}
                           onChange={(e) => setPatronSaint(e.target.value)}
                           className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:border-amber-500"
@@ -369,7 +444,7 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                       </div>
                       <div>
                         <label className="block text-xs font-semibold text-slate-700 mb-1">
-                          رمز دخول آمن (PIN)
+                          رمز دخول آمن (PIN اختياري)
                         </label>
                         <input
                           type="password"
@@ -383,11 +458,11 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
 
                     <div>
                       <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        كلمة قصيرة تعرفين بها نفسكِ ورسالتكِ في التكريس
+                        تأمل شخصي في رسالة التكريس أمام الله
                       </label>
                       <textarea
                         rows={2}
-                        placeholder="أكرس حياتي لخدمة المسيح وخلاص النفوس..."
+                        placeholder="أكرس حياتي لخدمة المسيح وخلاص النفوس، مع السهر على الصلاة والنمو الداخلي..."
                         value={personalBio}
                         onChange={(e) => setPersonalBio(e.target.value)}
                         className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:border-amber-500"
@@ -399,21 +474,21 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                     type="submit"
                     className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-600 to-indigo-800 text-white font-bold hover:brightness-105 shadow-md flex items-center justify-center gap-2 cursor-pointer transition text-sm"
                   >
-                    <UserCheck className="w-4 h-4" />
-                    <span>تأكيد التسجيل وحفظ بطاقة الهوية</span>
+                    <Cross className="w-4 h-4 text-amber-300" />
+                    <span>تأكيد التسجيل والدخول لمسيرة «حسب قلب الله»</span>
                   </button>
                 </form>
               ) : (
                 <form onSubmit={handleLoginSubmit} className="space-y-4 text-right">
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      أدخلي كود المشاركة الخاص بكِ
+                      أدخل كود المشاركة المعتمد
                     </label>
                     <div className="relative">
                       <input
                         type="text"
                         required
-                        placeholder="أدخلي كود مشاركتكِ المعتمد (مثال: MK-... أو كود المشرفة)"
+                        placeholder="أدخل كود المشاركة المعتمد (مثال: MK-... أو كود الإشراف)"
                         value={loginCode}
                         onChange={(e) => setLoginCode(e.target.value)}
                         className="w-full pr-10 pl-3 py-2.5 text-xs sm:text-sm rounded-xl border border-slate-300 focus:outline-none focus:border-amber-500 font-mono"

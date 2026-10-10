@@ -146,8 +146,8 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
                 <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold">
                   <tr>
                     <th className="py-3.5 px-4 text-center">المركز</th>
-                    <th className="py-3.5 px-4">اسم المكرسة</th>
-                    <th className="py-3.5 px-4">بيت التكريس والإيبارشية</th>
+                    <th className="py-3.5 px-4">اسم المشارك/ة</th>
+                    <th className="py-3.5 px-4">المقر الكنسي والإيبارشية</th>
                     <th className="py-3.5 px-4 text-center">النقاط</th>
                     <th className="py-3.5 px-4 text-center">الإجابات الصحيحة</th>
                     <th className="py-3.5 px-4 text-center">حالة التأهل</th>
@@ -176,7 +176,7 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
                           <span className="text-slate-900 font-semibold">{p.name}</span>
                           {isMe && (
                             <span className="mr-2 text-[10px] text-amber-800 bg-amber-200 px-2 py-0.5 rounded-full">
-                              أنتِ
+                              أنت
                             </span>
                           )}
                         </td>
@@ -193,7 +193,7 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
                         <td className="py-3.5 px-4 text-center">
                           {p.isQualifiedForFinal ? (
                             <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
-                              👑 مؤهلة للنهائي
+                              👑 مؤهل/ة للختام
                             </span>
                           ) : (
                             <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
@@ -224,7 +224,7 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
 
               <div>
                 <span className="text-xs font-bold text-amber-800 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
-                  بطاقة المتسابقة الرسمية
+                  بطاقة المشارك/ة الرسمية
                 </span>
                 <h2 className="text-xl font-bold font-spiritual text-slate-900 mt-2">
                   {currentUser.name}
@@ -260,7 +260,7 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
                 <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
                   <span className="text-[11px] text-slate-500 block">المرحلة المؤهلة</span>
                   <span className="text-xl font-black text-purple-700">
-                    {currentUser.currentStageId === 6 ? 'النهائي الكبير' : `المرحلة ${currentUser.currentStageId}`}
+                    {currentUser.currentStageId === 6 ? 'المرحلة الختامية' : `المرحلة ${currentUser.currentStageId}`}
                   </span>
                 </div>
               </div>
@@ -269,15 +269,15 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
                 onClick={() => onStartStage(currentUser.currentStageId)}
                 className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-600 to-indigo-800 text-white font-bold text-xs hover:brightness-105 shadow-md transition cursor-pointer"
               >
-                متابعة خوض المسابقة الآن
+                متابعة خوض المسيرة الآن
               </button>
             </div>
           ) : (
             <div className="rounded-3xl bg-white p-8 border border-slate-200 shadow-sm text-center space-y-4">
               <UserIcon className="w-12 h-12 text-slate-400 mx-auto" />
-              <h3 className="font-bold text-slate-800 text-base">لم تسجلي دخولكِ بعد</h3>
+              <h3 className="font-bold text-slate-800 text-base">لم تسجل دخولك بعد</h3>
               <p className="text-xs text-slate-500 leading-relaxed">
-                سجلي دخولكِ بكود المشاركة أو أنشئي حساباً جديداً لعرض ترتيبكِ ونقاطكِ بدقة.
+                سجل دخولك بكود المشاركة أو سجل بطاقة التكريس لعرض ترتيبك ونقاطك بدقة.
               </p>
               <button
                 onClick={onOpenRegister}
@@ -296,7 +296,7 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
       {tab === 'dioceses' && (
         <div className="space-y-4">
           <div className="p-4 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs">
-            💡 يتم احتساب ترتيب الإيبارشيات بناءً على متوسط درجات المكرسات المشاركات من كل إيبارشية بالإضافة لإجمالي النقاط المسجلة.
+            💡 يتم احتساب ترتيب الإيبارشيات بناءً على متوسط درجات المشاركين من كل إيبارشية بالإضافة لإجمالي النقاط المسجلة.
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -318,7 +318,7 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
                     <span className="font-bold text-indigo-900 text-xs">{d.averageScore}</span>
                   </div>
                   <div className="p-2 rounded-xl bg-slate-50">
-                    <span className="text-[10px] text-slate-500 block">المشاركات</span>
+                    <span className="text-[10px] text-slate-500 block">المشاركون</span>
                     <span className="font-bold text-slate-800 text-xs">{d.participantsCount}</span>
                   </div>
                   <div className="p-2 rounded-xl bg-slate-50">
@@ -328,7 +328,7 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
                 </div>
 
                 <div className="text-[11px] text-slate-500 pt-1">
-                  بيت التكريس المتصدر:{' '}
+                  المقر الكنسي المتصدر:{' '}
                   <span className="font-semibold text-slate-700">{d.topHouse}</span>
                 </div>
               </div>

@@ -156,7 +156,7 @@ export const CompetitionsHubView: React.FC<CompetitionsHubViewProps> = ({
                       <span className="font-bold text-indigo-900">
                         {stage.qualificationRule.type === 'percentage'
                           ? `أفضل ${stage.qualificationRule.value}%`
-                          : `أفضل ${stage.qualificationRule.value} متسابقات`}
+                          : `أفضل ${stage.qualificationRule.value} مشاركين`}
                       </span>
                     </div>
                   </div>
@@ -285,10 +285,10 @@ export const CompetitionsHubView: React.FC<CompetitionsHubViewProps> = ({
                   النهائي الملكي الكبير
                 </span>
                 <h3 className="text-lg font-bold text-slate-900">
-                  بطولة «المكرَّسة المثالية» الكبرى
+                  المرحلة الختامية: «حَسَبَ قَلْبِ اللهِ»
                 </h3>
                 <p className="text-xs text-slate-600 leading-relaxed mt-1">
-                  بطولة النخبة لأفضل المتأهلات في 5 تحديات (المعرفة، الذكاء، السرعة، الاختيار، المفاجأة) وإعلان المراكز الأولى والأوسمة الكبرى.
+                  جولة التقييم الختامي لأفضل المتأهلين في 5 محاور للمراجعة والنمو الروحي (المعرفة، الحكمة، السرعة، الاختيار، المفاجأة) وتكريم المراكز الأولى والأوسمة الكنسية.
                 </p>
               </div>
               <button
@@ -296,7 +296,7 @@ export const CompetitionsHubView: React.FC<CompetitionsHubViewProps> = ({
                 className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 text-indigo-950 font-black text-xs shadow-md hover:brightness-105 transition flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <Trophy className="w-4 h-4 fill-indigo-950" />
-                <span>👑 خوض النهائي وتتويج الفائزات</span>
+                <span>👑 خوض التقييم الختامي وحفل التكريم</span>
               </button>
             </div>
           </div>

@@ -138,6 +138,7 @@ export function saveAnnouncements(ann: Announcement[]): void {
 // ==========================================
 export function registerParticipant(data: {
   name: string;
+  vocation?: User['vocation'];
   consecrationHouse: string;
   diocese: string;
   governorate: string;
@@ -162,6 +163,7 @@ export function registerParticipant(data: {
   const newUser: User = {
     id: `user-${Date.now()}`,
     name: data.name.trim(),
+    vocation: data.vocation || 'مكرسة',
     consecrationHouse: data.consecrationHouse.trim(),
     diocese: data.diocese.trim(),
     governorate: data.governorate.trim(),
@@ -175,11 +177,11 @@ export function registerParticipant(data: {
     stageScores: {},
     registeredAt: new Date().toISOString().split('T')[0],
     consecrationRank: data.consecrationRank || 'مكرسة مبتدئة',
-    ministryField: data.ministryField || 'خدمة عامة وافتقاد',
+    ministryField: data.ministryField || 'خدمة ورعاية روحية',
     consecrationVerse:
       data.consecrationVerse || '«إِنَّمَا الْحَاجَةُ إِلَى وَاحِدٍ؛ فَاخْتَارَتْ مَرْيَمُ النَّصِيبَ الصَّالِحَ»',
     personalBio:
-      data.personalBio || 'مكرسة لخدمة المسيح والكنيسة، أسعى للأمانة في رسالتي والنمو في حياة القداسة والشهادة للفادي.',
+      data.personalBio || 'مكرس/ة لخدمة المسيح والكنيسة، أسعى للأمانة في رسالتي والنمو الروحي لأكون حسب قلب الله.',
     patronSaint: data.patronSaint || 'العذراء مريم أم النور',
   };
 

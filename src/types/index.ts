@@ -78,7 +78,21 @@ export interface TeamRoundLog {
   pointsAwarded: number;
 }
 
+export type ConsecrationVocation = 'كاهن' | 'مكرسة' | 'راهب' | 'راهبة';
+
 export type ConsecrationRank =
+  // كاهن
+  | 'كاهن (قس)'
+  | 'قمص'
+  // راهب
+  | 'راهب متبتل'
+  | 'راهب كاهن (قس)'
+  | 'راهب قمص'
+  | 'طالب رهبنة (مبتدئ)'
+  // راهبة
+  | 'راهبة مكرسة'
+  | 'طالبة رهبنة (مبتدئة)'
+  // مكرسة / خادمة
   | 'مكرسة دائمة'
   | 'مكرسة مبتدئة'
   | 'مساعدة مكرسة'
@@ -88,7 +102,8 @@ export type ConsecrationRank =
 export interface User {
   id: string;
   name: string;
-  consecrationHouse: string; // اسم الدير أو بيت التكريس
+  vocation?: ConsecrationVocation; // كاهن - مكرسة - راهب - راهبة
+  consecrationHouse: string; // اسم الدير أو الكنيسة أو بيت التكريس
   diocese: string; // الإيبارشية
   governorate: string; // المحافظة
   code: string; // رقم تعريفي أو كود مشاركة
@@ -105,10 +120,11 @@ export interface User {
   registeredAt: string;
   // Identity & Ministry profile
   consecrationRank?: ConsecrationRank;
-  ministryField?: string; // مجال الخدمة
-  consecrationVerse?: string; // آية التكريس وشعار الحياة
-  personalBio?: string; // تعريف المكرسة بنفسها ورسالتها
-  patronSaint?: string; // شفيعة التكريس
+  ministryField?: string; // مجال الخدمة والرعاية
+  consecrationVerse?: string; // آية التكريس وشعار المسيرة
+  personalBio?: string; // تعريف الشخص بنفسه ورسالته أمام الله
+  patronSaint?: string; // شفيع التكريس أو الدير
+  spiritualNotes?: string; // تأملات المراجعة والنمو
 }
 
 export interface Stage {

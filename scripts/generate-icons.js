@@ -74,8 +74,8 @@ const svgIconContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512
   <circle cx="392" cy="290" r="4" fill="#fbbf24" opacity="0.7" />
 
   <!-- Arabic Calligraphy Inscription -->
-  <text x="256" y="430" text-anchor="middle" font-family="'Cairo', sans-serif" font-weight="900" font-size="34" fill="#fef08a">المكرَّسة المثالية</text>
-  <text x="256" y="465" text-anchor="middle" font-family="'Cairo', sans-serif" font-weight="700" font-size="16" fill="#cbd5e1">مسابقة المعرفة والتحدي</text>
+  <text x="256" y="430" text-anchor="middle" font-family="'Cairo', sans-serif" font-weight="900" font-size="34" fill="#fef08a">حسب قلب الله</text>
+  <text x="256" y="465" text-anchor="middle" font-family="'Cairo', sans-serif" font-weight="700" font-size="15" fill="#cbd5e1">كاهن – مكرَّسة – راهب – راهبة</text>
 </svg>`;
 
 // Maskable SVG with safe margin padding (15% padding on all sides)
@@ -131,7 +131,7 @@ const maskableSvgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0
       <path d="M220,365 L292,365 L300,380 L212,380 Z" rx="4" />
     </g>
 
-    <text x="256" y="430" text-anchor="middle" font-family="'Cairo', sans-serif" font-weight="900" font-size="36" fill="#fef08a">المكرَّسة المثالية</text>
+    <text x="256" y="430" text-anchor="middle" font-family="'Cairo', sans-serif" font-weight="900" font-size="36" fill="#fef08a">حسب قلب الله</text>
   </g>
 </svg>`;
 

@@ -63,13 +63,13 @@ export const ParticipantsListView: React.FC<ParticipantsListViewProps> = ({
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-amber-200 text-xs font-semibold mb-2">
             <Users className="w-4 h-4 text-amber-300" />
-            <span>سجل المتسابقات الرسمي</span>
+            <span>سجل المشاركين الرسمي</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold font-spiritual text-amber-100">
-            📋 من سجل في المسابقة؟ (قائمة المشاركات)
+            📋 من سجل في المسيرة؟ (سجل المشاركين)
           </h1>
           <p className="text-xs sm:text-sm text-amber-200/80 mt-1">
-            استعراض كامل لبيانات وأكواد ونتائج جميع المكرسات والخادمات المسجلات في المسابقة
+            استعراض كامل لبيانات وأكواد ومسارات الآباء الكهنة والمكرسات والرهبان والراهبات المسجلين
           </p>
         </div>
 
@@ -79,7 +79,7 @@ export const ParticipantsListView: React.FC<ParticipantsListViewProps> = ({
             className="py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-indigo-950 font-black text-xs shadow-md transition flex items-center gap-1.5 cursor-pointer"
           >
             <PlusCircle className="w-4 h-4 fill-indigo-950 text-amber-500" />
-            <span>تسجيل متسابقة جديدة</span>
+            <span>تسجيل مشارك/ة جديد</span>
           </button>
           <button
             onClick={() => window.print()}
@@ -94,19 +94,19 @@ export const ParticipantsListView: React.FC<ParticipantsListViewProps> = ({
       {/* Summary KPI Badges */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm text-center">
-          <span className="text-[11px] text-slate-500 block">إجمالي المسجلات</span>
-          <span className="text-2xl font-black text-indigo-950">{users.length} مكرسة</span>
+          <span className="text-[11px] text-slate-500 block">إجمالي المسجلين</span>
+          <span className="text-2xl font-black text-indigo-950">{users.length} مشارك/ة</span>
         </div>
         <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm text-center">
-          <span className="text-[11px] text-slate-500 block">بيوت التكريس المشاركة</span>
-          <span className="text-2xl font-black text-amber-700">{houses.length} بيت ودير</span>
+          <span className="text-[11px] text-slate-500 block">الكنائس والأديرة وبيوت التكريس</span>
+          <span className="text-2xl font-black text-amber-700">{houses.length} مقر كنسي</span>
         </div>
         <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm text-center">
           <span className="text-[11px] text-slate-500 block">الإيبارشيات الممثلة</span>
           <span className="text-2xl font-black text-purple-700">{dioceses.length} إيبارشية</span>
         </div>
         <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm text-center">
-          <span className="text-[11px] text-slate-500 block">المتأهلات للنهائي</span>
+          <span className="text-[11px] text-slate-500 block">المتأهلون للختام</span>
           <span className="text-2xl font-black text-emerald-700">
             {users.filter((u) => u.isQualifiedForFinal).length}
           </span>
@@ -120,7 +120,7 @@ export const ParticipantsListView: React.FC<ParticipantsListViewProps> = ({
           <div className="flex-1 relative">
             <input
               type="text"
-              placeholder="ابحثي بالاسم، كود المشاركة (MK-XXX)، بيت التكريس، أو الإيبارشية..."
+              placeholder="ابحث بالاسم، كود المشاركة (MK-XXX)، الكنيسة أو الدير، أو الإيبارشية..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pr-10 pl-3 py-2.5 text-xs sm:text-sm rounded-xl border border-slate-300 focus:outline-none focus:border-amber-500"
@@ -157,7 +157,7 @@ export const ParticipantsListView: React.FC<ParticipantsListViewProps> = ({
               <option value="3">المرحلة 3: التحدي السريع</option>
               <option value="4">المرحلة 4: الحواس</option>
               <option value="5">المرحلة 5: التحدي الكبير</option>
-              <option value="final">👑 المتأهلات للنهائي</option>
+              <option value="final">👑 المتأهلون للختام</option>
             </select>
           </div>
         </div>
@@ -166,16 +166,16 @@ export const ParticipantsListView: React.FC<ParticipantsListViewProps> = ({
       {/* Participants Cards Grid */}
       <div className="space-y-3">
         <div className="flex items-center justify-between text-xs text-slate-500 font-semibold px-1">
-          <span>نتائج البحث: {filteredUsers.length} متسابقة</span>
+          <span>نتائج البحث: {filteredUsers.length} مشارك/ة</span>
           <span>مرتبة تنازلياً حسب مجموع النقاط والتصفيات</span>
         </div>
 
         {filteredUsers.length === 0 ? (
           <div className="p-12 text-center rounded-3xl bg-white border border-slate-200 space-y-3">
             <Users className="w-12 h-12 text-slate-300 mx-auto" />
-            <h3 className="font-bold text-slate-800 text-sm">لا توجد نتائج مطابقة لبحثكِ</h3>
+            <h3 className="font-bold text-slate-800 text-sm">لا توجد نتائج مطابقة لبحثك</h3>
             <p className="text-xs text-slate-500">
-              تأكدي من صحة كود المشاركة أو الاسم المكتوب، أو قومي بإلغاء الفلتر.
+              تأكد من صحة كود المشاركة أو الاسم المكتوب، أو قم بإلغاء الفلتر.
             </p>
           </div>
         ) : (
@@ -201,7 +201,7 @@ export const ParticipantsListView: React.FC<ParticipantsListViewProps> = ({
 
                   {p.isQualifiedForFinal ? (
                     <span className="text-[10px] font-bold text-amber-900 bg-amber-100 border border-amber-300 px-2 py-1 rounded-full whitespace-nowrap">
-                      👑 مؤهلة للنهائي
+                      👑 مؤهل/ة للختام
                     </span>
                   ) : (
                     <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full whitespace-nowrap">

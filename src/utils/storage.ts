@@ -72,14 +72,14 @@ export const saveQuizResult = (result: SoloQuizResult): void => {
 
 export const computeMonasticTitle = (percentage: number): { title: string; grade: SoloQuizResult['grade'] } => {
   if (percentage >= 95) {
-    return { title: 'المكرسة المثالية - وسام كوكب البرية والنصيب الصالح', grade: 'ممتاز مرتفع' };
+    return { title: 'وسام «حَسَبَ قَلْبِ اللهِ» - عمق الأمانة والاتضاع الكنسي', grade: 'ممتاز مرتفع' };
   } else if (percentage >= 85) {
-    return { title: 'المكرسة المتميزة - وسام فضيلة الإفراز والتمييز', grade: 'ممتاز' };
+    return { title: 'وسام حكمة الإفراز والتمييز الروحي والكنسي', grade: 'ممتاز' };
   } else if (percentage >= 75) {
-    return { title: 'المكرسة الفاضلة - وسام السهر الروحي والخدمة', grade: 'جيد جداً' };
+    return { title: 'وسام السهر الروحي والأمانة في الخدمة والرعاية', grade: 'جيد جداً' };
   } else if (percentage >= 60) {
-    return { title: 'مكرسة مجاهدة - وسام الأمانة والجهاد الصالح', grade: 'جيد' };
+    return { title: 'وسام الجهاد الصالح والنمو الداخلي المستمر', grade: 'جيد' };
   } else {
-    return { title: 'مكرسة مباركة في طريق الاستنارة والنمو', grade: 'مقبول' };
+    return { title: 'بركة المسيرة والبداية المتجددة في محبة الله', grade: 'مقبول' };
   }
 };

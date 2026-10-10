@@ -648,10 +648,10 @@ export const MonasticOasis: React.FC<MonasticOasisProps> = ({ onBackToHome }) =>
                 </div>
                 <div className="text-right">
                   <p className="font-spiritual text-base font-bold text-amber-950">
-                    مسابقة المكرسة المثالية
+                    منصة «حَسَبَ قَلْبِ اللهِ»
                   </p>
                   <p className="text-[10px] text-stone-500 font-sans">
-                    بطاقة العضوية والمشاركة التكريمية
+                    بطاقة الهوية والمسيرة الروحية التكريمية
                   </p>
                 </div>
               </div>
@@ -662,22 +662,22 @@ export const MonasticOasis: React.FC<MonasticOasisProps> = ({ onBackToHome }) =>
                   🕊️
                 </div>
                 <h3 className="font-spiritual text-2xl font-bold text-stone-900">
-                  {badgeName || 'الأخت المكرسة'}
+                  {badgeName || 'المكرس/ة المبارك/ة'}
                 </h3>
                 <p className="text-xs text-stone-600 font-spiritual mt-0.5">
-                  {badgeHouse || 'بيت التكريس المبارك'}
+                  {badgeHouse || 'الكنيسة / الدير / بيت التكريس'}
                 </p>
               </div>
 
               {/* Details table */}
               <div className="space-y-2 text-xs font-spiritual bg-white/70 p-4 rounded-2xl border border-amber-200/80 text-right">
                 <div className="flex justify-between border-b border-stone-100 pb-1.5">
-                  <span className="text-stone-500">الشفيعة:</span>
+                  <span className="text-stone-500">الشفيع / الشفيعة:</span>
                   <span className="font-bold text-stone-900">{badgePatron}</span>
                 </div>
                 <div className="flex justify-between border-b border-stone-100 pb-1.5">
-                  <span className="text-stone-500">الرتبة:</span>
-                  <span className="font-bold text-stone-900">مكرسة باحثة في العلوم الكنسية</span>
+                  <span className="text-stone-500">المسار:</span>
+                  <span className="font-bold text-stone-900">مسيرة المراجعة والنمو في العلوم الكنسية</span>
                 </div>
                 <div className="pt-1 text-center font-bold text-amber-900">
                   {badgeMotto}
@@ -687,7 +687,7 @@ export const MonasticOasis: React.FC<MonasticOasisProps> = ({ onBackToHome }) =>
               {/* Stamp Seal */}
               <div className="mt-6 pt-4 border-t border-amber-200 flex items-center justify-between text-[11px] text-stone-500">
                 <span>معتمد للعام الكنسي الحالي</span>
-                <span className="font-bold text-amber-800 font-spiritual">خاتم بيت التكريس</span>
+                <span className="font-bold text-amber-800 font-spiritual">خاتم التوثيق الكنسي</span>
               </div>
 
             </div>

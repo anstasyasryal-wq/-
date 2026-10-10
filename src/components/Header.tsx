@@ -42,11 +42,11 @@ export const Header: React.FC<HeaderProps> = ({
 
   const navLinks = [
     { view: 'home' as AppView, label: 'الرئيسية', icon: Home },
-    { view: 'participants' as AppView, label: 'من سجل؟ (المشاركات)', icon: Users },
-    { view: 'competitions_hub' as AppView, label: 'الاختبارات والمسابقات', icon: Sparkles },
+    { view: 'participants' as AppView, label: 'سجل المشاركين', icon: Users },
+    { view: 'competitions_hub' as AppView, label: 'المراجعات والاختبارات', icon: Sparkles },
     { view: 'leaderboard' as AppView, label: 'الترتيب العام', icon: Trophy },
-    { view: 'dioceses' as AppView, label: 'الإيبارشيات', icon: Layers },
-    { view: 'supervisor' as AppView, label: 'لوحة المشرفة', icon: Shield },
+    { view: 'dioceses' as AppView, label: 'الإيبارشيات والأديرة', icon: Layers },
+    { view: 'supervisor' as AppView, label: 'لوحة الإشراف', icon: Shield },
   ];
 
   return (
@@ -63,15 +63,15 @@ export const Header: React.FC<HeaderProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <span className="font-spiritual font-black text-base sm:text-lg text-indigo-950 tracking-wide">
-                المكرَّسة المثالية
+                حسب قلب الله
               </span>
               <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
                 <span>🟢 مفتوحة</span>
               </span>
             </div>
-            <p className="text-[10px] text-amber-700 font-medium hidden sm:block">
-              مسابقة المعرفة والذكاء والتحدي
+            <p className="text-[10px] text-amber-700 font-bold hidden sm:block">
+              كاهن – مكرَّسة – راهب – راهبة
             </p>
           </div>
         </div>
@@ -102,7 +102,7 @@ export const Header: React.FC<HeaderProps> = ({
             className="py-2 px-3 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition flex items-center gap-1.5 cursor-pointer"
           >
             <BookOpen className="w-3.5 h-3.5 text-sky-700" />
-            <span>قواعد المسابقة</span>
+            <span>ميثاق وقواعد المسيرة</span>
           </button>
         </nav>
 
@@ -194,7 +194,7 @@ export const Header: React.FC<HeaderProps> = ({
             }}
             className="w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center justify-between"
           >
-            <span>📜 قواعد المسابقة</span>
+            <span>📜 ميثاق وقواعد المسيرة</span>
             <BookOpen className="w-4 h-4 text-sky-700" />
           </button>
         </div>

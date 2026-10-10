@@ -89,10 +89,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
             </div>
             <div>
               <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full border border-amber-200">
-                ميثاق وهوية التكريس البتولي
+                ميثاق وهوية المكرسين لله
               </span>
               <h2 className="text-base sm:text-lg font-bold font-spiritual text-slate-900 mt-0.5">
-                تعريف المكرسة بهويتها، ورسالتها، وميدان خدمتها
+                بطاقة الهوية التكريسية، والرسالة، وميدان الخدمة
               </h2>
             </div>
           </div>
@@ -109,7 +109,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               onClick={onOpenLogin}
               className="text-xs text-white font-bold bg-indigo-900 hover:bg-indigo-800 px-3.5 py-1.5 rounded-xl shadow-xs transition cursor-pointer"
             >
-              سجلي هويتكِ وخدمتكِ الآن
+              تسجيل بطاقة الهوية والخدمة
             </button>
           )}
         </div>
@@ -121,14 +121,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
               <div className="flex items-center gap-2">
                 <span className="font-bold text-slate-900 text-sm">{currentUser.name}</span>
                 <span className="text-[10px] font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-300">
-                  {currentUser.consecrationRank || 'مكرسة دائمة'}
+                  {currentUser.consecrationRank || 'مكرس/ة'}
                 </span>
               </div>
               <p className="text-xs text-slate-600">
                 {currentUser.consecrationHouse} • {currentUser.diocese}
               </p>
               <div className="text-xs text-indigo-950 font-semibold bg-indigo-50/80 p-2 rounded-xl border border-indigo-100">
-                ميدان الخدمة: {currentUser.ministryField || 'خدمة عامة وافتقاد'}
+                ميدان الخدمة: {currentUser.ministryField || 'رعاية وخدمة عامة'}
               </div>
             </div>
 
@@ -140,14 +140,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
               </span>
               <p className="text-xs font-spiritual font-bold text-amber-950 leading-relaxed">
                 {currentUser.consecrationVerse ||
-                  '«إِنَّمَا الْحَاجَةُ إِلَى وَاحِدٍ؛ فَاخْتَارَتْ مَرْيَمُ النَّصِيبَ الصَّالِحَ»'}
+                  '«وَجَدْتُ دَاوُدَ بْنَ يَسَّى رَجُلاً حَسَبَ قَلْبِي، الَّذِي سَيَصْنَعُ كُلَّ مَشِيئَتِي»'}
               </p>
             </div>
 
             {/* Mission Bio */}
             <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-1">
               <span className="text-[10px] font-bold text-slate-500">
-                رسالتكِ في التكريس والشهادة للمسيح:
+                رسالة التكريس والشهادة للمسيح:
               </span>
               <p className="text-xs text-slate-700 leading-relaxed line-clamp-3">
                 {currentUser.personalBio ||
@@ -158,8 +158,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
         ) : (
           <div className="p-4 rounded-2xl bg-white/80 border border-slate-200 text-xs text-slate-700 leading-relaxed flex flex-col sm:flex-row items-center justify-between gap-3">
             <p>
-              أهلاً بكِ أختنا المكرسة المباركة! خصصنا هذه المنصة لتجمع بين المعرفة اللاهوتية والكتابية والذكاء وسرعة البديهة.
-              قومي بتسجيل هويتكِ التكريسية ورتبتكِ ومجال خدمتكِ، لتنطلقي في جولات المنافسة الشريفة.
+              أهلاً بكم في منصة «حَسَبَ قَلْبِ اللهِ»! صُممت هذه المنصة الكنسية للمراجعة الروحية والنمو في العلوم الكنسية والنضج الإنساني لكل شخص مكرس لله (كاهن – مكرَّسة – راهب – راهبة). قوموا بتسجيل بطاقة التكريس والهوية للانطلاق في مسيرة المراجعة والبركة.
             </p>
             <button
               onClick={onOpenLogin}
@@ -181,33 +180,36 @@ export const HomeView: React.FC<HomeViewProps> = ({
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-semibold mb-4 backdrop-blur-sm">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
           <span className="w-2 h-2 rounded-full bg-emerald-400 -mr-4" />
-          <span>🟢 المسابقة مفتوحة لجميع الإيبارشيات وبيوت التكريس</span>
+          <span>🟢 مسيرة المراجعة والتقييم الروحي مفتوحة لجميع الآباء والخدام</span>
         </div>
 
         {/* Title & Slogan */}
         <h1 className="text-3xl sm:text-5xl font-black font-spiritual text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-100 to-white tracking-wide">
-          🏆 المكرَّسة المثالية
+          🕊️ حَسَبَ قَلْبِ اللهِ
         </h1>
-        <p className="text-sm sm:text-lg text-amber-200/90 font-medium mt-2">
-          مسابقة المعرفة والذكاء والتحدي
+        <p className="text-sm sm:text-xl text-amber-200/95 font-bold mt-2">
+          «كاهن – مكرَّسة – راهب – راهبة»
         </p>
 
         {/* Motto Callout */}
-        <div className="my-5 inline-block px-5 py-2 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-md">
-          <p className="text-base sm:text-xl font-bold font-spiritual text-amber-100 tracking-wider">
-            «اعرفي... فكري... تحدّي... وتأهلي!»
+        <div className="my-5 inline-block px-5 py-2.5 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-md max-w-2xl mx-auto">
+          <p className="text-sm sm:text-lg font-bold font-spiritual text-amber-100 tracking-wider">
+            «وَجَدْتُ دَاوُدَ بْنَ يَسَّى رَجُلاً حَسَبَ قَلْبِي، الَّذِي سَيَصْنَعُ كُلَّ مَشِيئَتِي» (أع 13: 22)
+          </p>
+          <p className="text-xs text-slate-300 font-sans mt-1">
+            رحلة مراجعة داخلية ونضج روحي وإنساني في العلاقة مع الله والآخرين والخدمة
           </p>
         </div>
 
         {/* Action Buttons (The Main Primary Actions) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 max-w-3xl mx-auto pt-2">
-          {/* Button 1: ابدئي المسابقة */}
+          {/* Button 1: ابدأ التقييم والمراجعة */}
           <button
             onClick={() => onStartStage(currentEligibleStageId)}
             className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-400 hover:to-amber-600 text-indigo-950 font-black text-sm shadow-lg shadow-amber-600/30 flex items-center justify-center gap-2 transition transform active:scale-95 cursor-pointer"
           >
             <Play className="w-5 h-5 fill-indigo-950" />
-            <span>▶️ ابدئي المسابقة</span>
+            <span>▶️ ابدأ مسيرة التقييم</span>
           </button>
 
           {/* Button 2: تسجيل الدخول */}
@@ -234,7 +236,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
             className="w-full py-3.5 px-4 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/25 text-white font-bold text-sm backdrop-blur-md flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
           >
             <BookOpen className="w-4 h-4 text-sky-200" />
-            <span>📜 قواعد المسابقة</span>
+            <span>📜 ميثاق وقواعد المسيرة</span>
           </button>
         </div>
 
@@ -260,13 +262,13 @@ export const HomeView: React.FC<HomeViewProps> = ({
             </div>
             <div>
               <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
-                سجل المشاركات الرسمي
+                سجل المشاركين الرسمي
               </span>
               <h3 className="font-bold text-slate-900 text-base mt-0.5">
-                📋 من سجل في المسابقة؟ (المشاركات)
+                📋 من سجل في المسيرة؟ (المشاركون)
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                استعراض الأسماء، بيوت التكريس، الإيبارشيات، وأكواد المتسابقات
+                استعراض الأسماء، الكنائس والأديرة، الإيبارشيات، وأكواد المشاركين
               </p>
             </div>
           </div>
@@ -284,13 +286,13 @@ export const HomeView: React.FC<HomeViewProps> = ({
             </div>
             <div>
               <span className="text-[10px] font-bold text-indigo-800 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-200">
-                المسابقات والاختبارات الستة
+                المراجعات والاختبارات الستة
               </span>
               <h3 className="font-bold text-slate-900 text-base mt-0.5">
-                🎮 دليل الاختبارات والمسابقات
+                🎮 دليل المراجعات والاختبارات
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                استكشاف جميع الاختبارات، المسابقة الفردية، وتحدي الفرق
+                استكشاف جميع الاختبارات، المراجعة الفردية، وتحدي الفرق
               </p>
             </div>
           </div>

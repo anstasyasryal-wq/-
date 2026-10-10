@@ -39,10 +39,10 @@ export const FinalCeremonyView: React.FC<FinalCeremonyViewProps> = ({
         </div>
 
         <h1 className="text-3xl sm:text-5xl font-black font-spiritual text-amber-100 tracking-wide">
-          👑 تتويج «المكرَّسة المثالية»
+          👑 التكريم الختامي لمسيرة «حَسَبَ قَلْبِ اللهِ»
         </h1>
         <p className="text-sm sm:text-base text-amber-200 mt-2 font-medium">
-          الحفل الختامي وإعلان المتصدرات في مسابقة العلوم والمعرفة والذكاء الكنسي
+          الحفل الختامي وتكريم المتميزين في مسيرة العلوم والمعرفة والنضج الروحي (كاهن – مكرَّسة – راهب – راهبة)
         </p>
 
         <div className="mt-4 inline-block px-4 py-1.5 rounded-full bg-white/10 text-xs font-semibold text-amber-100 border border-white/20">
@@ -85,7 +85,7 @@ export const FinalCeremonyView: React.FC<FinalCeremonyViewProps> = ({
           {awards.firstPlace && (
             <div className="order-1 md:order-2 p-7 rounded-3xl bg-gradient-to-b from-amber-100 via-amber-50 to-white border-2 border-amber-400 shadow-xl text-center space-y-3 md:-translate-y-4 ring-4 ring-amber-400/30">
               <span className="text-xs font-black text-amber-950 bg-amber-300 px-3.5 py-1 rounded-full inline-block shadow-sm">
-                🥇 المكرَّسة المثالية الأولى
+                🥇 وسام «حَسَبَ قَلْبِ اللهِ» الأول
               </span>
               <div className="w-20 h-20 mx-auto rounded-full bg-amber-400 text-amber-950 flex items-center justify-center text-3xl font-bold border-4 border-white shadow-md">
                 👑
@@ -254,13 +254,13 @@ export const FinalCeremonyView: React.FC<FinalCeremonyViewProps> = ({
 
             <div className="space-y-1">
               <h3 className="text-xl sm:text-2xl font-bold font-spiritual text-amber-950">
-                شهادة تتويج وتقدير فائق
+                شهادة تكريم وتقدير فائق
               </h3>
-              <p className="text-xs text-amber-800">في مسابقة «المكرَّسة المثالية» الكبرى</p>
+              <p className="text-xs text-amber-800">في مسيرة «حَسَبَ قَلْبِ اللهِ» (كاهن – مكرَّسة – راهب – راهبة)</p>
             </div>
 
             <div className="py-2 space-y-2">
-              <p className="text-xs text-slate-600">تمنح هذه الشهادة المعتمدة للأخت المكرسة الفاضلة:</p>
+              <p className="text-xs text-slate-600">تمنح هذه الشهادة المعتمدة للمبارك/ة:</p>
               <h2 className="text-xl sm:text-2xl font-black font-spiritual text-indigo-950">
                 {selectedCertificateWinner.name}
               </h2>
@@ -270,9 +270,9 @@ export const FinalCeremonyView: React.FC<FinalCeremonyViewProps> = ({
             </div>
 
             <div className="bg-amber-100/60 p-3 rounded-xl border border-amber-300 text-xs text-amber-900 space-y-1 font-spiritual">
-              <p className="font-bold">«النصيب الصالح الذي لن يُنزع منها»</p>
+              <p className="font-bold">«وَجَدْتُ دَاوُدَ... رَجُلاً حَسَبَ قَلْبِي... الَّذِي سَيَصْنَعُ كُلَّ مَشِيئَتِي»</p>
               <p className="text-[11px] text-slate-700 font-sans">
-                تقديراً لتفوقها الباهر في العلوم الكتابية، تاريخ الكنيسة، النسك الرهباني، الألحان، والذكاء والتمييز.
+                تقديراً للاجتهاد والأمانة في العلوم الكتابية، تاريخ الكنيسة، النسك والروحانيات، الألحان، والحكمة والتمييز.
               </p>
             </div>
 

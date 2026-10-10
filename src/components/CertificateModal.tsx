@@ -75,36 +75,36 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({ result, onCl
                   شهادة تفوق وتكريم
                 </h1>
                 <p className="font-spiritual text-base sm:text-lg text-amber-800">
-                  «مسابقة المكرسة المثالية في العلوم الدينية والثقافية والرهبانية»
+                  «منصة حَسَبَ قَلْبِ اللهِ (كاهن – مكرَّسة – راهب – راهبة)»
                 </p>
               </div>
 
               {/* Biblical Citation */}
               <div className="my-5 py-2.5 px-6 border-y border-amber-200/80 bg-amber-50/60 text-center">
                 <p className="font-spiritual text-lg sm:text-xl text-amber-900 italic font-semibold">
-                  «فَاخْتَارَتْ مَرْيَمُ النَّصِيبَ الصَّالِحَ الَّذِي لَنْ يُنْزَعَ مِنْهَا»
+                  «وَجَدْتُ دَاوُدَ بْنَ يَسَّى رَجُلاً حَسَبَ قَلْبِي، الَّذِي سَيَصْنَعُ كُلَّ مَشِيئَتِي»
                 </p>
                 <p className="text-xs text-stone-600 mt-1 font-sans">
-                  (إنجيل لوقا 10: 42)
+                  (سفر أعمال الرسل 13: 22)
                 </p>
               </div>
 
               {/* Recipient Details */}
               <div className="text-center space-y-4 my-8">
                 <p className="text-base text-stone-700">
-                  يَسرُّ إدارة المسابقة تكريم الأخت الفاضلة المباركة:
+                  يَسرُّ لجنة المراجعة والتقييم الكنسي تكريم المبارك/ة:
                 </p>
                 
                 <h2 className="font-spiritual text-3xl sm:text-4xl font-bold text-stone-900 border-b-2 border-amber-800/40 inline-block px-8 pb-2">
-                  {result.participantName || 'المكرسة المباركة'}
+                  {result.participantName || 'المكرس/ة المبارك/ة'}
                 </h2>
 
                 <p className="text-stone-600 text-sm font-sans">
-                  {result.houseOrDiocese ? `التابعة لـ: ${result.houseOrDiocese}` : 'لجنة بيوت التكريس والخدمة'}
+                  {result.houseOrDiocese ? `التابعة / التابع لـ: ${result.houseOrDiocese}` : 'لجنة الرعاية والأديرة والتكريس'}
                 </p>
 
                 <p className="text-stone-700 text-sm sm:text-base max-w-xl mx-auto leading-relaxed pt-2">
-                  تقديراً لاجتيازها بتفوق واقتدار اختبارات المسابقة الشاملة في نصوص الكتاب المقدس، والعقيدة الكنسية، وسير أمهات وآباء الرهبنة، واللغة القبطية، والتراث الكنسي.
+                  تقديراً للاجتهاد والأمانة في مسيرة المراجعة والنمو الروحي والتعمق في نصوص الكتاب المقدس، والعقيدة الكنسية، وسير الآباء والأمهات، والألحان والتراث الكنسي الأصيل.
                 </p>
               </div>
 
@@ -146,10 +146,10 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({ result, onCl
               <div className="grid grid-cols-2 gap-8 pt-8 mt-6 border-t border-amber-200 text-center">
                 <div>
                   <p className="font-spiritual text-base font-bold text-stone-800">
-                    لجنة التحكيم والعلوم الرهبانية
+                    لجنة المراجعة والعلوم الكنسية
                   </p>
                   <p className="text-xs text-stone-500 font-sans mt-0.5">
-                    مسابقة المكرسة المثالية
+                    منصة «حسب قلب الله»
                   </p>
                   <div className="h-10 flex items-center justify-center font-spiritual text-stone-600 italic">
                     مُعتمد ومُجاز

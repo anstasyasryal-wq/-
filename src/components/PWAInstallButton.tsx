@@ -61,11 +61,11 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({
             </div>
             <div>
               <h4 className="font-bold text-sm text-amber-100 flex items-center gap-1.5">
-                <span>تثبيت تطبيق «المكرَّسة المثالية» على جهازكِ</span>
+                <span>تثبيت تطبيق «حَسَبَ قَلْبِ اللهِ» على جهازك</span>
                 <Sparkles className="w-3.5 h-3.5 text-amber-300" />
               </h4>
               <p className="text-xs text-slate-300 mt-0.5">
-                تصفحي بسرعة فائقة، إشعارات المسابقة، وعمل مستقل عن المتصفح على الهواتف والكمبيوتر.
+                تصفح بسرعة فائقة، إشعارات المسيرة، وعمل مستقل عن المتصفح على الهواتف والكمبيوتر.
               </p>
             </div>
           </div>
@@ -82,7 +82,7 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({
         <button
           type="button"
           onClick={handleInstallClick}
-          title="تثبيت التطبيق على جهازكِ"
+          title="تثبيت التطبيق على جهازك"
           className={`py-1.5 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5 cursor-pointer ${className}`}
         >
           <Download className="w-3.5 h-3.5" />
@@ -113,14 +113,14 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({
 
             <div className="space-y-3 text-xs text-slate-700 leading-relaxed">
               <p className="font-semibold text-slate-900">
-                لإضافة مسابقة «المكرَّسة المثالية» إلى شاشتكِ الرئيسية في متصفح Safari:
+                لإضافة تطبيق «حَسَبَ قَلْبِ اللهِ» إلى شاشتك الرئيسية في متصفح Safari:
               </p>
               <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 space-y-2">
                 <div className="flex items-center gap-2 text-indigo-950 font-bold">
                   <span className="w-5 h-5 rounded-full bg-amber-500 text-indigo-950 flex items-center justify-center text-[11px] font-black">
                     1
                   </span>
-                  <span>اضغطي على زر المشاركة</span>
+                  <span>اضغط على زر المشاركة</span>
                   <Share2 className="w-4 h-4 text-sky-600" />
                   <span className="text-[11px] text-slate-500">(أسفل شاشة Safari)</span>
                 </div>
@@ -128,7 +128,7 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({
                   <span className="w-5 h-5 rounded-full bg-amber-500 text-indigo-950 flex items-center justify-center text-[11px] font-black">
                     2
                   </span>
-                  <span>مرري لأسفل واختاري:</span>
+                  <span>مرر لأسفل واختر:</span>
                   <span className="text-emerald-700 bg-white px-2 py-0.5 rounded-lg border border-emerald-300 font-bold">
                     «إضافة إلى الشاشة الرئيسية» (Add to Home Screen)
                   </span>
@@ -137,7 +137,7 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({
                   <span className="w-5 h-5 rounded-full bg-amber-500 text-indigo-950 flex items-center justify-center text-[11px] font-black">
                     3
                   </span>
-                  <span>اضغطي على «إضافة» (Add) بأعلى اليمين</span>
+                  <span>اضغط على «إضافة» (Add) بأعلى اليمين</span>
                 </div>
               </div>
               <p className="text-[11px] text-slate-500 text-center">

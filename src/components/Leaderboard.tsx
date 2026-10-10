@@ -26,10 +26,10 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
             </div>
             <div>
               <h1 className="font-spiritual text-2xl sm:text-3xl font-bold text-stone-900">
-                لوحة الشرف وسجل المتفوقات
+                لوحة الشرف وسجل التقدير
               </h1>
               <p className="text-xs sm:text-sm text-stone-500 font-sans">
-                سجل إنجازات المكرسات الحاصلات على الأوسمة وشهادات التقدير
+                سجل إنجازات المشاركين الحاصلين على الأوسمة وشهادات التقدير الكنسية
               </p>
             </div>
           </div>
@@ -54,7 +54,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
             لا توجد سجلات بعد في لوحة الشرف
           </h3>
           <p className="text-stone-500 text-sm mb-6">
-            شاركي في المسابقة الفردية الآن لتسجيل اسمكِ والحصول على شهادة التقدير ووسام التكريم!
+            شارك في المراجعة الفردية لمسيرة «حسب قلب الله» لتسجيل نتيجتك ونيل شهادة التقدير الكنسية!
           </p>
           <button
             type="button"
@@ -70,8 +70,8 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
             <table className="w-full text-right text-sm">
               <thead className="bg-stone-50 text-stone-600 border-b border-stone-200 text-xs font-bold font-sans">
                 <tr>
-                  <th className="py-4 px-6">المتسابقة</th>
-                  <th className="py-4 px-6">بيت التكريس / الإيبارشية</th>
+                  <th className="py-4 px-6">المشارك/ة</th>
+                  <th className="py-4 px-6">المقر الكنسي / الإيبارشية</th>
                   <th className="py-4 px-6">النسبة والدرجة</th>
                   <th className="py-4 px-6">الوسام الممنوح</th>
                   <th className="py-4 px-6">التاريخ</th>

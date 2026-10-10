@@ -125,7 +125,7 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({
     soundManager.playVictory();
     const result = runAutomaticQualifications(stageId);
     setQualificationReport(
-      `🎉 تم تنفيذ التصفيات الإلكترونية التلقائية للمرحلة ${stageId}! تم تأهيل ${result.totalQualified} متسابقة وترقية ${result.promotedCount} إلى المرحلة التالية بنجاح.`
+      `🎉 تم تنفيذ التصفيات الإلكترونية التلقائية للمرحلة ${stageId}! تم تأهيل ${result.totalQualified} مشاركاً وترقية ${result.promotedCount} إلى المرحلة التالية بنجاح.`
     );
   };
 
@@ -183,7 +183,7 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({
   };
 
   const handleDeleteQuestion = (id: string) => {
-    if (confirm('هل أنتِ متأكدة من حذف هذا السؤال؟')) {
+    if (confirm('هل أنت متأكد من حذف هذا السؤال؟')) {
       const filtered = questions.filter((q) => q.id !== id);
       setQuestions(filtered);
       saveQuestions(filtered);
@@ -228,13 +228,13 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-amber-300 text-xs font-semibold mb-2">
               <Award className="w-4 h-4 text-amber-300" />
-              <span>إدارة المسابقة والتصفيات الكنسية</span>
+              <span>إدارة مسيرة «حَسَبَ قَلْبِ اللهِ» والتقييم الكنسي</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold font-spiritual text-white">
-              👩‍💼 لوحة تحكم المشرفة العامة
+              🛡️ لوحة الإشراف الكنسي العام
             </h1>
             <p className="text-xs sm:text-sm text-purple-200 mt-1">
-              إشراف كامل على المتسابقات، الأسئلة، المراحل، والتصفيات الإلكترونية التلقائية
+              إشراف متكامل على المشاركين، الأسئلة، المراحل، والتصفيات الإلكترونية التلقائية
             </p>
           </div>
 

@@ -99,7 +99,7 @@ export const WiseVirginsModal: React.FC<WiseVirginsModalProps> = ({ onClose }) =
 
                 <div className="p-3 rounded-xl bg-white border border-stone-200">
                   <strong className="text-amber-900 block mb-0.5">1. المصابيح الموقدة بالنور:</strong>
-                  <span>ترمز لنور المعمودية، والإيمان الحي الصادق، والاستنارة الروحية المستمرة في حياة المكرسة.</span>
+                  <span>ترمز لنور المعمودية، والإيمان الحي الصادق، والاستنارة الروحية المستمرة في مسيرة الإنسان المكرس لله.</span>
                 </div>
 
                 <div className="p-3 rounded-xl bg-white border border-stone-200">

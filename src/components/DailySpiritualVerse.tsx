@@ -67,7 +67,7 @@ export const DailySpiritualVerse: React.FC = () => {
 
   // Copy to clipboard
   const handleCopy = () => {
-    const textToCopy = `${currentVerse.text}\n— ${currentVerse.reference}\nتأمل: ${currentVerse.meditation}\n[من تطبيق مسابقة المكرسة المثالية]`;
+    const textToCopy = `${currentVerse.text}\n— ${currentVerse.reference}\nتأمل: ${currentVerse.meditation}\n[من منصة «حَسَبَ قَلْبِ اللهِ» (كاهن – مكرَّسة – راهب – راهبة)]`;
     navigator.clipboard.writeText(textToCopy).then(() => {
       setCopied(true);
       soundManager.playTick();

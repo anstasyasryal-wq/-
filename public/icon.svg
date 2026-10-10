@@ -60,6 +60,6 @@
   <circle cx="392" cy="290" r="4" fill="#fbbf24" opacity="0.7" />
 
   <!-- Arabic Calligraphy Inscription -->
-  <text x="256" y="430" text-anchor="middle" font-family="'Cairo', sans-serif" font-weight="900" font-size="34" fill="#fef08a">المكرَّسة المثالية</text>
-  <text x="256" y="465" text-anchor="middle" font-family="'Cairo', sans-serif" font-weight="700" font-size="16" fill="#cbd5e1">مسابقة المعرفة والتحدي</text>
+  <text x="256" y="430" text-anchor="middle" font-family="'Cairo', sans-serif" font-weight="900" font-size="34" fill="#fef08a">حسب قلب الله</text>
+  <text x="256" y="465" text-anchor="middle" font-family="'Cairo', sans-serif" font-weight="700" font-size="15" fill="#cbd5e1">كاهن – مكرَّسة – راهب – راهبة</text>
 </svg>

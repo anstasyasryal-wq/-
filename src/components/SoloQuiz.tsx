@@ -260,10 +260,13 @@ export const SoloQuiz: React.FC<SoloQuizProps> = ({
               <Award className="w-8 h-8 text-amber-800" />
             </div>
             <h1 className="font-spiritual text-3xl font-bold text-stone-900">
-              المسابقة الفردية للمكرسة المثالية
+              المراجعة الفردية لمسيرة «حَسَبَ قَلْبِ اللهِ»
             </h1>
-            <p className="text-stone-600 text-sm mt-1">
-              اختبار شخصي شامل وموثق يمنح شهادة تكريم ووساماً رهبانياً بحسب الدرجة
+            <p className="text-sm font-bold text-amber-800 mt-1">
+              «كاهن – مكرَّسة – راهب – راهبة»
+            </p>
+            <p className="text-stone-600 text-xs sm:text-sm mt-1">
+              مراجعة روحية وشخصية شاملة للنمو في العلوم الكنسية واكتشاف جوانب القوة والبركة
             </p>
           </div>
 
@@ -272,26 +275,26 @@ export const SoloQuiz: React.FC<SoloQuizProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-stone-800 mb-1">
-                  اسم المتسابقة (المكرسة / الخادمة) *
+                  الاسم المبارك (كاهن / مكرَّسة / راهب / راهبة) *
                 </label>
                 <input
                   type="text"
                   value={participantName}
                   onChange={(e) => setParticipantName(e.target.value)}
-                  placeholder="مثال: تاسوني مارينا / الأخت فيرينا"
+                  placeholder="مثال: أبونا بيشوي / الراهب بيجول / تاسوني مارينا / تماف إيريني"
                   className="w-full px-4 py-2.5 rounded-xl border border-stone-300 focus:border-amber-600 focus:ring-2 focus:ring-amber-200 outline-none text-stone-900"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-stone-800 mb-1">
-                  بيت التكريس / الإيبارشية
+                  الكنيسة / الدير / بيت التكريس / الإيبارشية
                 </label>
                 <input
                   type="text"
                   value={houseOrDiocese}
                   onChange={(e) => setHouseOrDiocese(e.target.value)}
-                  placeholder="مثال: بيت مارمرقس للتكريس / إيبارشية بني سويف"
+                  placeholder="مثال: دير الأنبا أنطونيوس / إيبارشية بني سويف / كنيسة العذراء"
                   className="w-full px-4 py-2.5 rounded-xl border border-stone-300 focus:border-amber-600 focus:ring-2 focus:ring-amber-200 outline-none text-stone-900"
                 />
               </div>
@@ -678,10 +681,10 @@ export const SoloQuiz: React.FC<SoloQuizProps> = ({
           </div>
 
           <h1 className="font-spiritual text-3xl sm:text-4xl font-bold text-stone-900 mb-1">
-            مبروك إتمام المسابقة بنجاح!
+            مبارك إتمام المراجعة والتقييم بنجاح!
           </h1>
           <p className="text-stone-600 text-sm">
-            المتسابقة المباركة: <strong className="text-stone-900">{completedResult.participantName}</strong> 
+            المبارك/ة: <strong className="text-stone-900">{completedResult.participantName}</strong> 
             {completedResult.houseOrDiocese && ` · ${completedResult.houseOrDiocese}`}
           </p>
 
@@ -749,6 +752,37 @@ export const SoloQuiz: React.FC<SoloQuizProps> = ({
                   </div>
                 );
               })}
+            </div>
+          </div>
+
+          {/* Spiritual Reflection & Growth Steps */}
+          <div className="max-w-xl mx-auto mb-8 p-5 rounded-2xl bg-gradient-to-b from-slate-50 to-amber-50/40 border border-amber-200/80 text-right space-y-3">
+            <h3 className="font-bold text-xs sm:text-sm text-indigo-950 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-amber-700" />
+              <span>مراجعة المسيرة: جوانب القوة وخطوات النمو العملي</span>
+            </h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              هذا التقييم هو مرآة للمراجعة والتشجيع في محضر الله؛ وليس حكماً على القداسة أو القيمة أمام الرب، فالنعمة تعمل في الضعف:
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
+              <div className="p-2.5 rounded-xl bg-white border border-emerald-200 text-emerald-950 space-y-1">
+                <span className="font-bold flex items-center gap-1 text-[11px] text-emerald-800">
+                  🌱 جوانب القوة والبركة:
+                </span>
+                <p className="text-[11px] text-slate-600">
+                  {completedResult.percentage >= 75
+                    ? 'إلمام كتابي وكنسي رفيع، وحس تمييز يقظ يعكس حباً أصيلاً للتراث والخدمة.'
+                    : 'محبة صادقة للمسيرة، مع بذل جهد مبارك في التفكير والمراجعة الهادئة.'}
+                </p>
+              </div>
+              <div className="p-2.5 rounded-xl bg-white border border-amber-200 text-amber-950 space-y-1">
+                <span className="font-bold flex items-center gap-1 text-[11px] text-amber-800">
+                  🕊️ خطوات النمو المقترحة:
+                </span>
+                <p className="text-[11px] text-slate-600">
+                  التعمق في أقوال الآباء والصلوات الطقسية، وقراءة متأنية في نصوص الأسفار والمراجع المقترحة في بنك الدراسة.
+                </p>
+              </div>
             </div>
           </div>
 

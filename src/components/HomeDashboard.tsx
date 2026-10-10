@@ -53,20 +53,23 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
         <div className="relative z-10 max-w-3xl">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-900/60 border border-amber-600/40 text-amber-300 text-xs font-semibold mb-4 backdrop-blur-xs">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>منصة مسابقات بيوت التكريس والشمامسة والخدام</span>
+            <span>منصة المراجعة والنمو الروحي والكنسي للمكرسين</span>
           </div>
 
-          <h1 className="font-spiritual text-3xl sm:text-5xl font-bold tracking-wide text-amber-100 leading-tight mb-4">
-            مسابقة المكرسة المثالية
+          <h1 className="font-spiritual text-3xl sm:text-5xl font-bold tracking-wide text-amber-100 leading-tight mb-2">
+            حَسَبَ قَلْبِ اللهِ
           </h1>
+          <p className="text-sm sm:text-base font-bold text-amber-300 mb-4 tracking-wider">
+            «كاهن – مكرَّسة – راهب – راهبة»
+          </p>
 
           <p className="font-spiritual text-lg sm:text-xl text-amber-200/90 leading-relaxed mb-4">
-            «فَاخْتَارَتْ مَرْيَمُ النَّصِيبَ الصَّالِحَ الَّذِي لَنْ يُنْزَعَ مِنْهَا»
-            <span className="text-stone-400 text-sm font-sans mr-2">(لوقا 10: 42)</span>
+            «وَجَدْتُ دَاوُدَ بْنَ يَسَّى رَجُلاً حَسَبَ قَلْبِي، الَّذِي سَيَصْنَعُ كُلَّ مَشِيئَتِي»
+            <span className="text-stone-400 text-sm font-sans mr-2">(أعمال 13: 22)</span>
           </p>
 
           <p className="text-stone-300 text-sm sm:text-base leading-relaxed mb-8 max-w-2xl font-sans">
-            منصة إلكترونية متخصصة للتنافس المعرفي والروحي بين المكرسات والخادمات، تجمع بين نصوص الكتاب المقدس والعقيدة والطقس، وفضائل وسير أمهات وآباء الرهبنة، واللغة القبطية والتراث الكنسي الأصيل.
+            منصة كنسية متخصصة للمراجعة الروحية والنمو الإنساني لكل شخص مكرس لله في مختلف ميادين دعوته، تجمع بين نصوص الكتاب المقدس والعقيدة والطقس، وأقوال وسير آباء وأمهات الكنيسة، لتحديد جوانب القوة وخطوات النمو العملي في محبة الله وخدمته بأمانة وتواضع.
           </p>
 
           {/* Call to Actions */}

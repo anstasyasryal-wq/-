@@ -18,7 +18,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ onClose }) => {
   // Primary URL is current browser origin or devUrl
   const currentUrl = typeof window !== 'undefined' ? window.location.href.split('#')[0] : devUrl;
 
-  const shareText = `🕊️ مسابقة المكرسة المثالية في العلوم الدينية والثقافية والرهبانية لبيوت التكريس والخدام.\nشاركي الآن واحصلي على شهادة التقدير ووسام التكريم:\n${currentUrl}`;
+  const shareText = `🕊️ مسيرة «حَسَبَ قَلْبِ اللهِ» (كاهن – مكرَّسة – راهب – راهبة) في العلوم الكنسية والعمق الروحي والرهباني.\nشارك الآن في رحلة المراجعة والنمو الروحي:\n${currentUrl}`;
 
   const handleCopy = (url: string, isDev: boolean) => {
     navigator.clipboard.writeText(url).then(() => {
@@ -39,7 +39,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ onClose }) => {
   };
 
   const handleShareTelegram = () => {
-    const url = `https://t.me/share/url?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent('🕊️ مسابقة المكرسة المثالية في العلوم الدينية والرهبانية')}`;
+    const url = `https://t.me/share/url?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent('🕊️ مسيرة «حَسَبَ قَلْبِ اللهِ» (كاهن – مكرَّسة – راهب – راهبة)')}`;
     window.open(url, '_blank');
   };
 
@@ -54,7 +54,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ onClose }) => {
           <div className="flex items-center gap-2">
             <Share2 className="w-5 h-5 text-amber-400" />
             <h2 className="font-spiritual text-xl font-bold text-amber-200">
-              روابط تشغيل ومشاركة المسابقة
+              روابط تشغيل ومشاركة المسيرة
             </h2>
           </div>
 
@@ -75,10 +75,10 @@ export const ShareModal: React.FC<ShareModalProps> = ({ onClose }) => {
               🕊️
             </div>
             <h3 className="font-spiritual text-2xl font-bold text-stone-900">
-              روابط منصة مسابقة المكرسة المثالية
+              روابط منصة «حَسَبَ قَلْبِ اللهِ»
             </h3>
             <p className="text-xs text-stone-600 font-sans max-w-sm mx-auto leading-relaxed">
-              إذا واجهتِ أي صعوبة في فتح الرابط المشترك، يمكنكِ استخدام الرابط المباشر الفوري أدناه:
+              يمكنكم استخدام ومشاركة الرابط المباشر الفوري أدناه للوصول للمنصة وتثبيتها:
             </p>
           </div>
 
