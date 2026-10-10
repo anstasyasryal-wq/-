@@ -1,0 +1,185 @@
+import fs from 'fs';
+import path from 'path';
+import sharp from 'sharp';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const rootDir = path.resolve(__dirname, '..');
+const publicDir = path.join(rootDir, 'public');
+
+if (!fs.existsSync(publicDir)) {
+  fs.mkdirSync(publicDir, { recursive: true });
+}
+
+const svgIconContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e1b4b" />
+      <stop offset="50%" stop-color="#31104b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="35%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#b45309" />
+    </linearGradient>
+    <linearGradient id="haloGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#d97706" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+
+  <!-- Deep Sacred Royal Background -->
+  <rect width="512" height="512" rx="108" fill="url(#bgGrad)" />
+
+  <!-- Outer Fine Gold Halo Ring -->
+  <circle cx="256" cy="240" r="190" fill="none" stroke="url(#goldGrad)" stroke-width="4" stroke-opacity="0.4" stroke-dasharray="12 8" />
+  <circle cx="256" cy="240" r="172" fill="url(#haloGrad)" />
+
+  <!-- Coptic / Sacred Cross (Centerpiece Top) -->
+  <g>
+    <rect x="246" y="80" width="20" height="90" rx="6" fill="url(#goldGrad)" />
+    <rect x="216" y="110" width="80" height="20" rx="6" fill="url(#goldGrad)" />
+    <circle cx="256" cy="120" r="8" fill="#ffffff" />
+    <circle cx="256" cy="90" r="4" fill="#ffffff" />
+    <circle cx="256" cy="160" r="4" fill="#ffffff" />
+    <circle cx="226" cy="120" r="4" fill="#ffffff" />
+    <circle cx="286" cy="120" r="4" fill="#ffffff" />
+  </g>
+
+  <!-- Holy Dove Symbol of Consecration & Pure Spirit -->
+  <g fill="#ffffff" fill-opacity="0.95">
+    <ellipse cx="256" cy="225" rx="22" ry="32" />
+    <circle cx="256" cy="195" r="14" />
+    <path d="M256,188 Q264,180 272,184 Q266,192 256,188 Z" fill="#34d399" />
+    <path d="M242,220 C200,190 150,210 135,245 C160,250 195,245 238,235 Z" fill="#f8fafc" />
+    <path d="M270,220 C312,190 362,210 377,245 C352,250 317,245 274,235 Z" fill="#f8fafc" />
+    <path d="M256,252 L240,290 L256,285 L272,290 Z" fill="#f1f5f9" />
+  </g>
+
+  <!-- Golden Trophy / Laurel of Excellence -->
+  <g fill="url(#goldGrad)">
+    <path d="M196,280 C196,350 316,350 316,280 L306,280 C306,335 206,335 206,280 Z" fill="url(#goldGrad)" />
+    <path d="M196,290 C170,290 170,325 198,330 L198,322 C178,318 178,298 196,298 Z" />
+    <path d="M316,290 C342,290 342,325 314,330 L314,322 C334,318 334,298 316,298 Z" />
+    <rect x="248" y="340" width="16" height="25" rx="3" />
+    <path d="M220,365 L292,365 L300,380 L212,380 Z" rx="4" />
+  </g>
+
+  <!-- Radiant Stars -->
+  <circle cx="160" cy="140" r="5" fill="#fde047" />
+  <circle cx="352" cy="140" r="5" fill="#fde047" />
+  <circle cx="120" cy="290" r="4" fill="#fbbf24" opacity="0.7" />
+  <circle cx="392" cy="290" r="4" fill="#fbbf24" opacity="0.7" />
+
+  <!-- Arabic Calligraphy Inscription -->
+  <text x="256" y="430" text-anchor="middle" font-family="'Cairo', sans-serif" font-weight="900" font-size="34" fill="#fef08a">المكرَّسة المثالية</text>
+  <text x="256" y="465" text-anchor="middle" font-family="'Cairo', sans-serif" font-weight="700" font-size="16" fill="#cbd5e1">مسابقة المعرفة والتحدي</text>
+</svg>`;
+
+// Maskable SVG with safe margin padding (15% padding on all sides)
+const maskableSvgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e1b4b" />
+      <stop offset="50%" stop-color="#31104b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <linearGradient id="goldGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="35%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#b45309" />
+    </linearGradient>
+  </defs>
+
+  <!-- Full-bleed background for maskable cropping -->
+  <rect width="512" height="512" fill="url(#bgGrad2)" />
+
+  <!-- Centered safe-zone group (scaled to 75% to stay strictly within safe-zone circle) -->
+  <g transform="translate(64, 64) scale(0.75)">
+    <!-- Outer Halo Ring -->
+    <circle cx="256" cy="240" r="190" fill="none" stroke="url(#goldGrad2)" stroke-width="4" stroke-opacity="0.4" stroke-dasharray="12 8" />
+
+    <!-- Coptic Cross -->
+    <g>
+      <rect x="246" y="80" width="20" height="90" rx="6" fill="url(#goldGrad2)" />
+      <rect x="216" y="110" width="80" height="20" rx="6" fill="url(#goldGrad2)" />
+      <circle cx="256" cy="120" r="8" fill="#ffffff" />
+      <circle cx="256" cy="90" r="4" fill="#ffffff" />
+      <circle cx="256" cy="160" r="4" fill="#ffffff" />
+      <circle cx="226" cy="120" r="4" fill="#ffffff" />
+      <circle cx="286" cy="120" r="4" fill="#ffffff" />
+    </g>
+
+    <!-- Holy Dove -->
+    <g fill="#ffffff" fill-opacity="0.95">
+      <ellipse cx="256" cy="225" rx="22" ry="32" />
+      <circle cx="256" cy="195" r="14" />
+      <path d="M256,188 Q264,180 272,184 Q266,192 256,188 Z" fill="#34d399" />
+      <path d="M242,220 C200,190 150,210 135,245 C160,250 195,245 238,235 Z" fill="#f8fafc" />
+      <path d="M270,220 C312,190 362,210 377,245 C352,250 317,245 274,235 Z" fill="#f8fafc" />
+      <path d="M256,252 L240,290 L256,285 L272,290 Z" fill="#f1f5f9" />
+    </g>
+
+    <!-- Trophy -->
+    <g fill="url(#goldGrad2)">
+      <path d="M196,280 C196,350 316,350 316,280 L306,280 C306,335 206,335 206,280 Z" fill="url(#goldGrad2)" />
+      <path d="M196,290 C170,290 170,325 198,330 L198,322 C178,318 178,298 196,298 Z" />
+      <path d="M316,290 C342,290 342,325 314,330 L314,322 C334,318 334,298 316,298 Z" />
+      <rect x="248" y="340" width="16" height="25" rx="3" />
+      <path d="M220,365 L292,365 L300,380 L212,380 Z" rx="4" />
+    </g>
+
+    <text x="256" y="430" text-anchor="middle" font-family="'Cairo', sans-serif" font-weight="900" font-size="36" fill="#fef08a">المكرَّسة المثالية</text>
+  </g>
+</svg>`;
+
+async function run() {
+  // Write SVG files
+  fs.writeFileSync(path.join(publicDir, 'icon.svg'), svgIconContent, 'utf-8');
+  fs.writeFileSync(path.join(publicDir, 'icon-maskable.svg'), maskableSvgContent, 'utf-8');
+
+  const svgBuffer = Buffer.from(svgIconContent);
+  const maskableSvgBuffer = Buffer.from(maskableSvgContent);
+
+  // Generate pwa-192x192.png
+  await sharp(svgBuffer)
+    .resize(192, 192)
+    .png()
+    .toFile(path.join(publicDir, 'pwa-192x192.png'));
+  console.log('Generated pwa-192x192.png');
+
+  // Generate pwa-512x512.png
+  await sharp(svgBuffer)
+    .resize(512, 512)
+    .png()
+    .toFile(path.join(publicDir, 'pwa-512x512.png'));
+  console.log('Generated pwa-512x512.png');
+
+  // Generate pwa-maskable-512x512.png
+  await sharp(maskableSvgBuffer)
+    .resize(512, 512)
+    .png()
+    .toFile(path.join(publicDir, 'pwa-maskable-512x512.png'));
+  console.log('Generated pwa-maskable-512x512.png');
+
+  // Generate apple-touch-icon.png (180x180)
+  await sharp(svgBuffer)
+    .resize(180, 180)
+    .png()
+    .toFile(path.join(publicDir, 'apple-touch-icon.png'));
+  console.log('Generated apple-touch-icon.png');
+
+  // Generate favicon.ico / favicon-32x32.png
+  await sharp(svgBuffer)
+    .resize(32, 32)
+    .png()
+    .toFile(path.join(publicDir, 'favicon-32x32.png'));
+  console.log('Generated favicon-32x32.png');
+}
+
+run().catch((err) => {
+  console.error('Error generating icons:', err);
+  process.exit(1);
+});

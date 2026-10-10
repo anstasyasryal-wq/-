@@ -15,6 +15,7 @@ import {
   Sparkles,
   Users,
 } from 'lucide-react';
+import { PWAInstallButton } from './PWAInstallButton';
 
 interface HeaderProps {
   currentView: AppView;
@@ -105,8 +106,11 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         </nav>
 
-        {/* Right Actions: Sound & User Profile */}
+        {/* Right Actions: PWA Install, Sound & User Profile */}
         <div className="flex items-center gap-2">
+          {/* PWA In-App Install Button */}
+          <PWAInstallButton variant="header" />
+
           {/* Sound Toggle */}
           <button
             onClick={toggleSound}

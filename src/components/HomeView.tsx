@@ -20,6 +20,7 @@ import {
   Quote,
   Flame,
 } from 'lucide-react';
+import { PWAInstallButton } from './PWAInstallButton';
 
 interface HomeViewProps {
   currentUser: User | null;
@@ -198,7 +199,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </p>
         </div>
 
-        {/* Action Buttons (The 4 Main Primary Actions Requested) */}
+        {/* Action Buttons (The Main Primary Actions) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 max-w-3xl mx-auto pt-2">
           {/* Button 1: ابدئي المسابقة */}
           <button
@@ -236,7 +237,15 @@ export const HomeView: React.FC<HomeViewProps> = ({
             <span>📜 قواعد المسابقة</span>
           </button>
         </div>
+
+        {/* PWA Install Quick Prompt */}
+        <div className="pt-4 max-w-md mx-auto">
+          <PWAInstallButton variant="hero" />
+        </div>
       </div>
+
+      {/* PWA Installation Card */}
+      <PWAInstallButton variant="banner" />
 
       {/* Distinct Action Hub Cards for: من سجل؟ + دليل الاختبارات والمسابقات */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-right">

@@ -29,6 +29,7 @@ import { ParticipantsListView } from './components/ParticipantsListView';
 import { CompetitionsHubView } from './components/CompetitionsHubView';
 import { RegistrationModal } from './components/RegistrationModal';
 import { RulesModal } from './components/RulesModal';
+import { OfflineIndicator } from './components/OfflineIndicator';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<AppView>(() => {
@@ -254,6 +255,9 @@ export default function App() {
         isOpen={showRulesModal}
         onClose={() => setShowRulesModal(false)}
       />
+
+      {/* Offline Status Connectivity Banner */}
+      <OfflineIndicator />
 
       {/* Minimal Reverent Footer */}
       <footer className="border-t border-slate-200 bg-white/60 py-6 text-center text-xs text-slate-500">
