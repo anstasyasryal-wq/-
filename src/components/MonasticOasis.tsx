@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { User, ConsecrationVocation } from '../types';
 import { MONASTIC_VIRTUES, MonasticVirtue } from '../data/monasticVirtues';
 import { COPTIC_TERMS, CopticTerm } from '../data/copticDictionary';
 import { DESERT_MOTHERS, DesertMother } from '../data/desertMothers';
@@ -24,9 +25,10 @@ import {
 
 interface MonasticOasisProps {
   onBackToHome: () => void;
+  currentUser?: User | null;
 }
 
-export const MonasticOasis: React.FC<MonasticOasisProps> = ({ onBackToHome }) => {
+export const MonasticOasis: React.FC<MonasticOasisProps> = ({ onBackToHome, currentUser }) => {
   const [activeTab, setActiveTab] = useState<'virtues' | 'coptic' | 'badge' | 'rosary' | 'mothers'>('virtues');
 
   // Virtues Wheel State
@@ -53,11 +55,24 @@ export const MonasticOasis: React.FC<MonasticOasisProps> = ({ onBackToHome }) =>
   const [quizSelectedIdx, setQuizSelectedIdx] = useState<number | null>(null);
   const [quizScore, setQuizScore] = useState<number>(0);
 
+  // Selected Vocation for Badge
+  const [badgeVocation, setBadgeVocation] = useState<ConsecrationVocation>(
+    currentUser?.vocation || 'مكرسة'
+  );
+
   // Badge Generator State
-  const [badgeName, setBadgeName] = useState('تاسوني مارينا');
-  const [badgeHouse, setBadgeHouse] = useState('بيت مارمرقس للتكريس - بني سويف');
-  const [badgePatron, setBadgePatron] = useState('القديسة فيرينا');
-  const [badgeMotto, setBadgeMotto] = useState('«اخْتَارَتْ مَرْيَمُ النَّصِيبَ الصَّالِحَ»');
+  const [badgeName, setBadgeName] = useState(
+    currentUser?.name || (currentUser?.vocation === 'كاهن' ? 'أبونا القس يوحنا' : currentUser?.vocation === 'راهب' ? 'الراهب أنطونيوس' : currentUser?.vocation === 'راهبة' ? 'الأم مورا' : 'تاسوني مارينا')
+  );
+  const [badgeHouse, setBadgeHouse] = useState(
+    currentUser?.consecrationHouse || 'الكنيسة / الدير / بيت التكريس'
+  );
+  const [badgePatron, setBadgePatron] = useState(
+    currentUser?.patronSaint || 'القديسة مريم العذراء'
+  );
+  const [badgeMotto, setBadgeMotto] = useState(
+    currentUser?.consecrationVerse || '«اخْتَارَتْ مَرْيَمُ النَّصِيبَ الصَّالِحَ»'
+  );
 
   // Load completed virtues from storage
   useEffect(() => {
@@ -188,7 +203,7 @@ export const MonasticOasis: React.FC<MonasticOasisProps> = ({ onBackToHome }) =>
                 واحة التكريس والفضائل الرهبانية
               </h1>
               <p className="text-xs sm:text-sm text-stone-500 font-sans">
-                إبداعات وتدريبات روحية ومعجم اللغة القبطية الكنسية وبطاقة المكرسة الشرفية
+                إبداعات وتدريبات روحية ومعجم اللغة القبطية الكنسية وبطاقة التكريس الشرفية
               </p>
             </div>
           </div>
@@ -269,7 +284,7 @@ export const MonasticOasis: React.FC<MonasticOasisProps> = ({ onBackToHome }) =>
             }`}
           >
             <IdCard className="w-4 h-4" />
-            <span>بطاقة المكرسة الشرفية</span>
+            <span>بطاقة التكريس الشرفية</span>
           </button>
         </div>
       </div>
@@ -570,15 +585,53 @@ export const MonasticOasis: React.FC<MonasticOasisProps> = ({ onBackToHome }) =>
           {/* Badge Inputs Configuration */}
           <div className="lg:col-span-5 bg-white rounded-3xl border border-stone-200 p-6 sm:p-8 shadow-sm space-y-4">
             <h3 className="font-spiritual text-xl font-bold text-stone-900 mb-1">
-              إعداد بطاقة المكرسة الشرفية
+              إعداد بطاقة التكريس الشرفية
             </h3>
             <p className="text-xs text-stone-500 mb-4">
-              أدخلي بياناتكِ لاستخراج وطباعة بطاقة العضوية التكريمية للمسابقة
+              أدخل بياناتك لاستخراج وطباعة بطاقة العضوية التكريمية المعتمدة للمسيرة
             </p>
+
+            {/* Vocation Selection (كاهن - مكرسة - راهب - راهبة) */}
+            <div>
+              <label className="block text-xs font-bold text-stone-700 mb-1.5">
+                فئة التكريس والخدمة:
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                {(['كاهن', 'مكرسة', 'راهب', 'راهبة'] as ConsecrationVocation[]).map((voc) => (
+                  <button
+                    key={voc}
+                    type="button"
+                    onClick={() => {
+                      setBadgeVocation(voc);
+                      if (!badgeName || badgeName === 'تاسوني مارينا' || badgeName === 'أبونا القس يوحنا' || badgeName === 'الراهب أنطونيوس' || badgeName === 'الأم مورا') {
+                        if (voc === 'كاهن') setBadgeName('أبونا القس يوحنا');
+                        else if (voc === 'راهب') setBadgeName('الراهب أنطونيوس');
+                        else if (voc === 'راهبة') setBadgeName('الأم مورا');
+                        else setBadgeName('تاسوني مارينا');
+                      }
+                    }}
+                    className={`py-2 px-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 border cursor-pointer ${
+                      badgeVocation === voc
+                        ? 'bg-amber-800 text-amber-50 border-amber-900 shadow-xs'
+                        : 'bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100'
+                    }`}
+                  >
+                    <span>{voc === 'كاهن' ? '✝️' : voc === 'راهب' ? '⛪' : voc === 'راهبة' ? '🕯️' : '🕊️'}</span>
+                    <span>{voc}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
 
             <div>
               <label className="block text-xs font-bold text-stone-700 mb-1">
-                اسم المكرسة / الخادمة
+                {badgeVocation === 'كاهن'
+                  ? 'اسم الأب الكاهن المبارك'
+                  : badgeVocation === 'راهب'
+                  ? 'اسم الأب الراهب المبارك'
+                  : badgeVocation === 'راهبة'
+                  ? 'اسم الأم الراهبة المباركة'
+                  : 'اسم المكرسة / الخادمة المباركة'}
               </label>
               <input
                 type="text"
@@ -590,7 +643,11 @@ export const MonasticOasis: React.FC<MonasticOasisProps> = ({ onBackToHome }) =>
 
             <div>
               <label className="block text-xs font-bold text-stone-700 mb-1">
-                بيت التكريس أو الإيبارشية
+                {badgeVocation === 'كاهن'
+                  ? 'الكنيسة والإيبارشية'
+                  : badgeVocation === 'راهب' || badgeVocation === 'راهبة'
+                  ? 'الدير العامر أو مقر الرهبنة'
+                  : 'بيت التكريس أو الإيبارشية'}
               </label>
               <input
                 type="text"
@@ -602,7 +659,7 @@ export const MonasticOasis: React.FC<MonasticOasisProps> = ({ onBackToHome }) =>
 
             <div>
               <label className="block text-xs font-bold text-stone-700 mb-1">
-                الشفيعة الروحية
+                الشفيع الروحي / الشفيعة
               </label>
               <input
                 type="text"
@@ -659,7 +716,16 @@ export const MonasticOasis: React.FC<MonasticOasisProps> = ({ onBackToHome }) =>
               {/* Avatar Emblem */}
               <div className="my-6">
                 <div className="w-24 h-24 rounded-full bg-amber-100 border-2 border-amber-700 mx-auto flex items-center justify-center shadow-inner text-4xl mb-3">
-                  🕊️
+                  {badgeVocation === 'كاهن' ? '✝️' : badgeVocation === 'راهب' ? '⛪' : badgeVocation === 'راهبة' ? '🕯️' : '🕊️'}
+                </div>
+                <div className="inline-block px-3 py-0.5 rounded-full bg-amber-800/10 text-amber-900 border border-amber-700/30 text-xs font-bold mb-1.5">
+                  {badgeVocation === 'كاهن'
+                    ? 'رتبة الكهنوت المقدس'
+                    : badgeVocation === 'راهب'
+                    ? 'الرهبنة المتبتلة'
+                    : badgeVocation === 'راهبة'
+                    ? 'الرهبنة والبتولية'
+                    : 'التكريس البتولي والخدمة'}
                 </div>
                 <h3 className="font-spiritual text-2xl font-bold text-stone-900">
                   {badgeName || 'المكرس/ة المبارك/ة'}
@@ -671,6 +737,10 @@ export const MonasticOasis: React.FC<MonasticOasisProps> = ({ onBackToHome }) =>
 
               {/* Details table */}
               <div className="space-y-2 text-xs font-spiritual bg-white/70 p-4 rounded-2xl border border-amber-200/80 text-right">
+                <div className="flex justify-between border-b border-stone-100 pb-1.5">
+                  <span className="text-stone-500">الفئة:</span>
+                  <span className="font-bold text-stone-900">{badgeVocation}</span>
+                </div>
                 <div className="flex justify-between border-b border-stone-100 pb-1.5">
                   <span className="text-stone-500">الشفيع / الشفيعة:</span>
                   <span className="font-bold text-stone-900">{badgePatron}</span>
@@ -711,7 +781,13 @@ export const MonasticOasis: React.FC<MonasticOasisProps> = ({ onBackToHome }) =>
             مسبحة صلاة يسوع السهمية (Chotki)
           </h2>
           <p className="text-xs text-stone-500 mb-6 font-sans">
-            رفيقة المكرسة في صلاة القلاية والسهر والخدمة الصامتة
+            {currentUser?.vocation === 'كاهن'
+              ? 'رفيقة الكاهن في صلاة المذبح والرعاية والخلوة والخدمة الصامتة'
+              : currentUser?.vocation === 'راهب'
+              ? 'رفيقة الراهب في صلاة القلاية والمطانيات والسهر والهدوء'
+              : currentUser?.vocation === 'راهبة'
+              ? 'رفيقة الراهبة في صلاة القلاية والبتولية والسهر والتسبيح'
+              : 'رفيقة المكرسين لله في صلاة القلاية والسهر والخدمة الصامتة'}
           </p>
 
           {/* Prayer Choice Select */}

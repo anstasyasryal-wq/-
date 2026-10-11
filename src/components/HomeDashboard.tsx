@@ -181,7 +181,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="font-spiritual text-2xl font-bold text-stone-900">
-            فروع العلوم في مسابقة المكرسة
+            فروع مسيرة حسب قلب الله
           </h2>
           <button
             onClick={() => onSelectMode('study')}
@@ -341,7 +341,7 @@ export const HomeDashboard: React.FC<HomeDashboardProps> = ({
                 واحة التكريس والفضائل الرهبانية
               </h3>
               <p className="text-xs sm:text-sm text-stone-300 max-w-2xl leading-relaxed font-sans">
-                استمتعي بـ <strong>عجلة فضائل البرية اليومية</strong> لاقتناء التدريب الروحي، و <strong>المعجم القبطي التفاعلي</strong> لمصطلحات التكريس والليتورجيا مع التحدي السريع، واستخرجي <strong>بطاقة المكرسة الشرفية</strong> المعتمدة.
+                استمتع بـ <strong>عجلة فضائل البرية اليومية</strong> لاقتناء التدريب الروحي، و <strong>المعجم القبطي التفاعلي</strong> لمصطلحات التكريس والليتورجيا مع التحدي السريع، واستخرج <strong>بطاقة التكريس الشرفية</strong> المعتمدة لجميع الفئات (كاهن – مكرَّسة – راهب – راهبة).
               </p>
             </div>
           </div>

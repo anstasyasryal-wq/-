@@ -210,7 +210,7 @@ export const CompetitionsHubView: React.FC<CompetitionsHubViewProps> = ({
                   المسابقة الرسمية الأولى
                 </span>
                 <h3 className="text-lg font-bold text-slate-900">
-                  مسابقة المراحل الفردية للمكرسات
+                  مسابقة المراحل الفردية (كاهن – مكرَّسة – راهب – راهبة)
                 </h3>
                 <p className="text-xs text-slate-600 leading-relaxed mt-1">
                   المسابقة الإلكترونية الرسمية الكبرى المقسمة على 5 مراحل تصاعدية: البداية، الاكتشاف، التحدي السريع، الحواس، والتحدي الكبير وصولاً للتأهل للنهائي.
@@ -235,10 +235,10 @@ export const CompetitionsHubView: React.FC<CompetitionsHubViewProps> = ({
                   المنافسة الجماعية
                 </span>
                 <h3 className="text-lg font-bold text-slate-900">
-                  مسابقة بيوت التكريس والفرق التكريسية
+                  مسابقة الكنائس والأديرة والبيوت التكريسية
                 </h3>
                 <p className="text-xs text-slate-600 leading-relaxed mt-1">
-                  منافسة حية بين فرق بيوت التكريس (بنات مريم، الشماسة فيبي، القديسة دميانة، القديسة فيرينا) بنظام الأدوار، خطف الأسئلة، ولوحة الشرف الحية.
+                  منافسة حية بين فرق الكنائس والأديرة وبيوت التكريس بنظام الأدوار، خطف الأسئلة، ولوحة الشرف الحية.
                 </p>
               </div>
               <button
