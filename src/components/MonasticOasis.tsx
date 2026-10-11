@@ -61,17 +61,15 @@ export const MonasticOasis: React.FC<MonasticOasisProps> = ({ onBackToHome, curr
   );
 
   // Badge Generator State
-  const [badgeName, setBadgeName] = useState(
-    currentUser?.name || (currentUser?.vocation === 'كاهن' ? 'أبونا القس يوحنا' : currentUser?.vocation === 'راهب' ? 'الراهب أنطونيوس' : currentUser?.vocation === 'راهبة' ? 'الأم مورا' : 'تاسوني مارينا')
-  );
+  const [badgeName, setBadgeName] = useState(currentUser?.name || '');
   const [badgeHouse, setBadgeHouse] = useState(
-    currentUser?.consecrationHouse || 'الكنيسة / الدير / بيت التكريس'
+    currentUser?.consecrationHouse || ''
   );
   const [badgePatron, setBadgePatron] = useState(
     currentUser?.patronSaint || 'القديسة مريم العذراء'
   );
   const [badgeMotto, setBadgeMotto] = useState(
-    currentUser?.consecrationVerse || '«اخْتَارَتْ مَرْيَمُ النَّصِيبَ الصَّالِحَ»'
+    currentUser?.consecrationVerse || '«وَجَدْتُ دَاوُدَ... رَجُلاً حَسَبَ قَلْبِي»'
   );
 
   // Load completed virtues from storage
@@ -603,12 +601,6 @@ export const MonasticOasis: React.FC<MonasticOasisProps> = ({ onBackToHome, curr
                     type="button"
                     onClick={() => {
                       setBadgeVocation(voc);
-                      if (!badgeName || badgeName === 'تاسوني مارينا' || badgeName === 'أبونا القس يوحنا' || badgeName === 'الراهب أنطونيوس' || badgeName === 'الأم مورا') {
-                        if (voc === 'كاهن') setBadgeName('أبونا القس يوحنا');
-                        else if (voc === 'راهب') setBadgeName('الراهب أنطونيوس');
-                        else if (voc === 'راهبة') setBadgeName('الأم مورا');
-                        else setBadgeName('تاسوني مارينا');
-                      }
                     }}
                     className={`py-2 px-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 border cursor-pointer ${
                       badgeVocation === voc
@@ -637,6 +629,15 @@ export const MonasticOasis: React.FC<MonasticOasisProps> = ({ onBackToHome, curr
                 type="text"
                 value={badgeName}
                 onChange={(e) => setBadgeName(e.target.value)}
+                placeholder={
+                  badgeVocation === 'كاهن'
+                    ? 'اكتب اسم الأب الكاهن هنا'
+                    : badgeVocation === 'راهب'
+                    ? 'اكتب اسم الأب الراهب هنا'
+                    : badgeVocation === 'راهبة'
+                    ? 'اكتب اسم الأم الراهبة هنا'
+                    : 'اكتب اسم الأخت المكرسة هنا'
+                }
                 className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 text-sm font-spiritual"
               />
             </div>
@@ -653,6 +654,7 @@ export const MonasticOasis: React.FC<MonasticOasisProps> = ({ onBackToHome, curr
                 type="text"
                 value={badgeHouse}
                 onChange={(e) => setBadgeHouse(e.target.value)}
+                placeholder="اكتب اسم الكنيسة أو الدير أو بيت التكريس"
                 className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 text-sm font-spiritual"
               />
             </div>
@@ -728,7 +730,14 @@ export const MonasticOasis: React.FC<MonasticOasisProps> = ({ onBackToHome, curr
                     : 'التكريس البتولي والخدمة'}
                 </div>
                 <h3 className="font-spiritual text-2xl font-bold text-stone-900">
-                  {badgeName || 'المكرس/ة المبارك/ة'}
+                  {badgeName ||
+                    (badgeVocation === 'كاهن'
+                      ? 'الأب الكاهن المبارك'
+                      : badgeVocation === 'راهب'
+                      ? 'الأب الراهب المبارك'
+                      : badgeVocation === 'راهبة'
+                      ? 'الأم الراهبة المباركة'
+                      : 'الأخت المكرسة المباركة')}
                 </h3>
                 <p className="text-xs text-stone-600 font-spiritual mt-0.5">
                   {badgeHouse || 'الكنيسة / الدير / بيت التكريس'}

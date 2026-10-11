@@ -387,13 +387,13 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({
         <div className="space-y-4">
           <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-center justify-between">
             <div>
-              <span className="font-bold block text-sm">👥 سجل المكرسات والخادمات المسجلات:</span>
+              <span className="font-bold block text-sm">👥 سجل المشاركين والمكرسين (كاهن – مكرَّسة – راهب – راهبة):</span>
               <p className="text-slate-700 mt-0.5">
-                استعراض كامل لبيانات الهوية التكريسية، الرتبة الكنسية، مجال الخدمة، وآية التكريس لكل متسابقة.
+                استعراض كامل لبيانات الهوية التكريسية، الرتبة الكنسية، مجال الخدمة، وآية التكريس لكل مشارك.
               </p>
             </div>
             <span className="px-3 py-1 rounded-full bg-amber-200 font-bold text-amber-950 font-mono text-xs">
-              {users.length} متسابقة
+              {users.length} مشارك ومكرس
             </span>
           </div>
 

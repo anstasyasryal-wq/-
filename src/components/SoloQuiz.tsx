@@ -281,7 +281,7 @@ export const SoloQuiz: React.FC<SoloQuizProps> = ({
                   type="text"
                   value={participantName}
                   onChange={(e) => setParticipantName(e.target.value)}
-                  placeholder="مثال: أبونا بيشوي / الراهب بيجول / تاسوني مارينا / تماف إيريني"
+                  placeholder="اكتب الاسم واللقب المبارك هنا (كاهن / مكرَّسة / راهب / راهبة)"
                   className="w-full px-4 py-2.5 rounded-xl border border-stone-300 focus:border-amber-600 focus:ring-2 focus:ring-amber-200 outline-none text-stone-900"
                 />
               </div>

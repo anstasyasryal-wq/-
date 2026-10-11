@@ -39,37 +39,37 @@ export const TeamQuiz: React.FC<TeamQuizProps> = ({
   const [teams, setTeams] = useState<Team[]>([
     {
       id: 't-1',
-      name: 'فريق بيت بنات مريم للتكريس',
+      name: 'فريق كنيسة رئيس الملائكة ميخائيل',
       consecrationHouse: 'إيبارشية بني سويف',
-      members: 'تاسوني مارينا، تاسوني فيرينا، تاسوني يوستينا',
-      patronSaint: 'القديسة العذراء مريم',
+      members: 'الآباء والخدام المشاركون',
+      patronSaint: 'رئيس الملائكة ميخائيل',
       score: 0,
       color: 'from-amber-600 to-amber-800',
-      avatar: '🕊️',
+      avatar: '✝️',
       answeredCorrectCount: 0,
       answeredWrongCount: 0,
     },
     {
       id: 't-2',
-      name: 'فريق بيت الشماسة فيبي',
-      consecrationHouse: 'إيبارشية القاهرة والخدمة',
-      members: 'تاسوني أوفيميا، تاسوني إيرين، تاسوني صوفيا',
-      patronSaint: 'القديسة فيبي الشماسة',
+      name: 'فريق دير القديس أنبا بيشوي',
+      consecrationHouse: 'برية شيهيت العامرة',
+      members: 'الآباء الرهبان المشاركون',
+      patronSaint: 'القديس أنبا بيشوي',
       score: 0,
       color: 'from-blue-600 to-blue-800',
-      avatar: '📜',
+      avatar: '⛪',
       answeredCorrectCount: 0,
       answeredWrongCount: 0,
     },
     {
       id: 't-3',
-      name: 'فريق بيت القديسة دميانة',
-      consecrationHouse: 'إيبارشية الدلتا والبراري',
-      members: 'تاسوني دميانة، تاسوني كاترين، تاسوني أغابي',
-      patronSaint: 'القديسة دميانة ورئيسة العذارى',
+      name: 'فريق بيت التكريس البتولي',
+      consecrationHouse: 'بيت التكريس وخدمة الفتيات',
+      members: 'الأخوات المكرسات المشاركات',
+      patronSaint: 'القديسة مريم العذراء',
       score: 0,
       color: 'from-rose-600 to-rose-800',
-      avatar: '👑',
+      avatar: '🕊️',
       answeredCorrectCount: 0,
       answeredWrongCount: 0,
     },
@@ -96,49 +96,49 @@ export const TeamQuiz: React.FC<TeamQuizProps> = ({
     setTeams([
       {
         id: 't-1',
-        name: 'بيت بنات مريم للتكريس',
-        consecrationHouse: 'إيبارشية بني سويف',
-        members: 'تاسوني مارينا، تاسوني فيرينا، تاسوني يوستينا',
-        patronSaint: 'القديسة مريم العذراء',
+        name: 'فريق الخدمة والرعاية الكهنوتية',
+        consecrationHouse: 'إيبارشية بني سويف والبهنسا',
+        members: 'فريق الآباء الكهنة والخدام',
+        patronSaint: 'القديس مارمرقس الرسول',
         score: 0,
         color: 'from-amber-600 to-amber-800',
-        avatar: '🕊️',
+        avatar: '✝️',
         answeredCorrectCount: 0,
         answeredWrongCount: 0,
       },
       {
         id: 't-2',
-        name: 'بيت الشماسة فيبي للتكريس',
-        consecrationHouse: 'إيبارشية القاهرة',
-        members: 'تاسوني أوفيميا، تاسوني إيرين، تاسوني صوفيا',
-        patronSaint: 'القديسة فيبي الشماسة',
+        name: 'فريق الأديرة الرهبانية العامرة',
+        consecrationHouse: 'براري مصر وأديرتها العامرة',
+        members: 'فريق الآباء الرهبان',
+        patronSaint: 'القديس أنبا أنطونيوس الكبير',
         score: 0,
         color: 'from-blue-600 to-blue-800',
-        avatar: '📜',
+        avatar: '⛪',
         answeredCorrectCount: 0,
         answeredWrongCount: 0,
       },
       {
         id: 't-3',
-        name: 'بيت القديسة دميانة للمكرسات',
-        consecrationHouse: 'إيبارشية الدلتا',
-        members: 'تاسوني دميانة، تاسوني كاترين، تاسوني أغابي',
-        patronSaint: 'القديسة دميانة',
+        name: 'فريق بيوت التكريس البتولي',
+        consecrationHouse: 'بيوت التكريس بالقاهرة والأقاليم',
+        members: 'فريق الأخوات المكرسات',
+        patronSaint: 'القديسة فيبي الشماسة',
         score: 0,
         color: 'from-rose-600 to-rose-800',
-        avatar: '👑',
+        avatar: '🕊️',
         answeredCorrectCount: 0,
         answeredWrongCount: 0,
       },
       {
         id: 't-4',
-        name: 'بيت القديسة فيرينا للرعاية',
-        consecrationHouse: 'إيبارشية الإسكندرية',
-        members: 'تاسوني سارة، تاسوني مريم، تاسوني فيلومينا',
-        patronSaint: 'القديسة فيرينا',
+        name: 'فريق أديرة الراهبات المباركة',
+        consecrationHouse: 'أديرة الراهبات القبطية',
+        members: 'فريق الأمهات الراهبات',
+        patronSaint: 'الشهيدة دميانة ورئيسة العذارى',
         score: 0,
         color: 'from-emerald-600 to-emerald-800',
-        avatar: '💧',
+        avatar: '🕯️',
         answeredCorrectCount: 0,
         answeredWrongCount: 0,
       },
@@ -285,14 +285,14 @@ export const TeamQuiz: React.FC<TeamQuizProps> = ({
   // Add / remove team in setup
   const handleAddTeam = () => {
     if (teams.length >= 4) return;
-    const defaultAvatars = ['🕊️', '📜', '👑', '💧'];
+    const defaultAvatars = ['✝️', '⛪', '🕊️', '🕯️'];
     const newId = `t-${Date.now()}`;
     const newTeam: Team = {
       id: newId,
-      name: `بيت تكريس جديد ${teams.length + 1}`,
-      consecrationHouse: 'إيبارشية كنسية',
-      members: 'تاسوني، تاسوني',
-      patronSaint: 'شفيعة مباركة',
+      name: `فريق كنسي جديد ${teams.length + 1}`,
+      consecrationHouse: 'الكنيسة / الدير / بيت التكريس',
+      members: 'أعضاء الفريق المبارك',
+      patronSaint: 'الشفيع المبارك',
       score: 0,
       color: 'from-amber-700 to-amber-900',
       avatar: defaultAvatars[teams.length % defaultAvatars.length],
@@ -326,7 +326,7 @@ export const TeamQuiz: React.FC<TeamQuizProps> = ({
               مسابقة الفرق والمجموعات الكنسية («حَسَبَ قَلْبِ اللهِ»)
             </h1>
             <p className="text-stone-600 text-sm mt-1">
-              تنافس تفاعلي موثق بين بيوت التكريس، الأديرة، الكنائس، والإيبارشيات مع نظام الأجراس، خطف الأسئلة، واستخراج درع التفوق
+              تنافس تفاعلي موثق بين الكنائس، الأديرة، بيوت التكريس، والإيبارشيات مع نظام الأجراس، خطف الأسئلة، واستخراج درع التفوق
             </p>
           </div>
 
@@ -336,10 +336,10 @@ export const TeamQuiz: React.FC<TeamQuizProps> = ({
             <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-300/80 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="font-bold text-xs text-amber-950 mb-0.5">
-                  قوالب بيوت ومجموعات التكريس الكنسية
+                  قوالب الفئات والمجموعات الكنسية
                 </p>
                 <p className="text-xs text-stone-600">
-                  تحميل أسماء بيوت التكريس الشهيرة (بني سويف، القاهرة، الدلتا، الإسكندرية) بضغطة واحدة.
+                  تحميل فرق تمثل الفئات الأربع (كهنة، رهبان، مكرسات، راهبات) بضغطة واحدة.
                 </p>
               </div>
 
@@ -348,7 +348,7 @@ export const TeamQuiz: React.FC<TeamQuizProps> = ({
                 onClick={handleLoadPresetHouses}
                 className="px-4 py-2 rounded-xl bg-amber-800 hover:bg-amber-900 text-white font-bold text-xs shadow-xs"
               >
-                تحميل بيوت التكريس المعتمدة
+                تحميل القوالب الكنسية المعتمدة
               </button>
             </div>
 
@@ -513,7 +513,7 @@ export const TeamQuiz: React.FC<TeamQuizProps> = ({
                             prev.map((item) => (item.id === t.id ? { ...item, patronSaint: val } : item))
                           );
                         }}
-                        placeholder="الشفيعة"
+                        placeholder="الشفيع المبارك"
                         className="px-2 py-1 rounded-lg border border-stone-200 bg-white"
                       />
                     </div>
@@ -527,7 +527,7 @@ export const TeamQuiz: React.FC<TeamQuizProps> = ({
                           prev.map((item) => (item.id === t.id ? { ...item, members: val } : item))
                         );
                       }}
-                      placeholder="أسماء المكرسات المشاركات (مثال: تاسوني مارينا، تاسوني فيرينا)"
+                      placeholder="اكتب أسماء أعضاء الفريق المشارك هنا"
                       className="w-full text-xs px-2 py-1 rounded-lg border border-stone-200 bg-white"
                     />
                   </div>
@@ -550,7 +550,7 @@ export const TeamQuiz: React.FC<TeamQuizProps> = ({
                 onClick={handleStartGame}
                 className="px-8 py-3 rounded-xl bg-gradient-to-r from-amber-700 to-amber-900 hover:from-amber-800 hover:to-amber-950 text-white font-bold text-base shadow-md hover:shadow-lg transition-all flex items-center gap-2"
               >
-                <span>بدء دوري بيوت التكريس</span>
+                <span>بدء دوري الفرق الكنسية</span>
                 <ChevronLeft className="w-5 h-5" />
               </button>
             </div>

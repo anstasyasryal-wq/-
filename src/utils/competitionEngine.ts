@@ -200,9 +200,9 @@ export function loginWithCode(code: string): User | null {
     if (!admin) {
       admin = {
         id: 'admin-1',
-        name: 'تاسوني المشرفة العامة',
-        consecrationHouse: 'بيت بنات مريم للتكريس',
-        diocese: 'إيبارشية بني سويف',
+        name: 'المشرف العام على المسابقة',
+        consecrationHouse: 'اللجنة المنظمة لمسيرة حسب قلب الله',
+        diocese: 'اللجنة المركزية للرعاية والتكريس',
         governorate: 'بني سويف',
         code: 'ADMIN',
         role: 'supervisor',

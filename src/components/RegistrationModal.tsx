@@ -295,7 +295,15 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({
                       <input
                         type="text"
                         required
-                        placeholder={vocation === 'كاهن' ? 'مثال: أبونا بيشوي كامل' : vocation === 'راهب' ? 'مثال: الراهب بيجول المقاري' : vocation === 'راهبة' ? 'مثال: تماف إيريني' : 'مثال: تاسوني مارينا القبطية'}
+                        placeholder={
+                          vocation === 'كاهن'
+                            ? 'اكتب اسم الأب الكاهن المبارك (أبونا...)'
+                            : vocation === 'راهب'
+                            ? 'اكتب اسم الأب الراهب المبارك (أبونا الراهب...)'
+                            : vocation === 'راهبة'
+                            ? 'اكتب اسم الأم الراهبة المباركة (تماف / أموني...)'
+                            : 'اكتب اسم الأخت المكرسة المباركة (تاسوني...)'
+                        }
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:outline-none focus:border-amber-500"
