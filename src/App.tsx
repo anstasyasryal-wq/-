@@ -113,7 +113,7 @@ export default function App() {
   const handleStartStage = (stageId: number) => {
     const targetStage = stages.find((s) => s.id === stageId);
     if (targetStage && targetStage.isOpen === false) {
-      setClosedStageToast(`تنبيه: مرحلة «${targetStage.title}» مغلقة حالياً بتوجيه المشرفة.`);
+      setClosedStageToast(`تنبيه: مرحلة «${targetStage.title}» مغلقة حالياً بتوجيه إدارة المسابقة.`);
       setTimeout(() => setClosedStageToast(null), 4000);
       return;
     }

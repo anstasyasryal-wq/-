@@ -149,7 +149,7 @@ export const FinalCeremonyView: React.FC<FinalCeremonyViewProps> = ({
               </div>
               <div>
                 <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-                  ⚡ وسام أسرع مكرسة
+                  ⚡ وسام أسرع مشارك/ة
                 </span>
                 <h4 className="font-bold text-xs text-slate-900 mt-1">
                   {awards.fastestParticipant.name}
@@ -169,7 +169,7 @@ export const FinalCeremonyView: React.FC<FinalCeremonyViewProps> = ({
               </div>
               <div>
                 <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                  🎯 وسام أدق مكرسة
+                  🎯 وسام أدق مشارك/ة
                 </span>
                 <h4 className="font-bold text-xs text-slate-900 mt-1">
                   {awards.mostAccurate.name}

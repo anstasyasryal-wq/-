@@ -220,8 +220,8 @@ export const SoloQuiz: React.FC<SoloQuizProps> = ({
 
     const resultObj: SoloQuizResult = {
       id: `solo-${Date.now()}`,
-      participantName: participantName.trim() || 'مكرسة مباركة',
-      houseOrDiocese: houseOrDiocese.trim() || 'بيت التكريس',
+      participantName: participantName.trim() || 'مشارك مبارك',
+      houseOrDiocese: houseOrDiocese.trim() || 'بيت التكريس / الإيبارشية',
       date: new Date().toISOString(),
       totalScore: correctCount,
       maxScore: totalQ,

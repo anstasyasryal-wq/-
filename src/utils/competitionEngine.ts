@@ -176,13 +176,44 @@ export function registerParticipant(data: {
     totalTimeSpentSeconds: 0,
     stageScores: {},
     registeredAt: new Date().toISOString().split('T')[0],
-    consecrationRank: data.consecrationRank || 'مكرسة مبتدئة',
-    ministryField: data.ministryField || 'خدمة ورعاية روحية',
+    consecrationRank:
+      data.consecrationRank ||
+      (data.vocation === 'كاهن'
+        ? 'كاهن (قس)'
+        : data.vocation === 'راهب'
+        ? 'راهب متبتل'
+        : data.vocation === 'راهبة'
+        ? 'راهبة مكرسة'
+        : 'مكرسة دائمة'),
+    ministryField:
+      data.ministryField ||
+      (data.vocation === 'كاهن'
+        ? 'الرعاية الكنسية وافتقاد الشعب'
+        : data.vocation === 'راهب'
+        ? 'الصلاة الدائمة والعمل النسكي'
+        : data.vocation === 'راهبة'
+        ? 'حياة الصلاة والتأمل والعمل اليدوي'
+        : 'خدمة ورعاية روحية'),
     consecrationVerse:
-      data.consecrationVerse || '«إِنَّمَا الْحَاجَةُ إِلَى وَاحِدٍ؛ فَاخْتَارَتْ مَرْيَمُ النَّصِيبَ الصَّالِحَ»',
+      data.consecrationVerse ||
+      (data.vocation === 'كاهن'
+        ? '«رَعَاهُمْ حَسَبَ كَمَالِ قَلْبِهِ، وَبِمَهَارَةِ يَدَيْهِ هَدَاهُمْ» (مز 78: 72)'
+        : data.vocation === 'راهب'
+        ? '«كَمَا يَشْتَاقُ الإِيَّلُ إِلَى جَدَاوِلِ الْمِيَاهِ، هكَذَا تَشْتَاقُ نَفْسِي إِلَيْكَ يَا اللهُ» (مز 42: 1)'
+        : data.vocation === 'راهبة'
+        ? '«أَنَا لِحَبِيبِي وَحَبِيبِي لِي، الرَّاعِي بَيْنَ السَّوْسَنِ» (نش 6: 3)'
+        : '«إِنَّمَا الْحَاجَةُ إِلَى وَاحِدٍ؛ فَاخْتَارَتْ مَرْيَمُ النَّصِيبَ الصَّالِحَ» (لو 10: 42)'),
     personalBio:
       data.personalBio || 'مكرس/ة لخدمة المسيح والكنيسة، أسعى للأمانة في رسالتي والنمو الروحي لأكون حسب قلب الله.',
-    patronSaint: data.patronSaint || 'العذراء مريم أم النور',
+    patronSaint:
+      data.patronSaint ||
+      (data.vocation === 'كاهن'
+        ? 'القديس يوحنا فم الذهب'
+        : data.vocation === 'راهب'
+        ? 'الأنبا أنطونيوس والأنبا بولا'
+        : data.vocation === 'راهبة'
+        ? 'القديسة دميانة'
+        : 'العذراء مريم أم النور'),
   };
 
   users.push(newUser);

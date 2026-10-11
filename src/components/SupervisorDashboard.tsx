@@ -39,6 +39,15 @@ interface SupervisorDashboardProps {
   onTestStageAsAdmin: (stageId: number) => void;
 }
 
+const getParticipantRankDisplay = (rank?: string, vocation?: string) => {
+  if (rank && rank.trim()) return rank;
+  if (vocation === 'كاهن') return 'أب كاهن';
+  if (vocation === 'راهب') return 'أب راهب';
+  if (vocation === 'راهبة') return 'أم راهبة';
+  if (vocation === 'مكرسة') return 'أخت مكرسة';
+  return 'مشارك مبارك';
+};
+
 export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({
   onTestStageAsAdmin,
 }) => {
@@ -411,7 +420,7 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({
                     <div>
                       <h4 className="font-bold text-slate-900 text-sm">{u.name}</h4>
                       <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                        {u.consecrationRank || 'مكرسة دائمة'}
+                        {getParticipantRankDisplay(u.consecrationRank, u.vocation)}
                       </span>
                     </div>
                   </div>
@@ -904,7 +913,10 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({
                 <div className="flex justify-between items-center">
                   <span className="font-semibold text-slate-500">الرتبة الكنسية:</span>
                   <span className="font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded-md border border-amber-200">
-                    {selectedParticipantDetail.consecrationRank || 'مكرسة دائمة'}
+                    {getParticipantRankDisplay(
+                      selectedParticipantDetail.consecrationRank,
+                      selectedParticipantDetail.vocation
+                    )}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
