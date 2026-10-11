@@ -29,6 +29,7 @@ import { ParticipantsListView } from './components/ParticipantsListView';
 import { CompetitionsHubView } from './components/CompetitionsHubView';
 import { RegistrationModal } from './components/RegistrationModal';
 import { RulesModal } from './components/RulesModal';
+import { SpiritualGuideModal } from './components/SpiritualGuideModal';
 import { OfflineIndicator } from './components/OfflineIndicator';
 
 export default function App() {
@@ -53,6 +54,7 @@ export default function App() {
   // Modals
   const [showRegistrationModal, setShowRegistrationModal] = useState<boolean>(false);
   const [showRulesModal, setShowRulesModal] = useState<boolean>(false);
+  const [showSpiritualGuideModal, setShowSpiritualGuideModal] = useState<boolean>(false);
 
   useEffect(() => {
     const user = getCurrentUser();
@@ -149,6 +151,7 @@ export default function App() {
           onNavigate={(view) => handleNavigate(view)}
           onOpenLogin={() => setShowRegistrationModal(true)}
           onOpenRules={() => setShowRulesModal(true)}
+          onOpenSpiritualGuide={() => setShowSpiritualGuideModal(true)}
         />
 
         {/* Toast for closed stages */}
@@ -182,6 +185,7 @@ export default function App() {
               onNavigateToSupervisor={() => handleNavigate('supervisor')}
               onNavigateToParticipants={() => handleNavigate('participants')}
               onNavigateToCompetitions={() => handleNavigate('competitions_hub')}
+              onOpenSpiritualGuide={() => setShowSpiritualGuideModal(true)}
             />
           )}
 
@@ -255,6 +259,33 @@ export default function App() {
         isOpen={showRulesModal}
         onClose={() => setShowRulesModal(false)}
       />
+
+      {/* Spiritual Father Guide Modal */}
+      <SpiritualGuideModal
+        isOpen={showSpiritualGuideModal}
+        onClose={() => setShowSpiritualGuideModal(false)}
+        currentUser={currentUser}
+      />
+
+      {/* Floating Spiritual Father Quick Access Button */}
+      <button
+        onClick={() => setShowSpiritualGuideModal(true)}
+        className="fixed bottom-6 left-6 z-40 bg-gradient-to-tr from-amber-600 via-amber-500 to-amber-400 text-indigo-950 font-black p-2.5 sm:px-4 sm:py-2.5 rounded-full shadow-2xl shadow-amber-600/40 border-2 border-white flex items-center gap-2.5 hover:scale-105 active:scale-95 transition cursor-pointer group"
+        title="استشارة أبونا الروحي (المرشد الرقمي)"
+      >
+        <div className="w-8 h-8 rounded-full overflow-hidden bg-indigo-950 border border-amber-200 flex-shrink-0">
+          <img
+            src="/src/assets/images/spiritual_father_avatar_1791703349048.jpg"
+            alt="أبونا الروحي"
+            className="w-full h-full object-cover object-top"
+          />
+        </div>
+        <div className="hidden sm:block text-right">
+          <span className="block text-xs font-bold leading-tight">أبونا الروحي</span>
+          <span className="block text-[10px] text-amber-950/80 font-normal">المرشد الرقمي</span>
+        </div>
+        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse border border-white" />
+      </button>
 
       {/* Offline Status Connectivity Banner */}
       <OfflineIndicator />

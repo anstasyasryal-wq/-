@@ -56,10 +56,10 @@ export const StudyBank: React.FC<StudyBankProps> = ({
             </div>
             <div>
               <h1 className="font-spiritual text-2xl sm:text-3xl font-bold text-stone-900">
-                بنك الاستذكار والعلوم الرهبانية
+                بنك الاستذكار والعلوم الكنسية والرهبانية
               </h1>
               <p className="text-xs sm:text-sm text-stone-500 font-sans">
-                مرجع توثيقي شامل للأسئلة والشروح الكنسية للاستعداد الروحي والمعرفي
+                مرجع توثيقي شامل للأسئلة والشروح الكنسية والآبائية للمراجعة والنمو المعرفي والروحي
               </p>
             </div>
           </div>

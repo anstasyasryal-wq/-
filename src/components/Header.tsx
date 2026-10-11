@@ -23,6 +23,7 @@ interface HeaderProps {
   onNavigate: (view: AppView) => void;
   onOpenLogin: () => void;
   onOpenRules: () => void;
+  onOpenSpiritualGuide: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -31,6 +32,7 @@ export const Header: React.FC<HeaderProps> = ({
   onNavigate,
   onOpenLogin,
   onOpenRules,
+  onOpenSpiritualGuide,
 }) => {
   const [isMuted, setIsMuted] = useState(soundManager.getIsMuted());
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -103,6 +105,17 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <BookOpen className="w-3.5 h-3.5 text-sky-700" />
             <span>ميثاق وقواعد المسيرة</span>
+          </button>
+
+          {/* Spiritual Guide Direct Action Button */}
+          <button
+            onClick={onOpenSpiritualGuide}
+            className="py-1.5 px-3 rounded-xl text-xs font-black bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-400 hover:to-amber-600 text-indigo-950 border border-amber-300 shadow-xs transition flex items-center gap-1.5 cursor-pointer group"
+            title="فتح المرشد الروحي الرقمي"
+          >
+            <span className="text-sm group-hover:scale-110 transition">🕊️</span>
+            <span>أبونا الروحي</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
           </button>
         </nav>
 
@@ -196,6 +209,20 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <span>📜 ميثاق وقواعد المسيرة</span>
             <BookOpen className="w-4 h-4 text-sky-700" />
+          </button>
+
+          <button
+            onClick={() => {
+              onOpenSpiritualGuide();
+              setMobileMenuOpen(false);
+            }}
+            className="w-full py-2.5 px-3 rounded-xl text-xs font-black bg-gradient-to-r from-amber-500 to-amber-600 text-indigo-950 flex items-center justify-between shadow-xs"
+          >
+            <div className="flex items-center gap-2">
+              <span>🕊️ أبونا الروحي (المرشد الرقمي)</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse" />
+            </div>
+            <span className="text-[10px] bg-amber-200/90 px-2 py-0.5 rounded-full font-bold">محادثة وصوت</span>
           </button>
         </div>
       )}

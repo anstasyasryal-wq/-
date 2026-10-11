@@ -181,7 +181,99 @@ async function startServer() {
   });
 
   // ==========================================
-  // 3. Vite middleware for frontend SPA
+  // 3. POST /api/spiritual-guide/chat
+  // SERVER-SIDE PROXY: Uses GoogleGenAI (gemini-3.8-flash) for reverent Coptic spiritual counseling
+  // Keeps API keys strictly on server, never exposing them to the client
+  // ==========================================
+  app.post('/api/spiritual-guide/chat', async (req, res) => {
+    const { message, vocation, dialect, conversationHistory } = req.body;
+
+    if (!message || typeof message !== 'string') {
+      return res.status(400).json({ error: 'Message is required' });
+    }
+
+    try {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        // Return structured signal so client can seamlessly fall back to local patristic wisdom
+        return res.status(503).json({
+          fallback: true,
+          error: 'Gemini API key not configured on server',
+        });
+      }
+
+      const { GoogleGenAI } = await import('@google/genai');
+      const ai = new GoogleGenAI();
+
+      const userVocation = vocation || 'مكرس/ة';
+      const isEgyptian = dialect === 'egyptian';
+
+      const systemInstruction = `أنت «المرشد الروحي الرقمي الأبوي» لمنصة «حَسَبَ قَلْبِ اللهِ» (منصة المراجعة والنمو الروحي الكنسي المخصصة للكاهن، والمكرَّسة، والراهب، والراهبة).
+الهوية والطابع:
+- أنت أب روحي قبطي أرثوذكسي وقور، حكيم، محب، أبوي، ودافئ.
+- تنادي السائل بمحبة وتقدير بحسب تكريسه:
+  * الكاهن: «يا أبانا المبارك / قدسك»
+  * المكرسة: «يا ابنتي المباركة / يا تاسوني المباركة»
+  * الراهب: «يا أخي الراهب المبارك»
+  * الراهبة: «يا أختي الراهبة الفاضلة / يا أمنا المباركة»
+  * إن لم يتحدد: «يا ابني/ابنتي المباركة».
+- لغة الإجابة: ${isEgyptian ? 'اللهجة المصرية الأبوية الدافئة والمهذبة (كما يتحدث الآباء الشيوخ الأفاضل بمحبة وبساطة ووقار)' : 'اللغة العربية الفصحى الرصينة والوقورة المليئة بالسلام والرجاء'}.
+
+قواعد وأمانة كنسية حاسمة:
+1. أنت مساعد ورفيق رقمي للمراجعة والتأمل والتعلم في المنصة ومراحلها الست، ولست بديلاً عن أب الاعتراف الكنسي الحقيقي، ولا تمنح سر الاعتراف أو الحِل والغفران الكنسي، ولا تطلب من المستخدم كشف أسرار اعترافه. إذا سأل المستخدم عن خطية خاصة، ذكّره بمحبة ببركة الجلوس تحت أقدام أب اعترافه في الكنيسة.
+2. استند في إرشادك دائماً إلى نصوص الكتاب المقدس وأقوال الآباء القديسين وسير الشهداء وتاريخ الكنيسة القبطية الأرثوذكسية. لا تخترع اقتباسات أو مفاهيم غريبة.
+3. ساعد المتسابق على فهم روحانية مسيرة «حسب قلب الله»، والاستعداد لمراحل المسابقة الست بروح السلام دون قلق أو منافسة سلبية.
+4. نسّق إجابتك لتكون وجيزة ومريحة (في حدود 120 إلى 180 كلمة)، واختمها دائماً بـ:
+   - آية كتابية واضحة وشاهدها.
+   - قول آبائي مع اسم القديس.
+   - خطوة عملية صغيرة ومتزنة للمراجعة اليومية.`;
+
+      // Build contents array
+      const contents: Array<{ role: string; parts: Array<{ text: string }> }> = [];
+
+      if (Array.isArray(conversationHistory)) {
+        for (const item of conversationHistory.slice(-4)) {
+          if (item.text) {
+            contents.push({
+              role: item.role === 'user' ? 'user' : 'model',
+              parts: [{ text: item.text }],
+            });
+          }
+        }
+      }
+
+      contents.push({
+        role: 'user',
+        parts: [{ text: `صاحب السؤال تكريسه: (${userVocation}).\nالسؤال: ${message}` }],
+      });
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-3.8-flash',
+        contents,
+        config: {
+          systemInstruction,
+          temperature: 0.6,
+          maxOutputTokens: 600,
+        },
+      });
+
+      const replyText = response.text || '';
+
+      return res.json({
+        reply: replyText,
+        source: 'gemini-live',
+      });
+    } catch (err: any) {
+      console.warn('Spiritual guide chat API error, signaling fallback:', err?.message || err);
+      return res.status(500).json({
+        fallback: true,
+        error: err?.message || 'Server error',
+      });
+    }
+  });
+
+  // ==========================================
+  // 4. Vite middleware for frontend SPA
   // ==========================================
   if (process.env.NODE_ENV === 'production') {
     app.use(express.static(path.join(__dirname, 'dist')));

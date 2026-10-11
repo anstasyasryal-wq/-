@@ -320,7 +320,7 @@ export const CreativeLab: React.FC<CreativeLabProps> = ({ onBackToHome }) => {
               {currentTimeline.title}
             </h2>
             <p className="text-stone-600 text-sm">
-              {currentTimeline.instruction} (استخدمي أسهم الصعود والنزول لترتيب الأحداث بالترتيب التاريخي السليم).
+              {currentTimeline.instruction} (استخدم أسهم الصعود والنزول لترتيب الأحداث بالترتيب التاريخي السليم).
             </p>
           </div>
 

@@ -942,7 +942,7 @@ export const TeamQuiz: React.FC<TeamQuizProps> = ({
                     
                     <div className="text-4xl mb-2">🏆</div>
                     <p className="text-xs tracking-widest text-stone-500 font-sans uppercase">
-                      دوري بيوت التكريس والشمامسة
+                      مسيرة «حَسَبَ قَلْبِ اللهِ» • منافسات المجموعات الكنسية
                     </p>
                     <h1 className="font-spiritual text-3xl sm:text-4xl font-bold text-amber-950 my-2">
                       درع التكريس الذهبي للتفوق الجماعي
@@ -966,7 +966,7 @@ export const TeamQuiz: React.FC<TeamQuizProps> = ({
 
                     {winningTeam.members && (
                       <p className="text-xs text-stone-500 font-spiritual max-w-lg mx-auto mb-4">
-                        المكرسات المشاركات: {winningTeam.members}
+                        الأعضاء المشاركون: {winningTeam.members}
                       </p>
                     )}
 

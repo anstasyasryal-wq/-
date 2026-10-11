@@ -35,6 +35,7 @@ interface HomeViewProps {
   onNavigateToSupervisor: () => void;
   onNavigateToParticipants: () => void;
   onNavigateToCompetitions: () => void;
+  onOpenSpiritualGuide: () => void;
 }
 
 export const HomeView: React.FC<HomeViewProps> = ({
@@ -50,6 +51,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
   onNavigateToSupervisor,
   onNavigateToParticipants,
   onNavigateToCompetitions,
+  onOpenSpiritualGuide,
 }) => {
   const currentEligibleStageId = currentUser ? currentUser.currentStageId : 1;
   const activeAnnouncement = announcements[0] || null;
@@ -248,6 +250,50 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
       {/* PWA Installation Card */}
       <PWAInstallButton variant="banner" />
+
+      {/* Spiritual Guide Interactive Showcase Card */}
+      <div className="rounded-3xl bg-gradient-to-r from-amber-50 via-white to-amber-100/60 border-2 border-amber-300 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-5 text-right">
+        <div className="flex items-center gap-4">
+          <div className="relative flex-shrink-0">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden p-0.5 bg-gradient-to-tr from-amber-600 via-amber-400 to-amber-200 shadow-md border-2 border-white">
+              <img
+                src="/src/assets/images/spiritual_father_avatar_1791703349048.jpg"
+                alt="أبونا الروحي"
+                className="w-full h-full object-cover object-top rounded-full"
+                onError={(e) => {
+                  (e.currentTarget as HTMLElement).style.display = 'none';
+                }}
+              />
+            </div>
+            <span className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white animate-pulse" title="جاهز للإرشاد" />
+          </div>
+
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold text-amber-900 bg-amber-200/80 px-2.5 py-0.5 rounded-full border border-amber-300">
+                مرشد أبوي وقور
+              </span>
+              <span className="text-[10px] font-bold text-indigo-900 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">
+                محادثة وصوت
+              </span>
+            </div>
+            <h3 className="text-base sm:text-lg font-bold font-spiritual text-slate-900">
+              🕊️ المرشد الروحي الرقمي • أبونا الروحي
+            </h3>
+            <p className="text-xs text-slate-600 max-w-xl leading-relaxed">
+              مرافقة أبوية في التأمل الروحي، ومراجعة نصوص الكنيسة وآبائها، والاستعداد لمراحل المسابقة الست بصوت وقور ومحادثة ذكية باللغة العربية واللهجة المصرية.
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={onOpenSpiritualGuide}
+          className="w-full sm:w-auto py-3 px-6 rounded-2xl bg-gradient-to-r from-amber-600 via-amber-700 to-indigo-950 hover:from-amber-500 hover:to-indigo-900 text-white font-black text-xs sm:text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer flex-shrink-0"
+        >
+          <span>تحدث مع أبونا الروحي</span>
+          <ChevronLeft className="w-4 h-4 rotate-180" />
+        </button>
+      </div>
 
       {/* Distinct Action Hub Cards for: من سجل؟ + دليل الاختبارات والمسابقات */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-right">
