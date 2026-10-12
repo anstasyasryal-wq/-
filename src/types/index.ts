@@ -203,7 +203,10 @@ export type AppView =
   | 'participants'
   | 'competitions_hub'
   | 'supervisor'
-  | 'final_ceremony';
+  | 'final_ceremony'
+  | 'spiritual_life'
+  | 'biblical_study'
+  | 'personal_space';
 
 export interface CategoryInfo {
   id: CategoryId;

@@ -1,5 +1,7 @@
 import React from 'react';
 import { User, Stage, Announcement } from '../types';
+import { useReadingTheme } from '../context/ReadingThemeContext';
+import { soundManager } from '../utils/audio';
 import {
   Trophy,
   Play,
@@ -19,6 +21,10 @@ import {
   Heart,
   Quote,
   Flame,
+  Moon,
+  Sun,
+  Sliders,
+  Eye,
 } from 'lucide-react';
 import { PWAInstallButton } from './PWAInstallButton';
 
@@ -36,6 +42,10 @@ interface HomeViewProps {
   onNavigateToParticipants: () => void;
   onNavigateToCompetitions: () => void;
   onOpenSpiritualGuide: () => void;
+  onNavigateToSpiritualLife?: () => void;
+  onNavigateToBiblicalStudy?: () => void;
+  onNavigateToPersonalSpace?: () => void;
+  onOpenReadingSettings?: () => void;
 }
 
 export const HomeView: React.FC<HomeViewProps> = ({
@@ -52,9 +62,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
   onNavigateToParticipants,
   onNavigateToCompetitions,
   onOpenSpiritualGuide,
+  onNavigateToSpiritualLife,
+  onNavigateToBiblicalStudy,
+  onNavigateToPersonalSpace,
+  onOpenReadingSettings,
 }) => {
   const currentEligibleStageId = currentUser ? currentUser.currentStageId : 1;
   const activeAnnouncement = announcements[0] || null;
+  const { isNightMode, toggleNightMode } = useReadingTheme();
 
   return (
     <div className="space-y-6 pb-12 animate-fade-in text-right">
@@ -293,6 +308,155 @@ export const HomeView: React.FC<HomeViewProps> = ({
           <span>تحدث مع أبونا الروحي</span>
           <ChevronLeft className="w-4 h-4 rotate-180" />
         </button>
+      </div>
+
+      {/* New Platform Modules Grid (أركان المنصة المتكاملة الثلاثة) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-right">
+        {/* 1. الحياة الروحية */}
+        <div
+          onClick={onNavigateToSpiritualLife}
+          className="bg-white rounded-3xl p-5 border-2 border-rose-200/80 hover:border-rose-400 hover:shadow-md transition cursor-pointer flex flex-col justify-between group"
+        >
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-800 flex items-center justify-center text-2xl group-hover:scale-105 transition">
+                🌱
+              </span>
+              <span className="text-[10px] font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">
+                خطط 7 أيام
+              </span>
+            </div>
+            <div>
+              <h3 className="font-spiritual text-lg font-bold text-slate-900 group-hover:text-rose-900 transition">
+                ركن الحياة الروحية
+              </h3>
+              <p className="text-xs text-slate-500 leading-relaxed mt-1">
+                خطط قراءة وتأمل كتابية مخصصة للكاهن، الراهب، والراهبة، والمكرسة، مع تدريبات عملية لحراسة سكون المخدع.
+              </p>
+            </div>
+          </div>
+          <div className="pt-4 mt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-rose-800">
+            <span>تصفح الخطط الروحية</span>
+            <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition" />
+          </div>
+        </div>
+
+        {/* 2. الدراسة الكتابية */}
+        <div
+          onClick={onNavigateToBiblicalStudy}
+          className="bg-white rounded-3xl p-5 border-2 border-amber-200/80 hover:border-amber-400 hover:shadow-md transition cursor-pointer flex flex-col justify-between group"
+        >
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center text-2xl group-hover:scale-105 transition">
+                📜
+              </span>
+              <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                دراسات وآباء
+              </span>
+            </div>
+            <div>
+              <h3 className="font-spiritual text-lg font-bold text-slate-900 group-hover:text-amber-900 transition">
+                ركن الدراسة والتعليم الكنسي
+              </h3>
+              <p className="text-xs text-slate-500 leading-relaxed mt-1">
+                دراسات معمقة في العقيدة والليتورجيا وتاريخ الكنيسة، موثقة بنصوص الإنجيل وأقوال الآباء، مع بنك الأسئلة الشامل.
+              </p>
+            </div>
+          </div>
+          <div className="pt-4 mt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-amber-800">
+            <span>دخول مكتبة الدراسات</span>
+            <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition" />
+          </div>
+        </div>
+
+        {/* 3. المساحة الشخصية ومذكرة المخدع */}
+        <div
+          onClick={onNavigateToPersonalSpace}
+          className="bg-white rounded-3xl p-5 border-2 border-emerald-200/80 hover:border-emerald-400 hover:shadow-md transition cursor-pointer flex flex-col justify-between group"
+        >
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-2xl group-hover:scale-105 transition">
+                🕯️
+              </span>
+              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                سري ومحمي
+              </span>
+            </div>
+            <div>
+              <h3 className="font-spiritual text-lg font-bold text-slate-900 group-hover:text-emerald-900 transition">
+                المساحة الشخصية ومذكرة المخدع
+              </h3>
+              <p className="text-xs text-slate-500 leading-relaxed mt-1">
+                سجل سري لمراجعة النفس وتجهيز جلسة الاعتراف وتأملات الإنجيل، مع حبل صلاة يسوع التفاعلي بالمسبحة.
+              </p>
+            </div>
+          </div>
+          <div className="pt-4 mt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-emerald-800">
+            <span>فتح المخدع الشخصي</span>
+            <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition" />
+          </div>
+        </div>
+      </div>
+
+      {/* Eye Comfort Reading & Settings Banner */}
+      <div
+        className={`rounded-3xl p-5 sm:p-6 border transition-all duration-300 flex flex-col sm:flex-row items-center justify-between gap-4 text-right shadow-xs ${
+          isNightMode
+            ? 'bg-gradient-to-r from-[#201d19] via-[#26221c] to-[#201d19] border-amber-800/60 text-amber-100'
+            : 'bg-gradient-to-r from-amber-50/80 via-white to-stone-50 border-amber-300 text-slate-800'
+        }`}
+      >
+        <div className="flex items-center gap-3.5">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-700 to-amber-500 text-white flex items-center justify-center text-xl flex-shrink-0 shadow-md">
+            {isNightMode ? '🌙' : '📖'}
+          </div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-400 bg-amber-100 text-amber-900">
+                {isNightMode ? 'وضع القراءة الليلي مُفعَّل' : 'إعدادات القراءة وسكون المخدع'}
+              </span>
+              <span className="text-xs text-stone-500 hidden sm:inline">حماية شبكية العين وراحة القراءة</span>
+            </div>
+            <h3 className="font-spiritual text-base sm:text-lg font-bold text-slate-900">
+              سكون المخدع: وضع القراءة الليلي المريح للعين
+            </h3>
+            <p className="text-xs text-slate-600 max-w-xl leading-relaxed">
+              تخفيف خلفية الورق والبردي، وضبط تباين النصوص وتكبير الخط للمطالعة الكنسية والتأملات الطويلة بدون إجهاد.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap sm:flex-nowrap">
+          <button
+            onClick={() => {
+              soundManager.playTick();
+              toggleNightMode();
+            }}
+            className={`py-2 px-3.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+              isNightMode
+                ? 'bg-amber-600 hover:bg-amber-500 text-white shadow-xs'
+                : 'bg-stone-800 hover:bg-stone-700 text-white'
+            }`}
+          >
+            {isNightMode ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+            <span>{isNightMode ? 'التبديل للنهاري ☀️' : 'تفعيل القراءة الليلية 🌙'}</span>
+          </button>
+
+          {onOpenReadingSettings && (
+            <button
+              onClick={() => {
+                soundManager.playTick();
+                onOpenReadingSettings();
+              }}
+              className="py-2 px-3.5 rounded-xl border border-amber-300 bg-white hover:bg-amber-50 text-amber-900 font-bold text-xs transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+            >
+              <Sliders className="w-3.5 h-3.5 text-amber-700" />
+              <span>تخصيص تباين النصوص والورق</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Distinct Action Hub Cards for: من سجل؟ + دليل الاختبارات والمسابقات */}

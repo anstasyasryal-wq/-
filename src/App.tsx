@@ -31,8 +31,13 @@ import { RegistrationModal } from './components/RegistrationModal';
 import { RulesModal } from './components/RulesModal';
 import { SpiritualGuideModal } from './components/SpiritualGuideModal';
 import { OfflineIndicator } from './components/OfflineIndicator';
+import { SpiritualLifeView } from './components/SpiritualLifeView';
+import { BiblicalStudyView } from './components/BiblicalStudyView';
+import { PersonalSpaceView } from './components/PersonalSpaceView';
+import { ReadingThemeProvider, useReadingTheme } from './context/ReadingThemeContext';
+import { ReadingSettingsModal } from './components/ReadingSettingsModal';
 
-export default function App() {
+function AppContent() {
   const [currentView, setCurrentView] = useState<AppView>(() => {
     if (typeof window !== 'undefined') {
       const saved = sessionStorage.getItem('mokarasa_current_view') as AppView;
@@ -55,6 +60,9 @@ export default function App() {
   const [showRegistrationModal, setShowRegistrationModal] = useState<boolean>(false);
   const [showRulesModal, setShowRulesModal] = useState<boolean>(false);
   const [showSpiritualGuideModal, setShowSpiritualGuideModal] = useState<boolean>(false);
+  const [showReadingSettingsModal, setShowReadingSettingsModal] = useState<boolean>(false);
+
+  const { isNightMode, getContainerClass } = useReadingTheme();
 
   useEffect(() => {
     const user = getCurrentUser();
@@ -131,10 +139,10 @@ export default function App() {
     const updated = getCurrentUser();
     if (updated) setCurrentUserState(updated);
 
-    if (nextStageId && nextStageId <= 5) {
+    if (nextStageId && nextStageId <= 6) {
       handleSetActiveStage(nextStageId);
       handleNavigate('stage_player');
-    } else if (nextStageId === 6) {
+    } else if (nextStageId === 7 || nextStageId === undefined) {
       handleNavigate('final_ceremony');
     } else {
       handleNavigate('leaderboard');
@@ -142,7 +150,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-amber-200 selection:text-amber-900 flex flex-col justify-between">
+    <div className={`min-h-screen ${getContainerClass()} font-sans selection:bg-amber-200 selection:text-amber-900 flex flex-col justify-between`}>
       <div>
         {/* Navigation Header */}
         <Header
@@ -152,6 +160,7 @@ export default function App() {
           onOpenLogin={() => setShowRegistrationModal(true)}
           onOpenRules={() => setShowRulesModal(true)}
           onOpenSpiritualGuide={() => setShowSpiritualGuideModal(true)}
+          onOpenReadingSettings={() => setShowReadingSettingsModal(true)}
         />
 
         {/* Toast for closed stages */}
@@ -186,6 +195,34 @@ export default function App() {
               onNavigateToParticipants={() => handleNavigate('participants')}
               onNavigateToCompetitions={() => handleNavigate('competitions_hub')}
               onOpenSpiritualGuide={() => setShowSpiritualGuideModal(true)}
+              onNavigateToSpiritualLife={() => handleNavigate('spiritual_life')}
+              onNavigateToBiblicalStudy={() => handleNavigate('biblical_study')}
+              onNavigateToPersonalSpace={() => handleNavigate('personal_space')}
+              onOpenReadingSettings={() => setShowReadingSettingsModal(true)}
+            />
+          )}
+
+          {currentView === 'spiritual_life' && (
+            <SpiritualLifeView
+              currentUser={currentUser}
+              onOpenLogin={() => setShowRegistrationModal(true)}
+              onOpenSpiritualGuide={() => setShowSpiritualGuideModal(true)}
+              onBackToHome={() => handleNavigate('home')}
+            />
+          )}
+
+          {currentView === 'biblical_study' && (
+            <BiblicalStudyView
+              currentUser={currentUser}
+              onBackToHome={() => handleNavigate('home')}
+            />
+          )}
+
+          {currentView === 'personal_space' && (
+            <PersonalSpaceView
+              currentUser={currentUser}
+              onOpenLogin={() => setShowRegistrationModal(true)}
+              onBackToHome={() => handleNavigate('home')}
             />
           )}
 
@@ -206,6 +243,7 @@ export default function App() {
 
           {currentView === 'stage_player' && currentUser && (
             <StagePlayer
+              key={`stage-${activeStageId}`}
               stageId={activeStageId}
               currentUser={currentUser}
               onFinishStage={handleFinishStage}
@@ -267,6 +305,12 @@ export default function App() {
         currentUser={currentUser}
       />
 
+      {/* Reading & Night Mode Settings Modal */}
+      <ReadingSettingsModal
+        isOpen={showReadingSettingsModal}
+        onClose={() => setShowReadingSettingsModal(false)}
+      />
+
       {/* Floating Spiritual Father Quick Access Button */}
       <button
         onClick={() => setShowSpiritualGuideModal(true)}
@@ -291,16 +335,34 @@ export default function App() {
       <OfflineIndicator />
 
       {/* Minimal Reverent Footer */}
-      <footer className="border-t border-slate-200 bg-white/60 py-6 text-center text-xs text-slate-500">
+      <footer
+        className={`border-t py-6 text-center text-xs transition-colors duration-200 ${
+          isNightMode
+            ? 'border-[#383229] bg-[#181614]/80 text-[#9e9587]'
+            : 'border-slate-200 bg-white/60 text-slate-500'
+        }`}
+      >
         <div className="max-w-6xl mx-auto px-4 space-y-1">
-          <p className="font-spiritual font-bold text-slate-700">
+          <p
+            className={`font-spiritual font-bold ${
+              isNightMode ? 'text-amber-200/90' : 'text-slate-700'
+            }`}
+          >
             منصة «حَسَبَ قَلْبِ اللهِ» (كاهن – مكرَّسة – راهب – راهبة) • مسيرة المراجعة والنمو الروحي والكنسي
           </p>
-          <p className="text-[11px] text-slate-400">
+          <p className={`text-[11px] ${isNightMode ? 'text-[#8c8273]' : 'text-slate-400'}`}>
             «كُنْ أَمِيناً إِلَى الْمَوْتِ فَسَأُعْطِيكَ إِكْلِيلَ الْحَيَاةِ» (رؤيا 2: 10)
           </p>
         </div>
       </footer>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <ReadingThemeProvider>
+      <AppContent />
+    </ReadingThemeProvider>
   );
 }

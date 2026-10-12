@@ -527,7 +527,7 @@ export const StagePlayer: React.FC<StagePlayerProps> = ({
             </button>
           ) : (
             <button
-              onClick={() => onFinishStage(6)}
+              onClick={() => onFinishStage(7)}
               className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 text-indigo-950 font-black text-sm shadow-md hover:brightness-105 flex items-center justify-center gap-2 transition cursor-pointer"
             >
               <Trophy className="w-5 h-5 fill-indigo-950" />
