@@ -34,11 +34,28 @@
     <meta name="application-name" content="حسب قلب الله" />
     <meta name="format-detection" content="telephone=no" />
 
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+
     <!-- App Icons -->
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="mask-icon" href="/icon-maskable.svg" color="#1e1b4b" />
+
+    <!-- Early capture of PWA beforeinstallprompt -->
+    <script>
+      window.__deferredPWAInstallPrompt = null;
+      window.addEventListener('beforeinstallprompt', function(e) {
+        e.preventDefault();
+        window.__deferredPWAInstallPrompt = e;
+        window.dispatchEvent(new CustomEvent('pwa-install-ready', { detail: e }));
+      });
+      window.addEventListener('appinstalled', function() {
+        window.__deferredPWAInstallPrompt = null;
+        window.dispatchEvent(new CustomEvent('pwa-installed'));
+      });
+    </script>
 
     <!-- Google Fonts: Cairo & Amiri for warm, dignified Arabic typographic hierarchy -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

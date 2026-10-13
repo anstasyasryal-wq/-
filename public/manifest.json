@@ -1,0 +1,78 @@
+{
+  "id": "/",
+  "name": "حسب قلب الله (كاهن – مكرَّسة – راهب – راهبة)",
+  "short_name": "حسب قلب الله",
+  "description": "منصة مراجعة روحية ونضج مسيحي وتقييم للمكرسين لله (كاهن – مكرَّسة – راهب – راهبة) في العلوم الكنسية والعمق الداخلي والخدمة",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "ar",
+  "theme_color": "#1e1b4b",
+  "background_color": "#1e1b4b",
+  "categories": ["education", "lifestyle", "books"],
+  "icons": [
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512 any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable.svg",
+      "sizes": "192x192 512x512 any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "المسابقة الرسمية",
+      "short_name": "المسابقة",
+      "description": "مراحل المسابقة الرسمية والتقييم الروحي",
+      "url": "/?section=competitions",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "المكتبة المعرفية",
+      "short_name": "المكتبة",
+      "description": "مكتبة القراءات والآبائيات والأبحاث",
+      "url": "/?section=library",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "المرشد",
+      "short_name": "المرشد",
+      "description": "الإرشاد الروحي والمشورة الكنسية",
+      "url": "/?section=guide",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "المخدع الشخصي",
+      "short_name": "المخدع",
+      "description": "مذكرة الاعتراف ومسبحة صلاة يسوع",
+      "url": "/?section=personal",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}
