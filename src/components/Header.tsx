@@ -54,13 +54,16 @@ export const Header: React.FC<HeaderProps> = ({
 
   const navLinks = [
     { view: 'home' as AppView, label: 'الرئيسية', icon: Home },
+    { view: 'library' as AppView, label: 'المكتبة المعرفية', icon: BookOpen },
+    { view: 'workshops' as AppView, label: 'ورش العمل', icon: Layers },
+    { view: 'creative_lab' as AppView, label: 'مختبر الإبداع', icon: Sparkles },
+    { view: 'study_tools' as AppView, label: 'منصة التدريب', icon: ScrollText },
     { view: 'spiritual_life' as AppView, label: 'الحياة الروحية', icon: Heart },
-    { view: 'biblical_study' as AppView, label: 'الدراسة الكتابية', icon: ScrollText },
+    { view: 'monastic_oasis' as AppView, label: 'واحة التكريس', icon: Shield },
+    { view: 'biblical_study' as AppView, label: 'الدراسة والآباء', icon: BookOpen },
     { view: 'personal_space' as AppView, label: 'المساحة الشخصية', icon: Lock },
-    { view: 'competitions_hub' as AppView, label: 'المسابقات والمراحل', icon: Sparkles },
-    { view: 'leaderboard' as AppView, label: 'الترتيب العام', icon: Trophy },
-    { view: 'participants' as AppView, label: 'المشاركون', icon: Users },
-    { view: 'dioceses' as AppView, label: 'الإيبارشيات والأديرة', icon: Layers },
+    { view: 'competitions_hub' as AppView, label: 'المسابقات الرسمية', icon: Trophy },
+    { view: 'leaderboard' as AppView, label: 'الترتيب', icon: Trophy },
     { view: 'supervisor' as AppView, label: 'الإشراف', icon: Shield },
   ];
 
@@ -142,7 +145,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={onOpenSpiritualGuide}
             className="py-1.5 px-3 rounded-xl text-xs font-black bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-400 hover:to-amber-600 text-indigo-950 border border-amber-300 shadow-xs transition flex items-center gap-1.5 cursor-pointer group"
-            title="فتح المرشد الروحي الرقمي"
+            title="فتح المرشد وأبونا الروحي"
           >
             <span className="text-sm group-hover:scale-110 transition">🕊️</span>
             <span>أبونا الروحي</span>
@@ -339,7 +342,7 @@ export const Header: React.FC<HeaderProps> = ({
             className="w-full py-2.5 px-3 rounded-xl text-xs font-black bg-gradient-to-r from-amber-500 to-amber-600 text-indigo-950 flex items-center justify-between shadow-xs"
           >
             <div className="flex items-center gap-2">
-              <span>🕊️ أبونا الروحي (المرشد الرقمي)</span>
+              <span>🕊️ أبونا الروحي والمرشد</span>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse" />
             </div>
             <span className="text-[10px] bg-amber-200/90 px-2 py-0.5 rounded-full font-bold">محادثة وصوت</span>

@@ -17,6 +17,7 @@ export interface SpiritualFatherAvatarProps {
   onToggleDialect: () => void;
   activeStatusText?: string;
   size?: 'sm' | 'md' | 'lg';
+  customPhoto?: string | null;
 }
 
 export const SpiritualFatherAvatar: React.FC<SpiritualFatherAvatarProps> = ({
@@ -34,9 +35,14 @@ export const SpiritualFatherAvatar: React.FC<SpiritualFatherAvatarProps> = ({
   onToggleDialect,
   activeStatusText,
   size = 'md',
+  customPhoto,
 }) => {
   const [imageError, setImageError] = useState(false);
   const [isBlinking, setIsBlinking] = useState(false);
+
+  useEffect(() => {
+    setImageError(false);
+  }, [customPhoto]);
 
   // Natural periodic eye blink effect (every 4-6 seconds)
   useEffect(() => {
@@ -137,7 +143,7 @@ export const SpiritualFatherAvatar: React.FC<SpiritualFatherAvatarProps> = ({
             {!imageError ? (
               <>
                 <img
-                  src={spiritualFatherImg}
+                  src={(customPhoto && !imageError) ? customPhoto : spiritualFatherImg}
                   alt="المرشد الروحي الأبوي"
                   className="w-full h-full object-cover object-top filter brightness-[1.02] contrast-[1.03]"
                   onError={() => setImageError(true)}
@@ -168,7 +174,7 @@ export const SpiritualFatherAvatar: React.FC<SpiritualFatherAvatarProps> = ({
                 <span className="text-xs font-spiritual font-bold text-amber-100 mt-1">
                   أبونا الروحي
                 </span>
-                <span className="text-[10px] text-amber-300/80">المرشد الرقمي</span>
+                <span className="text-[10px] text-amber-300/80">المرشد والأب الروحي</span>
               </div>
             )}
 

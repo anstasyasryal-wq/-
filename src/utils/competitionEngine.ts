@@ -8,6 +8,7 @@ import {
   FinalAwards,
 } from '../types';
 import { COMPETITION_STAGES, STAGE_QUESTIONS } from '../data/competitionStages';
+import { INITIAL_QUESTIONS } from '../data/questions';
 import { MOCK_PARTICIPANTS, INITIAL_ANNOUNCEMENTS } from '../data/mockParticipants';
 import { shuffleQuestionOptions } from './quizUtils';
 

@@ -26,6 +26,7 @@ import {
   WifiOff,
 } from 'lucide-react';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
+import { spiritualFatherPhotoStorage } from '../utils/spiritualFatherPhotoStorage';
 
 export interface SpiritualGuideModalProps {
   isOpen: boolean;
@@ -56,6 +57,53 @@ export const SpiritualGuideModal: React.FC<SpiritualGuideModalProps> = ({
   const [isMotionEnabled, setIsMotionEnabled] = useState(true);
   const [isLipSyncOpen, setIsLipSyncOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const userId = currentUser?.id || 'guest_user';
+  const [fatherPhoto, setFatherPhoto] = useState<string | null>(() =>
+    spiritualFatherPhotoStorage.getPhoto(userId)
+  );
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
+  const [photoErrorMsg, setPhotoErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    setFatherPhoto(spiritualFatherPhotoStorage.getPhoto(userId));
+  }, [userId]);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setPhotoErrorMsg('يرجى اختيار ملف صورة صالح (JPG, PNG)');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setPhotoErrorMsg('حجم الصورة كبير جداً. الحد الأقصى هو 5 ميجابايت.');
+      return;
+    }
+
+    setPhotoErrorMsg(null);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result as string;
+      if (result) {
+        spiritualFatherPhotoStorage.savePhoto(userId, result);
+        setFatherPhoto(result);
+        setShowPhotoModal(false);
+      }
+    };
+    reader.onerror = () => {
+      setPhotoErrorMsg('تعذر قراءة ملف الصورة. حاول مرة أخرى.');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemovePhoto = () => {
+    spiritualFatherPhotoStorage.removePhoto(userId);
+    setFatherPhoto(null);
+    setShowPhotoModal(false);
+  };
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -177,25 +225,29 @@ export const SpiritualGuideModal: React.FC<SpiritualGuideModalProps> = ({
     const userVocation: ConsecrationVocation | undefined = currentUser?.vocation;
 
     try {
-      // 1. If online, try server API (using GoogleGenAI gemini-3.8-flash securely)
+      // 1. If online, try server API (using GoogleGenAI gemini-3.8-flash securely with 15s timeout)
       let receivedReply: string | null = null;
       let replySource: 'gemini-live' | 'local-patristic' = 'local-patristic';
 
       if (isOnline) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
         try {
           const res = await fetch('/api/spiritual-guide/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            signal: controller.signal,
             body: JSON.stringify({
               message: textToSend.trim(),
               vocation: userVocation,
               dialect,
-              conversationHistory: messages.slice(-4).map((m) => ({
+              conversationHistory: messages.slice(-10).map((m) => ({
                 role: m.sender === 'user' ? 'user' : 'model',
                 text: m.text,
               })),
             }),
           });
+          clearTimeout(timeoutId);
 
           if (res.ok) {
             const data = await res.json();
@@ -205,14 +257,14 @@ export const SpiritualGuideModal: React.FC<SpiritualGuideModalProps> = ({
             }
           }
         } catch (fetchErr) {
-          console.warn('Online chat route error, falling back to local wisdom:', fetchErr);
+          clearTimeout(timeoutId);
+          console.warn('Online chat route error or timeout, falling back to local patristic wisdom:', fetchErr);
         }
       }
 
-      // 2. If no server reply (offline or fallback), query the local patristic knowledge base
+      // 2. If no server reply (offline, timeout, or error), query local patristic wisdom explicitly marked as local
       let structuredAnswer: FormattedSpiritualResponse;
       if (receivedReply) {
-        // Build response object from Gemini's tailored reply
         structuredAnswer = {
           paternalAdvice: receivedReply,
           biblicalVerse: '',
@@ -222,8 +274,16 @@ export const SpiritualGuideModal: React.FC<SpiritualGuideModalProps> = ({
           source: 'gemini-live',
         };
       } else {
-        // Fallback to offline patristic wisdom
-        structuredAnswer = findLocalSpiritualGuidance(textToSend.trim(), userVocation, dialect);
+        const localAns = findLocalSpiritualGuidance(
+          textToSend.trim(),
+          userVocation,
+          dialect,
+          messages.map((m) => ({ role: m.sender === 'user' ? 'user' : 'model', text: m.text }))
+        );
+        structuredAnswer = {
+          ...localAns,
+          source: 'local-patristic',
+        };
       }
 
       const fatherMessage: ChatMessage = {
@@ -282,7 +342,7 @@ export const SpiritualGuideModal: React.FC<SpiritualGuideModalProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="font-spiritual font-black text-lg sm:text-xl text-amber-100">
-                  المرشد الروحي الرقمي • أبونا الروحي
+                  المرشد • أبونا الروحي
                 </h2>
                 <span className="text-[10px] font-bold bg-amber-400/20 text-amber-200 border border-amber-300/30 px-2 py-0.5 rounded-full">
                   حسب قلب الله
@@ -308,7 +368,7 @@ export const SpiritualGuideModal: React.FC<SpiritualGuideModalProps> = ({
           <div className="flex items-start sm:items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5 sm:mt-0" />
             <span className="leading-relaxed">
-              <strong>تنبيه كنسي وأمانة رعوية:</strong> هذا المرشد مساعد رقمي للمراجعة والتأمل في المنصة، وليس بديلاً عن أب الاعتراف الكنسي، ولا يمنح الحِل، ولا يُطلب منك كشف أسرار اعترافك.
+              <strong>تنبيه كنسي وأمانة رعوية:</strong> هذا المرشد مساعد للمراجعة والتأمل في المنصة، وليس بديلاً عن أب الاعتراف الكنسي، ولا يمنح الحِل، ولا يُطلب منك كشف أسرار اعترافك.
             </span>
           </div>
           {!isOnline && (
@@ -364,7 +424,16 @@ export const SpiritualGuideModal: React.FC<SpiritualGuideModalProps> = ({
                     : 'في خدمتك بالمحبة'
                 }
                 size="md"
+                customPhoto={fatherPhoto}
               />
+
+              <button
+                onClick={() => setShowPhotoModal(true)}
+                className="mt-3 py-1.5 px-3.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-950 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer shadow-2xs"
+                title="تخصيص صورة أبي الروحي الحقيقي"
+              >
+                <span>📷 صورة أبي الروحي / مرشدي</span>
+              </button>
 
               {/* Paternal Motto Card */}
               <div className="mt-4 p-3 rounded-2xl bg-gradient-to-r from-amber-50/80 to-indigo-50/80 border border-amber-200/80 text-center w-full">
@@ -423,6 +492,15 @@ export const SpiritualGuideModal: React.FC<SpiritualGuideModalProps> = ({
                     <span>{msg.sender === 'user' ? (currentUser?.name || 'أنت') : 'أبونا الروحي'}</span>
                     <span>•</span>
                     <span className="font-mono text-[10px]">{msg.timestamp}</span>
+                    {msg.sender === 'father' && msg.structured?.source && (
+                      <span className={`text-[9px] px-1.5 py-0.2 rounded-full font-semibold ${
+                        msg.structured.source === 'gemini-live' 
+                          ? 'bg-indigo-100 text-indigo-900 border border-indigo-200' 
+                          : 'bg-amber-100 text-amber-900 border border-amber-200'
+                      }`} title={msg.structured.source === 'gemini-live' ? 'تأمل مولد بالذكاء الاصطناعي' : 'حكمة آبائية محلية (وضع محلي)'}>
+                        {msg.structured.source === 'gemini-live' ? '✨ تأمل ذكي' : '📚 حكمة محلية'}
+                      </span>
+                    )}
                   </div>
 
                   <div
@@ -535,7 +613,7 @@ export const SpiritualGuideModal: React.FC<SpiritualGuideModalProps> = ({
                 <div className="flex flex-col items-start animate-fade-in">
                   <div className="p-3.5 rounded-2xl bg-white border border-amber-200 shadow-sm flex items-center gap-2 text-xs text-amber-900 font-bold">
                     <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
-                    <span>أبونا الروحي يصلي ويصيغ لك كلمة المنفعة والبركة...</span>
+                    <span>بفهم كلامك وبصيغ لك كلمة المنفعة والبركة...</span>
                   </div>
                 </div>
               )}
@@ -595,6 +673,80 @@ export const SpiritualGuideModal: React.FC<SpiritualGuideModalProps> = ({
           </div>
         </div>
       </div>
+
+      {/* ========================================================================= */}
+      {/* SPIRITUAL FATHER PHOTO CUSTOMIZATION MODAL */}
+      {/* ========================================================================= */}
+      {showPhotoModal && (
+        <div className="fixed inset-0 z-60 bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 animate-fade-in text-right">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-amber-300 space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="font-spiritual font-bold text-base text-slate-900">
+                📷 تخصيص صورة أبي الروحي / مرشدي
+              </h3>
+              <button
+                onClick={() => setShowPhotoModal(false)}
+                className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-sm cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600 leading-relaxed bg-amber-50 p-3 rounded-2xl border border-amber-200">
+              يمكنك رفع صورة أبيك الروحي أو مرشدك الحقيقي لتظهر لك خصيصاً في واجهة المرشد الروحي.
+              <br />
+              <strong className="text-amber-950 block mt-1">تنبيه قانوني ورعوي:</strong> صورة المرشد الحقيقي مخصصة لراحتك وتذكيرك ببركة أبيك الروحي، ولا تعني أن الذكاء الاصطناعي يمثله أو يعبر عن آرائه الفعلية.
+            </p>
+
+            {photoErrorMsg && (
+              <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
+                {photoErrorMsg}
+              </div>
+            )}
+
+            <div className="flex flex-col items-center gap-3 py-2">
+              <div className="w-28 h-28 rounded-full overflow-hidden border-2 border-amber-400 bg-indigo-950 shadow-md">
+                <img
+                  src={fatherPhoto || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="%23d97706" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'}
+                  alt="صورة المرشد"
+                  className="w-full h-full object-cover object-top"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = '/favicon.ico';
+                  }}
+                />
+              </div>
+
+              <label className="py-2.5 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-md transition cursor-pointer flex items-center gap-2">
+                <span>اختر صورة من جهازك...</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+              </label>
+
+              {fatherPhoto && (
+                <button
+                  onClick={handleRemovePhoto}
+                  className="text-xs font-bold text-rose-700 hover:text-rose-900 cursor-pointer pt-1"
+                >
+                  إزالة الصورة والعودة للصورة الافتراضية
+                </button>
+              )}
+            </div>
+
+            <div className="flex justify-end pt-3 border-t border-slate-100">
+              <button
+                onClick={() => setShowPhotoModal(false)}
+                className="px-5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs cursor-pointer"
+              >
+                إغلاق
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

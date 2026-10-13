@@ -151,26 +151,127 @@ export interface FormattedSpiritualResponse {
 export function findLocalSpiritualGuidance(
   query: string,
   vocation?: ConsecrationVocation,
-  dialect: 'standard' | 'egyptian' = 'egyptian'
+  dialect: 'standard' | 'egyptian' = 'egyptian',
+  conversationHistory?: Array<{ role: string; text: string }>
 ): FormattedSpiritualResponse {
-  const normalizedQuery = query.toLowerCase().trim();
+  const q = query.toLowerCase().trim();
 
-  // Find best topic match
+  // Handle user correction / feeling misunderstood / repetition without canned apologies
+  if (q.includes('مش فاهمني') || q.includes('فهمتني غلط') || q.includes('مش ده') || q.includes('غلط') || q.includes('بتكرر') || q.includes('تكرار')) {
+    // Check if previous history mentioned exhaustion
+    const historyText = conversationHistory ? conversationHistory.map(h => h.text).join(' ').toLowerCase() : '';
+    const isExhaustedContext = historyText.includes('تعبان') || historyText.includes('مستنزف') || historyText.includes('مش قادر');
+
+    let advice = '';
+    if (isExhaustedContext) {
+      advice = dialect === 'egyptian'
+        ? 'أشكرك لأنك وضحت لي بدقة، الاستنزاف الحقيقي مختلف تماماً عن التهرب، وأنا أستوعب الآن أن طاقتك نفدت بالفعل وتحتاج إلى سكون حقيقي لا إلى مهام جديدة. دعنا نترك المسؤوليات جانبًا الآن ونتأمل في هدوء حضور المسيح معك.'
+        : 'أقدر توضيحك تماماً؛ فالاستنزاف الفعلي يختلف عن التهرب، وفهمي السابق لم يكن منصفاً لحجم إنهاكِك. لنركز الآن على استعادة سلامك الداخلي دون أي ضغوط إضافية.';
+    } else {
+      advice = dialect === 'egyptian'
+        ? 'أنا أسمعك بتركيز الآن. فهمي السابق لم يكن دقيقاً، ويسعدني أن تصحح لي لكي ننظر معاً للمسألة من زاويتك أنت لا من منظور عام. ما هي النقطة المحددة التي تود أن نبدأ منها بهدوء؟'
+        : 'أنصت إليك بعناية؛ تصحيحك في محله تماماً وسأبني على ما تقوله مباشرة دون افتراضات سابقة. تفضل بتحديد الجانب الأهم بالنسبة لك لنناقشه.';
+    }
+
+    return {
+      paternalAdvice: advice,
+      biblicalVerse: '«رَبِّ، أَنْتَ تَعْلَمُ كُلَّ شَيْءٍ. أَنْتَ تَعْلَمُ أَنِّي أُحِبُّكَ» (يوحنا 21: 17)',
+      patristicQuote: '«الاستماع الحقيقي للمتكلم هو أول بوابات الفهم المتبادل والتعزية.» — أقوال الآباء',
+      practicalAction: 'خذ نفساً عميقاً، واطرح فكرتك المحددة في سطرين لنتأملها معاً.',
+      fullSpeechText: advice,
+      source: 'local-patristic',
+    };
+  }
+
+  // Case 1: Exhaustion and guilt (منهك ويشعر بالذنب)
+  if (q.includes('منهك') || q.includes('تعبان') || q.includes('مش قادرة') || q.includes('مش قادر') || (q.includes('ذنب') && q.includes('استمرار'))) {
+    const advice = dialect === 'egyptian'
+      ? 'يا ابني/ابنتي، التعب الجسدي والنفسي مش خطية ولا قلة إيمان. السيد المسيح نفسه كان بيقعد ويستريح على البئر من التعب. ارتاح دلوقتي ومتجلدش نفسك، ربنا مش بيكلف نفساً فوق طاقتها.'
+      : 'يا مبارك، الإنهاك الجسدي أو النفسي ليس خطية أو نقصاً في الإيمان. المعلم الصالح يشفق على تعبنا. امنح نفسك فترة هدوء ولا تحمل نفسك ما لا تطيق في هذه اللحظة.';
+    return {
+      paternalAdvice: advice,
+      biblicalVerse: '«تَعَالَوْا إِلَيَّ يَا جَمِيعَ الْمُتْعَبِينَ... وَأَنَا أُرِيحُكُمْ» (متى 11: 28)',
+      patristicQuote: '«الله لا يطلب من الإنسان فوق طاقته، بل يقبل حتى الأنين الصامت.» — القديس إبراهيم البسيط',
+      practicalAction: 'توقف فوراً عن أي مهام غير عاجلة، وخذ قسطاً من الراحة الجسدية والذهنية.',
+      fullSpeechText: advice,
+      source: 'local-patristic',
+    };
+  }
+
+  // Case 2: Evading responsibility (يتهرب من مسئولية)
+  if (q.includes('هرب') || q.includes('مش عايز أعمل') || q.includes('مسؤولية') || q.includes('مش فاضي') || q.includes('تهرب')) {
+    const advice = dialect === 'egyptian'
+      ? 'يا ابني، الهروب من مسئولية واضحة ربنا ائتمنك عليها بيتعب الضمير أكتر. المواجهة بشجاعة مع نعمة ربنا هي الحل، بدل تأجيل اللي المفروض تتداوله بأمانة.'
+      : 'يا مبارك، التهرب من المسئولية التي بين يديك لن يريح الفكر بل يضاعف العبء. من الأفضل مواجهة الأمر بأمانة ومسئولية متكلين على معونة الله.';
+    return {
+      paternalAdvice: advice,
+      biblicalVerse: '«كُلُّ مَا تجده يَدُكَ لِتَعْمَلَهُ، فَاعْمَلْهُ بِقُوَّتِكَ» (جامعة 9: 10)',
+      patristicQuote: '«الأمانة في القليل تقيمنا على الكثير.» — القديس باسيليوس',
+      practicalAction: 'حدد خطوة واحدة عملية مؤجلة وابدأ في تنفيذها اليوم.',
+      fullSpeechText: advice,
+      source: 'local-patristic',
+    };
+  }
+
+  // Case 3: Admitting a mistake and fixing impact (خطأ ويحتاج اعتراف)
+  if (q.includes('غلطت') || q.includes('أخطأت') || q.includes('خطأ') || q.includes('أثر')) {
+    const advice = dialect === 'egyptian'
+      ? 'الاعتراف بالخطأ بشجاعة والاعتذار لمن أخطأت في حقه وإصلاح الأثر هو طريق السلام الحقيقي. ربنا بيغفر ويدينا قوة نبدأ من جديد بنقاء.'
+      : 'الاعتراف الواضح بالخطأ والسعي لإصلاح ما أفسدناه هو دليل على استنارة الضمير ونعمة التوبة العاملة في القلب.';
+    return {
+      paternalAdvice: advice,
+      biblicalVerse: '«إِنِ اعْتَرَفْنَا بخطايانا فَهُوَ أَمِينٌ وَعَادِلٌ، حَتَّى يَغْفِرَ لَنَا» (1 يو 1: 9)',
+      patristicQuote: '«الاعتراف بالخطأ يمحوه، والتجمل به يضاعفه.» — القديس يوحنا ذهبي الفم',
+      practicalAction: 'بادر بالاعتذار أو إصلاح الضرر بهدوء ودون أعذار واهية.',
+      fullSpeechText: advice,
+      source: 'local-patristic',
+    };
+  }
+
+  // Case 4: Self-flagellation over uncontrollable things (يجلد نفسه بلا سبب)
+  if (q.includes('أجلد نفسي') || q.includes('لوم') || q.includes('ضميري يأنبني في كل حاجة') || q.includes('خارج عن إرادتي')) {
+    const advice = dialect === 'egyptian'
+      ? 'جلد الذات المستمر على أمور خارجة عن إرادتك مش تواضع، ده نوع من القسوة على النفس اللي ربنا ما طلبهاش. سيب اللي فات في أمانة فداء الصليب.'
+      : 'لوم النفس المفرط على أمور خارجة عن نطاق سيطرتك ليس تواضعاً روحياً بل إنهاكاً للسلام الداخلي. ألقِ حمولك على المسيح وتخلى عن القسوة على ذاتك.';
+    return {
+      paternalAdvice: advice,
+      biblicalVerse: '«إِذاً لاَ شَيْءَ مِنَ الدَّيْنُونَةِ الآنَ عَلَى الَّذِينَ هُمْ فِي الْمَسِيحِ يَسُوعَ» (رو 8: 1)',
+      patristicQuote: '«التواضع الحقيقي هو تسليم الضعف للرب بفرح، لا اليأس من النفس.» — القديس اسحق',
+      practicalAction: 'اطلب من الله أن يمنحك سلام الضمير ويحررك من القلق المفرط.',
+      fullSpeechText: advice,
+      source: 'local-patristic',
+    };
+  }
+
+  // Case 5: Asking judgment without info (يطلب حكماً بلا معلومات كافية)
+  if (q.includes('مين الصح') || q.includes('مين الغلط') || q.includes('احكم') || q.includes('مين الظالم')) {
+    const advice = dialect === 'egyptian'
+      ? 'يا ابني، أنا ما أقدرش أحكم على موقف تفاصيله مش واضحة قدامي بدقة أو من طرف واحد. الأفضل تعرض كل ملابسات الموضوع على أب اعترافك الحقيقي عشان يديك إرشاد سليم.'
+      : 'يا مبارك، إصدار حكم قاطع دون الإحاطة الكاملة بملابسات الأمر قد يكون غير دقيق. من الحكمة التروي وعرض الأمر كاملاً على أب الاعتراف.';
+    return {
+      paternalAdvice: advice,
+      biblicalVerse: '«لاَ تَحْكُمُوا بحسب الظاهر، بَلِ احْكُمُوا حُكْماً عَادِلاً» (يوحنا 7: 24)',
+      patristicQuote: '«من يقضي في أمر قبل تمام معرفته فهو كمن يرمي سهماً في الظلام.» — الآباء',
+      practicalAction: 'اجمع أفكارك وعرض القصة بصراحة كاملة على أب اعترافك.',
+      fullSpeechText: advice,
+      source: 'local-patristic',
+    };
+  }
+
+  // Standard fallback matching existing logic
   let bestTopic: FallbackSpiritualTopic = GENERAL_SPIRITUAL_FALLBACK;
   let maxScore = 0;
 
   for (const topic of FALLBACK_SPIRITUAL_TOPICS) {
     let score = 0;
     for (const kw of topic.keywords) {
-      if (normalizedQuery.includes(kw.toLowerCase())) {
+      if (q.includes(kw.toLowerCase())) {
         score += 3;
       }
     }
-    // Boost if vocation matches keyword
     if (vocation && topic.keywords.some((k) => k.includes(vocation))) {
       score += 2;
     }
-
     if (score > maxScore) {
       maxScore = score;
       bestTopic = topic;

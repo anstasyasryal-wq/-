@@ -35,6 +35,12 @@ import {
   Zap,
 } from 'lucide-react';
 
+import { LIBRARY_ARTICLES } from '../data/libraryArticles';
+import { LIBRARY_BOOKS } from '../data/libraryBooks';
+import { INTERACTIVE_WORKSHOPS } from '../data/workshopsData';
+import { Article, BookItem, ContentStatus } from '../types/library';
+import { Workshop } from '../types/workshops';
+
 interface SupervisorDashboardProps {
   onTestStageAsAdmin: (stageId: number) => void;
 }
@@ -52,7 +58,7 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({
   onTestStageAsAdmin,
 }) => {
   const [activeTab, setActiveTab] = useState<
-    'stats' | 'participants' | 'stages' | 'questions' | 'announcements'
+    'stats' | 'participants' | 'stages' | 'questions' | 'announcements' | 'content_library' | 'content_workshops'
   >('stats');
 
   const [stages, setStages] = useState<Stage[]>(getStoredStages());
@@ -70,6 +76,58 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({
   // New announcement form
   const [newAnnTitle, setNewAnnTitle] = useState('');
   const [newAnnContent, setNewAnnContent] = useState('');
+
+  // Content Management State
+  const [articlesList, setArticlesList] = useState<Article[]>(() => {
+    try {
+      const saved = localStorage.getItem('mokarasa_admin_articles');
+      return saved ? JSON.parse(saved) : LIBRARY_ARTICLES;
+    } catch {
+      return LIBRARY_ARTICLES;
+    }
+  });
+
+  const [booksList, setBooksList] = useState<BookItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('mokarasa_admin_books');
+      return saved ? JSON.parse(saved) : LIBRARY_BOOKS;
+    } catch {
+      return LIBRARY_BOOKS;
+    }
+  });
+
+  const [workshopsList, setWorkshopsList] = useState<Workshop[]>(() => {
+    try {
+      const saved = localStorage.getItem('mokarasa_admin_workshops');
+      return saved ? JSON.parse(saved) : INTERACTIVE_WORKSHOPS;
+    } catch {
+      return INTERACTIVE_WORKSHOPS;
+    }
+  });
+
+  const [contentToast, setContentToast] = useState<string | null>(null);
+
+  const handleUpdateArticleStatus = (articleId: string, nextStatus: ContentStatus) => {
+    soundManager.playCorrect();
+    const updated = articlesList.map((a) => (a.id === articleId ? { ...a, status: nextStatus } : a));
+    setArticlesList(updated);
+    try {
+      localStorage.setItem('mokarasa_admin_articles', JSON.stringify(updated));
+    } catch {}
+    setContentToast(`تم تحديث حالة المقال إلى: ${nextStatus === 'published' ? 'منشور' : nextStatus === 'under_review' ? 'قيد المراجعة' : 'مسودة'}`);
+    setTimeout(() => setContentToast(null), 3000);
+  };
+
+  const handleUpdateWorkshopStatus = (wsId: string, nextStatus: ContentStatus) => {
+    soundManager.playCorrect();
+    const updated = workshopsList.map((w) => (w.id === wsId ? { ...w, status: nextStatus } : w));
+    setWorkshopsList(updated);
+    try {
+      localStorage.setItem('mokarasa_admin_workshops', JSON.stringify(updated));
+    } catch {}
+    setContentToast(`تم تحديث حالة الورشة إلى: ${nextStatus === 'published' ? 'منشور' : nextStatus === 'under_review' ? 'قيد المراجعة' : 'مسودة'}`);
+    setTimeout(() => setContentToast(null), 3000);
+  };
 
   // Statistics calculation
   const totalParticipants = users.length;
@@ -315,6 +373,28 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({
         >
           <Bell className="w-3.5 h-3.5 text-rose-600" />
           <span>📢 الإعلانات العامة</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('content_library')}
+          className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
+            activeTab === 'content_library'
+              ? 'bg-white text-indigo-950 shadow-sm'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          <BookOpen className="w-3.5 h-3.5 text-amber-600" />
+          <span>📚 إدارة المكتبة</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('content_workshops')}
+          className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
+            activeTab === 'content_workshops'
+              ? 'bg-white text-indigo-950 shadow-sm'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          <Award className="w-3.5 h-3.5 text-indigo-600" />
+          <span>🛠️ إدارة الورش</span>
         </button>
       </div>
 
@@ -759,6 +839,185 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* TAB 6: Content Management - Library (Articles & Books) */}
+      {/* ========================================================= */}
+      {activeTab === 'content_library' && (
+        <div className="space-y-6">
+          {contentToast && (
+            <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-bold flex items-center gap-2">
+              <Check className="w-4 h-4 text-emerald-600" />
+              <span>{contentToast}</span>
+            </div>
+          )}
+
+          {/* Section 1: Articles Approval & Status */}
+          <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="font-spiritual font-bold text-base text-slate-900">
+                  📑 إدارة المقالات والدراسات الموثقة ({articlesList.length})
+                </h3>
+                <p className="text-xs text-slate-500">
+                  مراجعة المقالات واعتماد حالتها (منشور / قيد المراجعة / مسودة) لمنع نشر أي محتوى غير معتمد
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {articlesList.map((art) => (
+                <div
+                  key={art.id}
+                  className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-right"
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full">
+                        {art.category}
+                      </span>
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                          art.status === 'published'
+                            ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                            : art.status === 'under_review'
+                            ? 'bg-amber-50 text-amber-800 border-amber-300'
+                            : 'bg-slate-200 text-slate-700 border-slate-300'
+                        }`}
+                      >
+                        {art.status === 'published'
+                          ? '✅ منشور ومعتمد'
+                          : art.status === 'under_review'
+                          ? '⏳ قيد المراجعة'
+                          : '📝 مسودة'}
+                      </span>
+                    </div>
+                    <h4 className="font-bold text-xs sm:text-sm text-slate-900">{art.title}</h4>
+                    <p className="text-[11px] text-slate-500">
+                      الكاتب: {art.author} • وقت القراءة: {art.readingTimeMinutes} دقيقة
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 self-end sm:self-auto">
+                    <button
+                      onClick={() => handleUpdateArticleStatus(art.id, 'published')}
+                      className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+                        art.status === 'published'
+                          ? 'bg-emerald-600 text-white'
+                          : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100'
+                      }`}
+                    >
+                      اعتماد للنشر
+                    </button>
+                    <button
+                      onClick={() => handleUpdateArticleStatus(art.id, 'under_review')}
+                      className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+                        art.status === 'under_review'
+                          ? 'bg-amber-600 text-white'
+                          : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100'
+                      }`}
+                    >
+                      قيد المراجعة
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Section 2: Books Catalog Overview */}
+          <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-4">
+            <h3 className="font-spiritual font-bold text-base text-slate-900 border-b border-slate-100 pb-3">
+              📖 مكتبة الكتب والتراث الكنسي ({booksList.length})
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {booksList.map((book) => (
+                <div key={book.id} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="font-bold text-indigo-900 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">
+                      {book.category}
+                    </span>
+                    <span className="text-slate-500">{book.totalPages} صفحة</span>
+                  </div>
+                  <h4 className="font-bold text-xs text-slate-900">{book.title}</h4>
+                  <p className="text-[11px] text-slate-600">{book.author}</p>
+                  <p className="text-[10px] text-amber-800 font-semibold">{book.legalStatus}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* TAB 7: Content Management - Workshops */}
+      {/* ========================================================= */}
+      {activeTab === 'content_workshops' && (
+        <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-4">
+          <div className="border-b border-slate-100 pb-3">
+            <h3 className="font-spiritual font-bold text-base text-slate-900">
+              🛠️ إدارة ورش العمل التفاعلية والاعتماد ({workshopsList.length})
+            </h3>
+            <p className="text-xs text-slate-500">
+              متابعة الوحدات التدريبية وحالة النشر والمشروعات الختامية لكل ورشة عمل
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            {workshopsList.map((ws) => (
+              <div
+                key={ws.id}
+                className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-right"
+              >
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-indigo-900 bg-indigo-100 px-2.5 py-0.5 rounded-full">
+                      ورشة {ws.number} • {ws.category}
+                    </span>
+                    <span
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                        ws.status === 'published'
+                          ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                          : 'bg-amber-50 text-amber-800 border-amber-300'
+                      }`}
+                    >
+                      {ws.status === 'published' ? '✅ معتمدة للتدريب' : '⏳ قيد المراجعة'}
+                    </span>
+                  </div>
+                  <h4 className="font-bold text-xs sm:text-sm text-slate-900">{ws.title}</h4>
+                  <p className="text-[11px] text-slate-500">
+                    {ws.units.length} وحدات تفاعلية • التقدير: {ws.estimatedHours} ساعات • الصعوبة: {ws.difficulty}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-1.5 self-end sm:self-auto">
+                  <button
+                    onClick={() => handleUpdateWorkshopStatus(ws.id, 'published')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+                      ws.status === 'published'
+                        ? 'bg-emerald-600 text-white'
+                        : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100'
+                    }`}
+                  >
+                    معتمدة
+                  </button>
+                  <button
+                    onClick={() => handleUpdateWorkshopStatus(ws.id, 'under_review')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+                      ws.status === 'under_review'
+                        ? 'bg-amber-600 text-white'
+                        : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100'
+                    }`}
+                  >
+                    مراجعة
+                  </button>
+                </div>
               </div>
             ))}
           </div>

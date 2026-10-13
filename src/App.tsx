@@ -34,6 +34,11 @@ import { OfflineIndicator } from './components/OfflineIndicator';
 import { SpiritualLifeView } from './components/SpiritualLifeView';
 import { BiblicalStudyView } from './components/BiblicalStudyView';
 import { PersonalSpaceView } from './components/PersonalSpaceView';
+import { LibraryView } from './components/LibraryView';
+import { WorkshopsView } from './components/WorkshopsView';
+import { CreativeLab } from './components/CreativeLab';
+import { StudyToolsView } from './components/StudyToolsView';
+import { MonasticOasis } from './components/MonasticOasis';
 import { ReadingThemeProvider, useReadingTheme } from './context/ReadingThemeContext';
 import { ReadingSettingsModal } from './components/ReadingSettingsModal';
 
@@ -199,6 +204,48 @@ function AppContent() {
               onNavigateToBiblicalStudy={() => handleNavigate('biblical_study')}
               onNavigateToPersonalSpace={() => handleNavigate('personal_space')}
               onOpenReadingSettings={() => setShowReadingSettingsModal(true)}
+              onNavigateToLibrary={() => handleNavigate('library')}
+              onNavigateToWorkshops={() => handleNavigate('workshops')}
+              onNavigateToCreativeLab={() => handleNavigate('creative_lab')}
+              onNavigateToStudyTools={() => handleNavigate('study_tools')}
+              onNavigateToMonasticOasis={() => handleNavigate('monastic_oasis')}
+            />
+          )}
+
+          {currentView === 'library' && (
+            <LibraryView
+              currentUser={currentUser}
+              onOpenLogin={() => setShowRegistrationModal(true)}
+              onBackToHome={() => handleNavigate('home')}
+            />
+          )}
+
+          {currentView === 'workshops' && (
+            <WorkshopsView
+              currentUser={currentUser}
+              onOpenLogin={() => setShowRegistrationModal(true)}
+              onBackToHome={() => handleNavigate('home')}
+            />
+          )}
+
+          {currentView === 'creative_lab' && (
+            <CreativeLab
+              currentUser={currentUser}
+              onBackToHome={() => handleNavigate('home')}
+            />
+          )}
+
+          {currentView === 'study_tools' && (
+            <StudyToolsView
+              currentUser={currentUser}
+              onBackToHome={() => handleNavigate('home')}
+            />
+          )}
+
+          {currentView === 'monastic_oasis' && (
+            <MonasticOasis
+              currentUser={currentUser}
+              onBackToHome={() => handleNavigate('home')}
             />
           )}
 
@@ -315,7 +362,7 @@ function AppContent() {
       <button
         onClick={() => setShowSpiritualGuideModal(true)}
         className="fixed bottom-6 left-6 z-40 bg-gradient-to-tr from-amber-600 via-amber-500 to-amber-400 text-indigo-950 font-black p-2.5 sm:px-4 sm:py-2.5 rounded-full shadow-2xl shadow-amber-600/40 border-2 border-white flex items-center gap-2.5 hover:scale-105 active:scale-95 transition cursor-pointer group"
-        title="استشارة أبونا الروحي (المرشد الرقمي)"
+        title="استشارة أبونا الروحي والمرشد"
       >
         <div className="w-8 h-8 rounded-full overflow-hidden bg-indigo-950 border border-amber-200 flex-shrink-0">
           <img
@@ -326,7 +373,7 @@ function AppContent() {
         </div>
         <div className="hidden sm:block text-right">
           <span className="block text-xs font-bold leading-tight">أبونا الروحي</span>
-          <span className="block text-[10px] text-amber-950/80 font-normal">المرشد الرقمي</span>
+          <span className="block text-[10px] text-amber-950/80 font-normal">رفيق التأمل والنمو</span>
         </div>
         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse border border-white" />
       </button>

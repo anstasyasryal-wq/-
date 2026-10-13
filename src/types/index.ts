@@ -206,7 +206,12 @@ export type AppView =
   | 'final_ceremony'
   | 'spiritual_life'
   | 'biblical_study'
-  | 'personal_space';
+  | 'personal_space'
+  | 'library'
+  | 'workshops'
+  | 'creative_lab'
+  | 'study_tools'
+  | 'monastic_oasis';
 
 export interface CategoryInfo {
   id: CategoryId;
