@@ -39,8 +39,11 @@ import { WorkshopsView } from './components/WorkshopsView';
 import { CreativeLab } from './components/CreativeLab';
 import { StudyToolsView } from './components/StudyToolsView';
 import { MonasticOasis } from './components/MonasticOasis';
+import { SpiritualGamesHub } from './components/SpiritualGamesHub';
 import { ReadingThemeProvider, useReadingTheme } from './context/ReadingThemeContext';
+import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { ReadingSettingsModal } from './components/ReadingSettingsModal';
+import { EmergencyRescueModal } from './components/EmergencyRescueModal';
 
 function AppContent() {
   const [currentView, setCurrentView] = useState<AppView>(() => {
@@ -66,8 +69,20 @@ function AppContent() {
   const [showRulesModal, setShowRulesModal] = useState<boolean>(false);
   const [showSpiritualGuideModal, setShowSpiritualGuideModal] = useState<boolean>(false);
   const [showReadingSettingsModal, setShowReadingSettingsModal] = useState<boolean>(false);
+  const [showEmergencyModal, setShowEmergencyModal] = useState<boolean>(false);
+  const [emergencyInitialSituation, setEmergencyInitialSituation] = useState<
+    'distress' | 'boredom' | 'lukewarmness' | 'anger'
+  >('distress');
+
+  const handleOpenEmergency = (
+    situation: 'distress' | 'boredom' | 'lukewarmness' | 'anger' = 'distress'
+  ) => {
+    setEmergencyInitialSituation(situation);
+    setShowEmergencyModal(true);
+  };
 
   const { isNightMode, getContainerClass } = useReadingTheme();
+  const { language, t } = useLanguage();
 
   useEffect(() => {
     const user = getCurrentUser();
@@ -209,6 +224,8 @@ function AppContent() {
               onNavigateToCreativeLab={() => handleNavigate('creative_lab')}
               onNavigateToStudyTools={() => handleNavigate('study_tools')}
               onNavigateToMonasticOasis={() => handleNavigate('monastic_oasis')}
+              onOpenEmergencyModal={handleOpenEmergency}
+              onNavigateToSpiritualGames={() => handleNavigate('spiritual_games')}
             />
           )}
 
@@ -244,6 +261,13 @@ function AppContent() {
 
           {currentView === 'monastic_oasis' && (
             <MonasticOasis
+              currentUser={currentUser}
+              onBackToHome={() => handleNavigate('home')}
+            />
+          )}
+
+          {currentView === 'spiritual_games' && (
+            <SpiritualGamesHub
               currentUser={currentUser}
               onBackToHome={() => handleNavigate('home')}
             />
@@ -358,6 +382,23 @@ function AppContent() {
         onClose={() => setShowReadingSettingsModal(false)}
       />
 
+      {/* Emergency Rescue Modal */}
+      <EmergencyRescueModal
+        isOpen={showEmergencyModal}
+        onClose={() => setShowEmergencyModal(false)}
+        initialSituation={emergencyInitialSituation}
+      />
+
+      {/* Floating Emergency Rescue Quick Access Button */}
+      <button
+        onClick={() => handleOpenEmergency('distress')}
+        className="fixed bottom-20 left-6 z-40 bg-gradient-to-r from-rose-600 to-red-700 hover:from-rose-500 hover:to-red-600 text-white font-bold p-2.5 sm:px-4 sm:py-2.5 rounded-full shadow-2xl shadow-rose-600/40 border-2 border-white flex items-center gap-2 hover:scale-105 active:scale-95 transition cursor-pointer"
+        title="خطط الإنقاذ السريعة وقت الضيق والفتور"
+      >
+        <span className="text-lg">🚨</span>
+        <span className="hidden sm:inline text-xs font-bold">خطط الطوارئ والإنقاذ</span>
+      </button>
+
       {/* Floating Spiritual Father Quick Access Button */}
       <button
         onClick={() => setShowSpiritualGuideModal(true)}
@@ -377,6 +418,21 @@ function AppContent() {
         </div>
         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse border border-white" />
       </button>
+
+      {/* Floating Spiritual Games Quick Access Button */}
+      {currentView !== 'spiritual_games' && (
+        <button
+          onClick={() => handleNavigate('spiritual_games')}
+          className="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-400 hover:to-amber-500 text-indigo-950 font-black p-3 sm:px-5 sm:py-3 rounded-full shadow-2xl shadow-amber-600/50 border-2 border-white flex items-center gap-2 hover:scale-105 active:scale-95 transition cursor-pointer animate-bounce-subtle"
+          title="الألعاب الترفيهية الروحية"
+        >
+          <span className="text-xl">🎮</span>
+          <span className="font-spiritual font-black text-xs sm:text-sm">الألعاب الترفيهية الروحية</span>
+          <span className="bg-indigo-950 text-amber-300 text-[10px] px-2 py-0.5 rounded-full font-bold">
+            جديد ✨
+          </span>
+        </button>
+      )}
 
       {/* Offline Status Connectivity Banner */}
       <OfflineIndicator />
@@ -408,8 +464,10 @@ function AppContent() {
 
 export default function App() {
   return (
-    <ReadingThemeProvider>
-      <AppContent />
-    </ReadingThemeProvider>
+    <LanguageProvider>
+      <ReadingThemeProvider>
+        <AppContent />
+      </ReadingThemeProvider>
+    </LanguageProvider>
   );
 }

@@ -16,7 +16,9 @@ import {
   Clock,
   User as UserIcon,
   ChevronLeft,
+  ChevronRight,
   ArrowRight,
+  ArrowLeft,
   ExternalLink,
   CheckCircle2,
   BookMarked,
@@ -30,7 +32,14 @@ import {
   Printer,
   Sliders,
   Check,
+  Sun,
+  Moon,
+  Type,
+  BookCheck,
+  Cloud,
+  RefreshCw,
 } from 'lucide-react';
+import confetti from 'canvas-confetti';
 
 interface LibraryViewProps {
   currentUser: User | null;
@@ -38,19 +47,44 @@ interface LibraryViewProps {
   onBackToHome: () => void;
 }
 
+// Helper to paginate chapter text into clean reader pages
+function paginateContent(content: string, paragraphsPerPage = 2): string[] {
+  if (!content) return [''];
+  const paragraphs = content.split(/\n\s*\n/).filter((p) => p.trim().length > 0);
+  if (paragraphs.length <= paragraphsPerPage) {
+    return [content];
+  }
+  const pages: string[] = [];
+  for (let i = 0; i < paragraphs.length; i += paragraphsPerPage) {
+    pages.push(paragraphs.slice(i, i + paragraphsPerPage).join('\n\n'));
+  }
+  return pages;
+}
+
 export const LibraryView: React.FC<LibraryViewProps> = ({
   currentUser,
   onOpenLogin,
   onBackToHome,
 }) => {
-  const [activeTab, setActiveTab] = useState<'articles' | 'books' | 'references'>('articles');
+  const [activeTab, setActiveTab] = useState<'articles' | 'books' | 'chapters_reader' | 'references'>('books');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [vocationFilter, setVocationFilter] = useState<string>('all');
+  const [fullTextOnlyFilter, setFullTextOnlyFilter] = useState<boolean>(false);
+
+  // Dedicated Chapters & Pagination Reader State
+  const [selectedReaderBookId, setSelectedReaderBookId] = useState<string>('book-athanasius-incarnation');
+  const [selectedChapterIdx, setSelectedChapterIdx] = useState<number>(0);
+  const [currentPageInChapter, setCurrentPageInChapter] = useState<number>(0);
+  const [cloudSyncStatus, setCloudSyncStatus] = useState<'synced' | 'saving' | 'idle'>('idle');
+  const [lastCloudSaveTime, setLastCloudSaveTime] = useState<string | null>(null);
 
   // Reader modal states
   const [readingArticle, setReadingArticle] = useState<Article | null>(null);
   const [selectedBook, setSelectedBook] = useState<BookItem | null>(null);
+  const [readingBook, setReadingBook] = useState<{ book: BookItem; chapterIndex: number } | null>(null);
+  const [bookFontSize, setBookFontSize] = useState<'sm' | 'base' | 'lg' | 'xl'>('base');
+  const [bookTheme, setBookTheme] = useState<'sepia' | 'light' | 'dark'>('sepia');
 
   // User state
   const userId = currentUser?.id || 'guest_user';
@@ -65,7 +99,25 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
   useEffect(() => {
     setFavoriteArticleIds(libraryStorage.getFavoriteArticles(userId));
     setBookRecords(libraryStorage.getUserBookRecords(userId));
-  }, [userId]);
+
+    // Initial sync with Cloud Firestore
+    libraryStorage.syncWithCloud(userId).then((synced) => {
+      setBookRecords(synced);
+      const savedRec = synced[selectedReaderBookId];
+      if (savedRec && savedRec.chapterIndex !== undefined) {
+        setSelectedChapterIdx(savedRec.chapterIndex);
+        setCurrentPageInChapter(savedRec.pageInChapter ?? 0);
+        if (savedRec.lastUpdated) {
+          setLastCloudSaveTime(
+            new Date(savedRec.lastUpdated).toLocaleTimeString('ar-EG', {
+              hour: '2-digit',
+              minute: '2-digit',
+            })
+          );
+        }
+      }
+    });
+  }, [userId, selectedReaderBookId]);
 
   const handleToggleFavorite = (articleId: string) => {
     soundManager.playTick();
@@ -124,6 +176,188 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
     setTimeout(() => setSaveToast(null), 3000);
   };
 
+  const handleOpenBookReader = (book: BookItem, chapterIdx: number = 0) => {
+    soundManager.playTick();
+    setReadingBook({ book, chapterIndex: chapterIdx });
+    const rec = libraryStorage.getBookRecord(userId, book.id);
+    const totalCh = book.chapters?.length || 1;
+    const newPage = Math.max(rec.currentPage || 1, Math.round(((chapterIdx + 1) / totalCh) * book.totalPages));
+    const updated = {
+      ...rec,
+      bookId: book.id,
+      status: (rec.status === 'completed' ? 'completed' : 'reading') as BookReadingStatus,
+      currentPage: newPage,
+      totalPages: book.totalPages,
+      personalNotes: rec.personalNotes || '',
+    };
+    libraryStorage.saveBookRecord(userId, updated);
+    setBookRecords(libraryStorage.getUserBookRecords(userId));
+  };
+
+  const handleNextChapter = () => {
+    if (!readingBook || !readingBook.book.chapters) return;
+    const nextIdx = readingBook.chapterIndex + 1;
+    if (nextIdx < readingBook.book.chapters.length) {
+      handleOpenBookReader(readingBook.book, nextIdx);
+    } else {
+      confetti({ particleCount: 75, spread: 70, origin: { y: 0.6 } });
+      soundManager.playCorrect();
+      handleUpdateBookStatus(readingBook.book.id, 'completed');
+      setSaveToast(`مبارك! لقد أتممت قراءة كتاب «${readingBook.book.title}» بالكامل`);
+      setTimeout(() => setSaveToast(null), 4000);
+    }
+  };
+
+  const handlePrevChapter = () => {
+    if (!readingBook || !readingBook.book.chapters) return;
+    const prevIdx = readingBook.chapterIndex - 1;
+    if (prevIdx >= 0) {
+      handleOpenBookReader(readingBook.book, prevIdx);
+    }
+  };
+
+  // Dedicated Chapters & Pagination Reader Selectors & Handlers
+  const fullBooksWithChapters = useMemo(() => {
+    return LIBRARY_BOOKS.filter(
+      (b) => b.isFullTextAvailable && b.chapters && b.chapters.length > 0
+    );
+  }, []);
+
+  const activeReaderBook = useMemo(() => {
+    return (
+      fullBooksWithChapters.find((b) => b.id === selectedReaderBookId) ||
+      fullBooksWithChapters[0]
+    );
+  }, [fullBooksWithChapters, selectedReaderBookId]);
+
+  const activeChapter = useMemo(() => {
+    if (!activeReaderBook || !activeReaderBook.chapters || activeReaderBook.chapters.length === 0)
+      return null;
+    const idx = Math.min(activeReaderBook.chapters.length - 1, Math.max(0, selectedChapterIdx));
+    return activeReaderBook.chapters[idx];
+  }, [activeReaderBook, selectedChapterIdx]);
+
+  const chapterPages = useMemo(() => {
+    if (!activeChapter) return [''];
+    return paginateContent(activeChapter.content, 2);
+  }, [activeChapter]);
+
+  const handleSelectReaderBook = (bookId: string) => {
+    soundManager.playTick();
+    setSelectedReaderBookId(bookId);
+    const savedRec = bookRecords[bookId];
+    if (savedRec && savedRec.chapterIndex !== undefined) {
+      setSelectedChapterIdx(savedRec.chapterIndex);
+      setCurrentPageInChapter(savedRec.pageInChapter ?? 0);
+    } else {
+      setSelectedChapterIdx(0);
+      setCurrentPageInChapter(0);
+    }
+  };
+
+  const handleSavePagePosition = (
+    book: BookItem,
+    chIdx: number,
+    pIdx: number,
+    totalPgs: number
+  ) => {
+    const totalChapters = book.chapters?.length || 1;
+    const progressRatio = (chIdx + (pIdx + 1) / totalPgs) / totalChapters;
+    const approxPage = Math.min(
+      book.totalPages,
+      Math.max(1, Math.round(progressRatio * book.totalPages))
+    );
+    const isCompleted = chIdx === totalChapters - 1 && pIdx === totalPgs - 1;
+
+    setCloudSyncStatus('saving');
+    const updatedRec: UserBookRecord = {
+      bookId: book.id,
+      status: isCompleted ? 'completed' : 'reading',
+      currentPage: approxPage,
+      totalPages: book.totalPages,
+      chapterIndex: chIdx,
+      chapterTitle: book.chapters?.[chIdx]?.title || `الفصل ${chIdx + 1}`,
+      pageInChapter: pIdx,
+      totalPagesInChapter: totalPgs,
+      lastUpdated: new Date().toISOString(),
+      personalNotes: bookRecords[book.id]?.personalNotes || '',
+      isFavorite: bookRecords[book.id]?.isFavorite || false,
+    };
+
+    libraryStorage.saveBookRecord(userId, updatedRec);
+    setBookRecords((prev) => ({ ...prev, [book.id]: updatedRec }));
+
+    setTimeout(() => {
+      setCloudSyncStatus('synced');
+      setLastCloudSaveTime(
+        new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
+      );
+    }, 350);
+  };
+
+  const handleNextPage = () => {
+    if (!activeReaderBook || !activeReaderBook.chapters) return;
+    soundManager.playTick();
+    if (currentPageInChapter < chapterPages.length - 1) {
+      const nextP = currentPageInChapter + 1;
+      setCurrentPageInChapter(nextP);
+      handleSavePagePosition(activeReaderBook, selectedChapterIdx, nextP, chapterPages.length);
+    } else {
+      // Move to next chapter
+      if (selectedChapterIdx < activeReaderBook.chapters.length - 1) {
+        const nextCh = selectedChapterIdx + 1;
+        setSelectedChapterIdx(nextCh);
+        setCurrentPageInChapter(0);
+        const nextChPages = paginateContent(activeReaderBook.chapters[nextCh].content, 2);
+        handleSavePagePosition(activeReaderBook, nextCh, 0, nextChPages.length);
+        setSaveToast(`الانتقال إلى الفصل ${nextCh + 1}: ${activeReaderBook.chapters[nextCh].title}`);
+        setTimeout(() => setSaveToast(null), 2500);
+      } else {
+        // Finished all chapters of the book!
+        confetti({ particleCount: 80, spread: 75, origin: { y: 0.6 } });
+        soundManager.playCorrect();
+        handleSavePagePosition(
+          activeReaderBook,
+          selectedChapterIdx,
+          currentPageInChapter,
+          chapterPages.length
+        );
+        setSaveToast(`مبارك! لقد أتممت قراءة كتاب «${activeReaderBook.title}» كاملاً`);
+        setTimeout(() => setSaveToast(null), 4000);
+      }
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (!activeReaderBook || !activeReaderBook.chapters) return;
+    soundManager.playTick();
+    if (currentPageInChapter > 0) {
+      const prevP = currentPageInChapter - 1;
+      setCurrentPageInChapter(prevP);
+      handleSavePagePosition(activeReaderBook, selectedChapterIdx, prevP, chapterPages.length);
+    } else if (selectedChapterIdx > 0) {
+      const prevCh = selectedChapterIdx - 1;
+      const prevChPages = paginateContent(activeReaderBook.chapters[prevCh].content, 2);
+      const lastP = prevChPages.length - 1;
+      setSelectedChapterIdx(prevCh);
+      setCurrentPageInChapter(lastP);
+      handleSavePagePosition(activeReaderBook, prevCh, lastP, prevChPages.length);
+    }
+  };
+
+  const handleOpenBookInChaptersReader = (book: BookItem, chIdx?: number) => {
+    soundManager.playTick();
+    setSelectedReaderBookId(book.id);
+    const rec = bookRecords[book.id];
+    const targetCh = chIdx !== undefined ? chIdx : rec?.chapterIndex ?? 0;
+    const targetPage = chIdx !== undefined ? 0 : rec?.pageInChapter ?? 0;
+    setSelectedChapterIdx(targetCh);
+    setCurrentPageInChapter(targetPage);
+    setActiveTab('chapters_reader');
+    setSaveToast(`تم فتح «${book.title}» في واجهة القراءة والتمرير`);
+    setTimeout(() => setSaveToast(null), 3000);
+  };
+
   // Filtered Articles
   const filteredArticles = useMemo(() => {
     return LIBRARY_ARTICLES.filter((a) => {
@@ -147,6 +381,8 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
   // Filtered Books
   const filteredBooks = useMemo(() => {
     return LIBRARY_BOOKS.filter((b) => {
+      if (fullTextOnlyFilter && !b.isFullTextAvailable) return false;
+
       const matchSearch =
         searchQuery.trim() === '' ||
         b.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -161,7 +397,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 
       return matchSearch && matchCat && matchVoc;
     });
-  }, [searchQuery, selectedCategory, vocationFilter]);
+  }, [searchQuery, selectedCategory, vocationFilter, fullTextOnlyFilter]);
 
   // Filtered References
   const filteredReferences = useMemo(() => {
@@ -414,11 +650,30 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
       {/* ========================================================================= */}
       {activeTab === 'books' && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between text-xs text-slate-600 px-1">
-            <span className="font-bold">مكتبة الكتب والتراث: ({filteredBooks.length} كتاب)</span>
-            <span className="text-amber-800 font-semibold">
-              إمكانية تدوين الملاحظات الخاصة ومتابعة تقدم القراءة
-            </span>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-600 px-1 bg-amber-50/70 p-4 rounded-2xl border border-amber-200/80">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-slate-900 text-sm">مكتبة الكتب الروحية الكاملة والتراث الآبائي ({filteredBooks.length} كتاب)</span>
+                <span className="bg-emerald-700 text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full shadow-xs">
+                  ✨ نصوص كاملة وفصول محققة
+                </span>
+              </div>
+              <p className="text-[11px] text-amber-900 font-medium">
+                كتب روحية كنسية كبرى متكاملة بفصولها الأصلية وتأملاتها الآبائية وآياتها مع حفظ تقدم القراءة والملاحظات الشخصية.
+              </p>
+            </div>
+
+            <button
+              onClick={() => setFullTextOnlyFilter(!fullTextOnlyFilter)}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap ${
+                fullTextOnlyFilter
+                  ? 'bg-emerald-800 text-white'
+                  : 'bg-white text-emerald-950 border border-emerald-300 hover:bg-emerald-50'
+              }`}
+            >
+              <BookCheck className="w-4 h-4 text-emerald-500" />
+              <span>{fullTextOnlyFilter ? 'عرض جميع الكتب' : 'الكتب الكاملة فقط'}</span>
+            </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -432,29 +687,42 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
               return (
                 <div
                   key={book.id}
-                  className="rounded-2xl bg-white border border-slate-200 hover:border-amber-400 p-5 shadow-xs transition hover:shadow-md flex flex-col justify-between space-y-4 text-right"
+                  className="rounded-2xl bg-white border border-slate-200 hover:border-amber-400 p-5 shadow-xs transition hover:shadow-md flex flex-col justify-between space-y-4 text-right group"
                 >
                   <div className="space-y-3">
                     {/* Visual Book Spine Header */}
                     <div
-                      className={`h-24 rounded-xl bg-gradient-to-r ${book.coverColor} p-3.5 text-white flex flex-col justify-between shadow-xs`}
+                      className={`h-24 rounded-xl bg-gradient-to-r ${book.coverColor} p-3.5 text-white flex flex-col justify-between shadow-xs relative overflow-hidden`}
                     >
-                      <div className="flex items-center justify-between text-[10px]">
-                        <span className="bg-black/30 px-2 py-0.5 rounded-full border border-white/20">
+                      <div className="flex items-center justify-between text-[10px] relative z-10">
+                        <span className="bg-black/35 px-2 py-0.5 rounded-full border border-white/20">
                           {book.category}
                         </span>
-                        <span className="bg-amber-400 text-indigo-950 font-bold px-2 py-0.5 rounded-full">
-                          {book.readingLevel}
-                        </span>
+                        {book.isFullTextAvailable ? (
+                          <span className="bg-emerald-400 text-slate-950 font-black px-2 py-0.5 rounded-full flex items-center gap-1 shadow-xs">
+                            <BookOpen className="w-3 h-3" />
+                            <span>كامل الفصول</span>
+                          </span>
+                        ) : (
+                          <span className="bg-amber-400 text-indigo-950 font-bold px-2 py-0.5 rounded-full">
+                            {book.readingLevel}
+                          </span>
+                        )}
                       </div>
-                      <h4 className="font-spiritual font-bold text-sm text-amber-100 line-clamp-1">
+                      <h4 className="font-spiritual font-bold text-sm text-amber-100 line-clamp-1 relative z-10">
                         {book.title}
                       </h4>
                     </div>
 
                     <div>
                       <h3
-                        onClick={() => handleOpenBook(book)}
+                        onClick={() => {
+                          if (book.chapters && book.chapters.length > 0) {
+                            handleOpenBookReader(book, 0);
+                          } else {
+                            handleOpenBook(book);
+                          }
+                        }}
                         className="font-spiritual font-bold text-base text-slate-900 cursor-pointer hover:text-amber-800 transition line-clamp-2"
                       >
                         {book.title}
@@ -487,15 +755,28 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                     </div>
                   </div>
 
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
-                    <span className="text-[10px] text-slate-400">{book.legalStatus}</span>
-                    <button
-                      onClick={() => handleOpenBook(book)}
-                      className="px-3.5 py-1.5 rounded-xl bg-indigo-900 hover:bg-indigo-800 text-white font-bold text-xs transition flex items-center gap-1 cursor-pointer"
-                    >
-                      <span>تصفح وتدوين</span>
-                      <ChevronLeft className="w-3.5 h-3.5" />
-                    </button>
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+                    <span className="text-[10px] text-slate-400 truncate max-w-[90px]">{book.legalStatus}</span>
+                    <div className="flex items-center gap-1.5">
+                      {book.chapters && book.chapters.length > 0 && (
+                        <button
+                          onClick={() => handleOpenBookReader(book, 0)}
+                          className="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs transition flex items-center gap-1 cursor-pointer shadow-xs"
+                          title="قراءة نص الكتاب كاملاً فصلاً بفصل"
+                        >
+                          <BookOpen className="w-3.5 h-3.5" />
+                          <span>قراءة ({book.chapters.length} فصول)</span>
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleOpenBook(book)}
+                        className="px-2.5 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-950 font-bold text-xs transition flex items-center gap-1 cursor-pointer border border-indigo-200"
+                        title="تفاصيل الكتاب وتدوين الملاحظات"
+                      >
+                        <FileText className="w-3.5 h-3.5" />
+                        <span>ملاحظات</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
@@ -760,21 +1041,63 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
               </div>
             </div>
 
-            {/* Table of Contents */}
+            {/* Full text direct banner */}
+            {selectedBook.chapters && selectedBook.chapters.length > 0 && (
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-600 via-amber-700 to-amber-800 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md">
+                <div className="space-y-0.5">
+                  <span className="font-spiritual font-bold text-sm block text-amber-100">
+                    📖 هذا الكتاب متاح بنصه الأصلي الكامل ({selectedBook.chapters.length} فصول محققة)
+                  </span>
+                  <span className="text-[11px] text-amber-200">
+                    يمكنك البدء في قراءة الفصول فوراً مع الآيات والتأملات الآبائية الموثقة.
+                  </span>
+                </div>
+                <button
+                  onClick={() => {
+                    handleOpenBookReader(selectedBook, 0);
+                    setSelectedBook(null);
+                  }}
+                  className="px-4 py-2 rounded-xl bg-white text-amber-900 font-bold text-xs hover:bg-amber-50 transition cursor-pointer shadow-xs whitespace-nowrap flex items-center gap-1.5"
+                >
+                  <BookOpen className="w-4 h-4" />
+                  <span>بدء القراءة الآن</span>
+                </button>
+              </div>
+            )}
+
+            {/* Table of Contents with direct chapter access */}
             <div className="space-y-2">
               <span className="text-xs font-bold text-slate-800 block">📑 فهرس فصول الكتاب:</span>
-              <div className="max-h-40 overflow-y-auto pr-1 space-y-1">
-                {selectedBook.tableOfContents.map((item, i) => (
-                  <div
-                    key={i}
-                    className="p-2 rounded-xl bg-slate-50 border border-slate-100 text-xs text-slate-700 flex items-center gap-2"
-                  >
-                    <span className="w-5 h-5 rounded-full bg-slate-200 text-slate-700 text-[10px] font-bold flex items-center justify-center flex-shrink-0">
-                      {i + 1}
-                    </span>
-                    <span>{item}</span>
-                  </div>
-                ))}
+              <div className="max-h-56 overflow-y-auto pr-1 space-y-1.5">
+                {selectedBook.tableOfContents.map((item, i) => {
+                  const hasChapter = selectedBook.chapters && selectedBook.chapters[i];
+                  return (
+                    <div
+                      key={i}
+                      className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs text-slate-700 flex items-center justify-between gap-2 hover:bg-amber-50/60 transition"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="w-5 h-5 rounded-full bg-slate-200 text-slate-700 text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                          {i + 1}
+                        </span>
+                        <span className="font-medium text-slate-800">{item}</span>
+                      </div>
+                      {hasChapter && (
+                        <button
+                          onClick={() => {
+                            handleOpenBookReader(selectedBook, i);
+                            setSelectedBook(null);
+                          }}
+                          className="px-2.5 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-950 font-bold text-[11px] transition cursor-pointer flex items-center gap-1 whitespace-nowrap border border-amber-300"
+                        >
+                          <BookOpen className="w-3 h-3 text-amber-700" />
+                          <span>قراءة</span>
+                          <ChevronLeft className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -811,6 +1134,262 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
           </div>
         </div>
       )}
+
+      {/* ========================================================================= */}
+      {/* 4. COMPREHENSIVE FULL-TEXT BOOK READER MODAL */}
+      {/* ========================================================================= */}
+      {readingBook && readingBook.book.chapters && readingBook.book.chapters[readingBook.chapterIndex] && (() => {
+        const currentChapter = readingBook.book.chapters[readingBook.chapterIndex];
+        const totalChapters = readingBook.book.chapters.length;
+
+        const fontSizeClasses = {
+          sm: 'text-xs sm:text-sm leading-relaxed',
+          base: 'text-sm sm:text-base leading-relaxed',
+          lg: 'text-base sm:text-lg leading-loose',
+          xl: 'text-lg sm:text-xl leading-loose',
+        };
+
+        const themeBg =
+          bookTheme === 'sepia'
+            ? 'bg-[#fcf8f2] text-[#2b2118]'
+            : bookTheme === 'dark'
+            ? 'bg-slate-950 text-slate-100'
+            : 'bg-white text-slate-900';
+
+        const themeHeaderBorder =
+          bookTheme === 'sepia'
+            ? 'border-[#e8ded0] bg-[#f5ecde]/70'
+            : bookTheme === 'dark'
+            ? 'border-slate-800 bg-slate-900/90'
+            : 'border-slate-200 bg-slate-50';
+
+        const themeBox =
+          bookTheme === 'sepia'
+            ? 'bg-[#f4ebd9] border-[#dfd1bd] text-[#33261a]'
+            : bookTheme === 'dark'
+            ? 'bg-slate-900 border-slate-800 text-slate-200'
+            : 'bg-amber-50/70 border-amber-200 text-amber-950';
+
+        return (
+          <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto animate-fade-in">
+            <div
+              className={`rounded-3xl max-w-4xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border transition-colors flex flex-col justify-between text-right ${themeBg}`}
+            >
+              {/* Sticky Top Controls Bar */}
+              <div className={`sticky top-0 z-20 px-5 py-3.5 border-b backdrop-blur-md flex flex-wrap items-center justify-between gap-3 ${themeHeaderBorder}`}>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setReadingBook(null)}
+                    className="w-8 h-8 rounded-xl bg-black/10 hover:bg-black/20 text-current flex items-center justify-center font-bold text-sm cursor-pointer transition"
+                    title="إغلاق القارئ"
+                  >
+                    ✕
+                  </button>
+                  <div className="space-y-0.5">
+                    <h3 className="font-spiritual font-bold text-xs sm:text-sm line-clamp-1">
+                      {readingBook.book.title}
+                    </h3>
+                    <p className="text-[10px] opacity-75">
+                      {readingBook.book.author} • الفصل {readingBook.chapterIndex + 1} من {totalChapters}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Right controls: Chapter select, Themes, Font Size */}
+                <div className="flex items-center flex-wrap gap-2">
+                  {/* Chapter Selector Dropdown */}
+                  <select
+                    value={readingBook.chapterIndex}
+                    onChange={(e) => handleOpenBookReader(readingBook.book, Number(e.target.value))}
+                    className="px-2.5 py-1 rounded-xl text-xs font-bold bg-black/5 border border-current/20 outline-none cursor-pointer"
+                  >
+                    {readingBook.book.chapters.map((ch, idx) => (
+                      <option key={ch.id} value={idx} className="text-slate-900 bg-white">
+                        فصل {ch.chapterNumber}: {ch.title.substring(0, 35)}...
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* Theme Switcher */}
+                  <div className="flex items-center rounded-xl bg-black/5 p-0.5 border border-current/15">
+                    <button
+                      onClick={() => setBookTheme('light')}
+                      className={`px-2 py-1 rounded-lg text-[11px] font-bold cursor-pointer transition ${
+                        bookTheme === 'light' ? 'bg-white text-slate-900 shadow-xs' : 'opacity-70'
+                      }`}
+                      title="المظهر الأبيض"
+                    >
+                      <Sun className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => setBookTheme('sepia')}
+                      className={`px-2 py-1 rounded-lg text-[11px] font-bold cursor-pointer transition ${
+                        bookTheme === 'sepia' ? 'bg-[#e9decb] text-[#2b2118] shadow-xs' : 'opacity-70'
+                      }`}
+                      title="مظهر الورق المخطوط (سيبيا)"
+                    >
+                      <span>📜</span>
+                    </button>
+                    <button
+                      onClick={() => setBookTheme('dark')}
+                      className={`px-2 py-1 rounded-lg text-[11px] font-bold cursor-pointer transition ${
+                        bookTheme === 'dark' ? 'bg-slate-800 text-white shadow-xs' : 'opacity-70'
+                      }`}
+                      title="المظهر الليلي"
+                    >
+                      <Moon className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  {/* Font Size Adjuster */}
+                  <div className="flex items-center rounded-xl bg-black/5 p-0.5 border border-current/15">
+                    <button
+                      onClick={() => {
+                        const sizes: ('sm' | 'base' | 'lg' | 'xl')[] = ['sm', 'base', 'lg', 'xl'];
+                        const curr = sizes.indexOf(bookFontSize);
+                        if (curr > 0) setBookFontSize(sizes[curr - 1]);
+                      }}
+                      className="px-2 py-0.5 text-xs font-bold cursor-pointer opacity-80 hover:opacity-100"
+                      title="تصغير الخط"
+                    >
+                      A-
+                    </button>
+                    <span className="text-[10px] px-1 font-mono font-bold opacity-75">
+                      {bookFontSize === 'sm' ? 'ص' : bookFontSize === 'base' ? 'م' : bookFontSize === 'lg' ? 'ك' : 'ك+'}
+                    </span>
+                    <button
+                      onClick={() => {
+                        const sizes: ('sm' | 'base' | 'lg' | 'xl')[] = ['sm', 'base', 'lg', 'xl'];
+                        const curr = sizes.indexOf(bookFontSize);
+                        if (curr < sizes.length - 1) setBookFontSize(sizes[curr + 1]);
+                      }}
+                      className="px-2 py-0.5 text-xs font-bold cursor-pointer opacity-80 hover:opacity-100"
+                      title="تكبير الخط"
+                    >
+                      A+
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Main Chapter Reading Area */}
+              <div className="p-6 sm:p-10 space-y-7">
+                {/* Chapter Meta */}
+                <div className="space-y-3 pb-4 border-b border-current/10">
+                  <div className="flex items-center justify-between text-xs font-bold opacity-75">
+                    <span className="px-3 py-1 rounded-full bg-current/10 border border-current/15">
+                      الفصل {currentChapter.chapterNumber} من {totalChapters}
+                    </span>
+                    {currentChapter.readingTimeMinutes && (
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>وقت القراءة: {currentChapter.readingTimeMinutes} دقائق</span>
+                      </span>
+                    )}
+                  </div>
+
+                  <h2 className="font-spiritual font-black text-2xl sm:text-3xl leading-snug">
+                    {currentChapter.title}
+                  </h2>
+
+                  {currentChapter.subtitle && (
+                    <p className="text-xs sm:text-sm font-semibold opacity-85">
+                      {currentChapter.subtitle}
+                    </p>
+                  )}
+                </div>
+
+                {/* Key Verse Highlight */}
+                {currentChapter.keyVerse && (
+                  <div className={`p-4 rounded-2xl border flex items-center gap-3 font-spiritual font-bold text-xs sm:text-sm shadow-xs ${themeBox}`}>
+                    <Quote className="w-5 h-5 opacity-80 flex-shrink-0" />
+                    <span>{currentChapter.keyVerse}</span>
+                  </div>
+                )}
+
+                {/* Patristic Reflection Box */}
+                {currentChapter.patristicReflection && (
+                  <div className={`p-4 rounded-2xl border text-xs sm:text-sm space-y-1 ${themeBox}`}>
+                    <span className="font-bold flex items-center gap-1.5 opacity-90">
+                      <Sparkles className="w-4 h-4 text-amber-500" />
+                      <span>تأمل آبائي ونور الروح:</span>
+                    </span>
+                    <p className="font-spiritual leading-relaxed opacity-95">
+                      {currentChapter.patristicReflection}
+                    </p>
+                  </div>
+                )}
+
+                {/* Chapter Body Full-Text Content */}
+                <div className={`pt-2 font-serif ${fontSizeClasses[bookFontSize]}`}>
+                  <p className="whitespace-pre-line leading-relaxed font-sans text-justify">
+                    {currentChapter.content}
+                  </p>
+                </div>
+              </div>
+
+              {/* Sticky Navigation Bottom Bar */}
+              <div className={`sticky bottom-0 z-20 px-5 py-4 border-t backdrop-blur-md flex flex-wrap items-center justify-between gap-3 ${themeHeaderBorder}`}>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handlePrevChapter}
+                    disabled={readingBook.chapterIndex === 0}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                      readingBook.chapterIndex === 0
+                        ? 'opacity-40 cursor-not-allowed bg-black/5'
+                        : 'bg-black/10 hover:bg-black/20 cursor-pointer shadow-xs'
+                    }`}
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                    <span>الفصل السابق</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setSelectedBook(readingBook.book);
+                      const rec = libraryStorage.getBookRecord(userId, readingBook.book.id);
+                      setBookNotesInput(rec.personalNotes || '');
+                      setBookPageInput(rec.currentPage || 0);
+                    }}
+                    className="px-3 py-2 rounded-xl bg-black/5 hover:bg-black/15 text-xs font-bold transition flex items-center gap-1 cursor-pointer"
+                    title="فتح مذكرة التأملات لهذا الكتاب"
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">ملاحظاتي</span>
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      soundManager.playCorrect();
+                      handleUpdateBookStatus(readingBook.book.id, 'completed');
+                      setSaveToast('تم وضع علامة إتمام قراءة الكتاب كاملاً');
+                      setTimeout(() => setSaveToast(null), 3000);
+                    }}
+                    className="px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs transition cursor-pointer flex items-center gap-1 shadow-xs"
+                    title="وضع علامة إنهاء الكتاب"
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    <span>أنهيت الكتاب</span>
+                  </button>
+
+                  <button
+                    onClick={handleNextChapter}
+                    className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs transition flex items-center gap-1.5 cursor-pointer shadow-md"
+                  >
+                    <span>
+                      {readingBook.chapterIndex < totalChapters - 1 ? 'الفصل التالي' : 'ختام الكتاب'}
+                    </span>
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };
+

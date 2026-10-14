@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { User, AppView } from '../types';
 import { soundManager } from '../utils/audio';
 import { useReadingTheme } from '../context/ReadingThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import {
   Trophy,
   Volume2,
@@ -21,6 +22,8 @@ import {
   Moon,
   Sun,
   Sliders,
+  Globe,
+  Gamepad2,
 } from 'lucide-react';
 import { PWAInstallButton } from './PWAInstallButton';
 
@@ -46,6 +49,7 @@ export const Header: React.FC<HeaderProps> = ({
   const [isMuted, setIsMuted] = useState(soundManager.getIsMuted());
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isNightMode, toggleNightMode } = useReadingTheme();
+  const { language, toggleLanguage } = useLanguage();
 
   const toggleSound = () => {
     const nextState = soundManager.toggleMute();
@@ -64,6 +68,7 @@ export const Header: React.FC<HeaderProps> = ({
     { view: 'personal_space' as AppView, label: 'المساحة الشخصية', icon: Lock },
     { view: 'competitions_hub' as AppView, label: 'المسابقات الرسمية', icon: Trophy },
     { view: 'leaderboard' as AppView, label: 'الترتيب', icon: Trophy },
+    { view: 'spiritual_games' as AppView, label: 'الألعاب الترفيهية', icon: Gamepad2 },
     { view: 'supervisor' as AppView, label: 'الإشراف', icon: Shield },
   ];
 
@@ -93,9 +98,8 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 حسب قلب الله
               </span>
-              <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                <span>🟢 مفتوحة</span>
+              <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                <span>🕊️ واحة التكريس</span>
               </span>
             </div>
             <p className="text-[10px] text-amber-700 font-bold hidden sm:block">
@@ -202,6 +206,23 @@ export const Header: React.FC<HeaderProps> = ({
           {/* PWA In-App Install Button */}
           <PWAInstallButton variant="header" />
 
+          {/* Language Switch Button */}
+          <button
+            onClick={() => {
+              soundManager.playTick();
+              toggleLanguage();
+            }}
+            title={language === 'ar' ? 'Switch to English' : 'التبديل إلى العربية'}
+            className={`py-1.5 px-2.5 rounded-xl border transition cursor-pointer flex items-center gap-1.5 font-bold text-xs ${
+              isNightMode
+                ? 'border-[#443c32] bg-[#221f1a] text-amber-300 hover:bg-[#2b2721]'
+                : 'border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-50'
+            }`}
+          >
+            <Globe className="w-3.5 h-3.5 text-amber-500" />
+            <span>{language === 'ar' ? 'EN' : 'عربي'}</span>
+          </button>
+
           {/* Sound Toggle */}
           <button
             onClick={toggleSound}
@@ -217,6 +238,26 @@ export const Header: React.FC<HeaderProps> = ({
             ) : (
               <Volume2 className="w-4 h-4 text-amber-600" />
             )}
+          </button>
+
+          {/* Direct Games Button */}
+          <button
+            onClick={() => {
+              soundManager.playTick();
+              onNavigate('spiritual_games');
+            }}
+            title="الألعاب الترفيهية الروحية"
+            className={`py-1.5 px-3 rounded-xl font-bold text-xs transition cursor-pointer flex items-center gap-1.5 shadow-xs hover:scale-105 active:scale-95 ${
+              currentView === 'spiritual_games'
+                ? 'bg-amber-600 text-white ring-2 ring-amber-300'
+                : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-indigo-950 border border-amber-300'
+            }`}
+          >
+            <Gamepad2 className="w-4 h-4 text-indigo-950 fill-amber-100" />
+            <span className="font-spiritual font-black">الألعاب الروحية</span>
+            <span className="bg-amber-950 text-amber-200 text-[10px] px-1.5 py-0.5 rounded-full font-sans font-bold">
+              جديد
+            </span>
           </button>
 
           {/* User Profile Pill */}
@@ -301,6 +342,28 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             </div>
           </div>
+
+          {/* Prominent Spiritual Games Banner in Mobile Drawer */}
+          <button
+            onClick={() => {
+              soundManager.playTick();
+              onNavigate('spiritual_games');
+              setMobileMenuOpen(false);
+            }}
+            className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 text-indigo-950 font-black text-xs sm:text-sm flex items-center justify-between shadow-md mb-3 cursor-pointer hover:opacity-95"
+          >
+            <div className="flex items-center gap-2.5">
+              <span className="text-xl">🎮</span>
+              <div className="text-right">
+                <span className="block font-spiritual font-black text-sm">واحة الألعاب الترفيهية الروحية</span>
+                <span className="block text-[10px] text-indigo-950/80 font-normal">مطابقة الفضائل، فوازير، وعجلة الحكمة</span>
+              </div>
+            </div>
+            <span className="bg-indigo-950 text-amber-300 text-[10px] px-2.5 py-1 rounded-full font-bold">
+              ابدأ اللعب ✨
+            </span>
+          </button>
+
           {navLinks.map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.view;

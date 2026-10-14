@@ -74,5 +74,16 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isSupervisor() || !exists(/databases/$(database)/documents/announcements/$(announcementId));
     }
+
+    // 6. Reading Progress collection:
+    // Allows participants to sync and persist their last read chapter and page across devices
+    match /reading_progress/{progressId} {
+      allow read: if true;
+      allow write: if (
+        request.resource.data.userId is string &&
+        request.resource.data.bookId is string &&
+        request.resource.data.chapterIndex is number
+      );
+    }
   }
 }

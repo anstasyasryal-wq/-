@@ -1,4 +1,8 @@
 import { UserBookRecord } from '../types/library';
+import {
+  saveReadingProgressToCloud,
+  getAllUserReadingProgressFromCloud,
+} from './firebaseService';
 
 const BOOK_PROGRESS_KEY_PREFIX = 'mokarasa_book_progress_';
 const FAVORITE_ARTICLES_KEY_PREFIX = 'mokarasa_fav_articles_';
@@ -33,6 +37,8 @@ export const libraryStorage = {
         status: 'not_started',
         currentPage: 0,
         totalPages: 100,
+        chapterIndex: 0,
+        pageInChapter: 0,
         lastUpdated: new Date().toISOString(),
         personalNotes: '',
         isFavorite: false,
@@ -56,8 +62,60 @@ export const libraryStorage = {
         category: 'قراءة الكتب',
         updatedAt: new Date().toISOString(),
       });
+
+      // Background Sync to Cloud Firestore
+      saveReadingProgressToCloud(userId, record.bookId, {
+        bookTitle: record.bookId,
+        chapterIndex: record.chapterIndex ?? 0,
+        chapterTitle: record.chapterTitle || `فصل ${(record.chapterIndex ?? 0) + 1}`,
+        pageIndex: record.pageInChapter ?? 0,
+        totalPagesInChapter: record.totalPagesInChapter ?? 1,
+        overallPercent: Math.min(
+          100,
+          Math.round(((record.currentPage || 0) / (record.totalPages || 1)) * 100)
+        ),
+        status: record.status,
+        updatedAt: new Date().toISOString(),
+        personalNotes: record.personalNotes,
+      }).catch((e) => console.warn('Cloud sync background error:', e));
     } catch (err) {
       console.warn('Failed to save book record:', err);
+    }
+  },
+
+  async syncWithCloud(userId: string): Promise<Record<string, UserBookRecord>> {
+    if (!userId) return {};
+    const local = this.getUserBookRecords(userId);
+    try {
+      const cloudMap = await getAllUserReadingProgressFromCloud(userId);
+      let changed = false;
+      for (const bookId of Object.keys(cloudMap)) {
+        const c = cloudMap[bookId];
+        const l = local[bookId];
+        if (!l || (c.updatedAt && new Date(c.updatedAt) > new Date(l.lastUpdated))) {
+          local[bookId] = {
+            bookId,
+            status: c.status,
+            currentPage: Math.round((c.overallPercent / 100) * (l?.totalPages || 100)),
+            totalPages: l?.totalPages || 100,
+            chapterIndex: c.chapterIndex,
+            chapterTitle: c.chapterTitle,
+            pageInChapter: c.pageIndex,
+            totalPagesInChapter: c.totalPagesInChapter,
+            personalNotes: c.personalNotes || l?.personalNotes || '',
+            lastUpdated: c.updatedAt,
+            isFavorite: l?.isFavorite || false,
+          };
+          changed = true;
+        }
+      }
+      if (changed) {
+        localStorage.setItem(`${BOOK_PROGRESS_KEY_PREFIX}${userId}`, JSON.stringify(local));
+      }
+      return local;
+    } catch (err) {
+      console.warn('Sync with cloud failed:', err);
+      return local;
     }
   },
 

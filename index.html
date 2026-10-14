@@ -5,18 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
     <script>
       // Gracefully prevent benign HMR WebSocket disconnect errors in Cloud Run / iframe environments
-      window.addEventListener('error', function(event) {
-        if (event && event.message && (event.message.indexOf('WebSocket') !== -1 || event.message.indexOf('@vite/client') !== -1)) {
-          event.stopImmediatePropagation();
-          event.preventDefault();
+      (function() {
+        if (typeof window !== 'undefined' && window.WebSocket) {
+          var OrigWebSocket = window.WebSocket;
+          window.WebSocket = function(url, protocols) {
+            var isViteHMR = protocols === 'vite-hmr' || (Array.isArray(protocols) && protocols.indexOf('vite-hmr') !== -1);
+            if (isViteHMR) {
+              return {
+                readyState: 3,
+                close: function() {},
+                send: function() {},
+                addEventListener: function() {},
+                removeEventListener: function() {},
+                dispatchEvent: function() { return false; },
+                onopen: null,
+                onclose: null,
+                onerror: null,
+                onmessage: null,
+              };
+            }
+            return new OrigWebSocket(url, protocols);
+          };
+          window.WebSocket.prototype = OrigWebSocket.prototype;
+          window.WebSocket.CONNECTING = OrigWebSocket.CONNECTING;
+          window.WebSocket.OPEN = OrigWebSocket.OPEN;
+          window.WebSocket.CLOSING = OrigWebSocket.CLOSING;
+          window.WebSocket.CLOSED = OrigWebSocket.CLOSED;
         }
-      }, true);
-      window.addEventListener('unhandledrejection', function(event) {
-        if (event && (String(event.reason).indexOf('WebSocket') !== -1 || (event.reason && event.reason.message && event.reason.message.indexOf('WebSocket') !== -1))) {
-          event.stopImmediatePropagation();
-          event.preventDefault();
-        }
-      }, true);
+
+        window.addEventListener('error', function(event) {
+          if (event && (
+            (event.message && (event.message.indexOf('WebSocket') !== -1 || event.message.indexOf('@vite/client') !== -1)) ||
+            (event.filename && event.filename.indexOf('@vite/client') !== -1)
+          )) {
+            event.stopImmediatePropagation();
+            event.preventDefault();
+          }
+        }, true);
+
+        window.addEventListener('unhandledrejection', function(event) {
+          if (event && (String(event.reason).indexOf('WebSocket') !== -1 || (event.reason && event.reason.message && event.reason.message.indexOf('WebSocket') !== -1))) {
+            event.stopImmediatePropagation();
+            event.preventDefault();
+          }
+        }, true);
+      })();
     </script>
     <title>حسب قلب الله | كاهن – مكرَّسة – راهب – راهبة</title>
     <meta name="description" content="منصة مراجعة روحية وتقييم للمكرسين لله (كاهن – مكرَّسة – راهب – راهبة) في العلوم الكنسية والنضج الداخلي والخدمة" />

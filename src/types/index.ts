@@ -211,7 +211,8 @@ export type AppView =
   | 'workshops'
   | 'creative_lab'
   | 'study_tools'
-  | 'monastic_oasis';
+  | 'monastic_oasis'
+  | 'spiritual_games';
 
 export interface CategoryInfo {
   id: CategoryId;

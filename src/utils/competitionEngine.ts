@@ -120,7 +120,15 @@ export function getStoredAnnouncements(): Announcement[] {
       localStorage.setItem(KEYS.ANNOUNCEMENTS, JSON.stringify(INITIAL_ANNOUNCEMENTS));
       return INITIAL_ANNOUNCEMENTS;
     }
-    return JSON.parse(raw);
+    const parsed: Announcement[] = JSON.parse(raw);
+    const hasOldRef = parsed.some(
+      (a) => a.content.includes('مسابقة المكرسات') || a.title.includes('مسابقة المكرسات')
+    );
+    if (hasOldRef) {
+      localStorage.setItem(KEYS.ANNOUNCEMENTS, JSON.stringify(INITIAL_ANNOUNCEMENTS));
+      return INITIAL_ANNOUNCEMENTS;
+    }
+    return parsed;
   } catch {
     return INITIAL_ANNOUNCEMENTS;
   }

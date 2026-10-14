@@ -90,6 +90,25 @@
         "isUrgent": { "type": "boolean" }
       },
       "required": ["id", "title", "content", "date"]
+    },
+    "ReadingProgress": {
+      "title": "ReadingProgress",
+      "description": "Last reading position and chapter pagination bookmark in complete spiritual books",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "bookId": { "type": "string" },
+        "bookTitle": { "type": "string" },
+        "chapterIndex": { "type": "number" },
+        "chapterTitle": { "type": "string" },
+        "pageIndex": { "type": "number" },
+        "totalPagesInChapter": { "type": "number" },
+        "overallPercent": { "type": "number" },
+        "status": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "bookId", "chapterIndex", "pageIndex"]
     }
   },
   "firestore": {
@@ -112,6 +131,10 @@
     "/announcements/{announcementId}": {
       "schema": "Announcement",
       "description": "Competition news and directives"
+    },
+    "/reading_progress/{progressId}": {
+      "schema": "ReadingProgress",
+      "description": "User reading bookmark and progress synced across devices"
     }
   }
 }

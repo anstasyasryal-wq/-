@@ -38,6 +38,17 @@ export type BookReadingStatus = 'not_started' | 'reading' | 'completed';
 
 export type BookReadingLevel = 'مبتدئ' | 'متوسط' | 'متقدم' | 'تخصصي آبائي';
 
+export interface BookChapter {
+  id: string;
+  chapterNumber: number;
+  title: string;
+  subtitle?: string;
+  content: string;
+  keyVerse?: string;
+  patristicReflection?: string;
+  readingTimeMinutes?: number;
+}
+
 export interface BookItem {
   id: string;
   title: string;
@@ -56,6 +67,8 @@ export interface BookItem {
   keyQuotes?: string[];
   externalUrl?: string;
   coverColor: string;
+  isFullTextAvailable?: boolean;
+  chapters?: BookChapter[];
 }
 
 export interface UserBookRecord {
@@ -63,6 +76,10 @@ export interface UserBookRecord {
   status: BookReadingStatus;
   currentPage: number;
   totalPages: number;
+  chapterIndex?: number;
+  chapterTitle?: string;
+  pageInChapter?: number;
+  totalPagesInChapter?: number;
   startedAt?: string;
   finishedAt?: string;
   lastUpdated: string;

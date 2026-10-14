@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Stage, Question } from '../types';
-import { getStoredStages, getStoredQuestions } from '../utils/competitionEngine';
+import { Stage, Question, Announcement } from '../types';
+import { getStoredStages, getStoredQuestions, getCurrentUser, getStoredAnnouncements } from '../utils/competitionEngine';
 import {
   Trophy,
   Play,
@@ -17,6 +17,7 @@ import {
   ChevronDown,
   CheckCircle2,
   HelpCircle,
+  Lock,
 } from 'lucide-react';
 
 interface CompetitionsHubViewProps {
@@ -33,6 +34,23 @@ export const CompetitionsHubView: React.FC<CompetitionsHubViewProps> = ({
 
   const stages: Stage[] = getStoredStages();
   const allQuestions: Question[] = getStoredQuestions();
+  const announcements: Announcement[] = getStoredAnnouncements();
+  const currentUser = getCurrentUser();
+  const userCurrentStage = currentUser?.currentStageId || 1;
+
+  const isStageUnlocked = (stageId: number) => {
+    if (stageId === 1) return true;
+    if (currentUser?.role === 'supervisor') return true;
+    return userCurrentStage >= stageId;
+  };
+
+  const handleStartAttempt = (stageId: number) => {
+    if (!isStageUnlocked(stageId)) {
+      alert('🔒 هذه المرحلة مغلقة حالياً!\n\nيجب عليك إتمام واجتياز المراحل السابقة بالترتيب لفتح هذه المرحلة وتحدي أسئلتها.');
+      return;
+    }
+    onStartStage(stageId);
+  };
 
   const toggleExpandStage = (stageId: number) => {
     setExpandedStageId(expandedStageId === stageId ? null : stageId);
@@ -44,15 +62,44 @@ export const CompetitionsHubView: React.FC<CompetitionsHubViewProps> = ({
       <div className="rounded-3xl bg-gradient-to-r from-indigo-950 via-purple-950 to-amber-950 text-white p-6 sm:p-8 shadow-xl border border-amber-300/30">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-amber-300 text-xs font-semibold mb-2">
           <Trophy className="w-4 h-4 text-amber-300" />
-          <span>الدليل الشامل للاختبارات والمسابقات</span>
+          <span>نظام المسابقة التدريجي (يعمل دون إنترنت - Offline)</span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold font-spiritual text-amber-100">
-          🎮 دليل الاختبارات والمسابقات الرسمية
+          🎮 مراحل مسيرة حسب قلب الله المتدرجة
         </h1>
         <p className="text-xs sm:text-sm text-amber-200/80 mt-1">
-          استكشاف كامل لجميع الاختبارات الإلكترونية الخمسة، التحديات الفردية والجماعية، وبنك الأسئلة
+          مراحل متدرجة حسب الصعوبة والتفكير والبحث، تشمل الكتاب المقدس، العقيدة، الألحان، الفوازير، وأسئلة الذكاء. إتمام مرحلة يفتح لك المرحلة التالية تلقائياً!
         </p>
       </div>
+
+      {/* Competition Announcements / Notices */}
+      {announcements.length > 0 && (
+        <div className="space-y-3">
+          {announcements.map((ann) => (
+            <div
+              key={ann.id}
+              className="rounded-2xl bg-gradient-to-r from-amber-500/10 via-indigo-500/10 to-purple-500/10 border border-amber-300/60 p-4 text-right flex items-center justify-between gap-3 shadow-xs"
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-amber-600 text-white shadow-xs flex-shrink-0">
+                  📢
+                </div>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-amber-100">
+                    {ann.title}
+                  </h4>
+                  <p className="text-[11px] sm:text-xs text-slate-600 dark:text-stone-300 mt-0.5 leading-relaxed">
+                    {ann.content}
+                  </p>
+                </div>
+              </div>
+              <span className="text-[10px] text-amber-800 dark:text-amber-300 font-semibold bg-amber-100 dark:bg-amber-950/80 px-2.5 py-1 rounded-full whitespace-nowrap hidden sm:inline-block border border-amber-300">
+                إعلان مسابقة رسمي
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Navigation Switcher */}
       <div className="flex rounded-2xl bg-slate-100 p-1 max-w-md mx-auto">
@@ -65,7 +112,7 @@ export const CompetitionsHubView: React.FC<CompetitionsHubViewProps> = ({
           }`}
         >
           <Brain className="w-3.5 h-3.5 text-indigo-600" />
-          <span>📝 الاختبارات والمراحل (6 اختبارات)</span>
+          <span>📝 مراحل المسابقة (6 مستويات)</span>
         </button>
         <button
           onClick={() => setActiveSection('competitions')}
@@ -86,9 +133,9 @@ export const CompetitionsHubView: React.FC<CompetitionsHubViewProps> = ({
       {activeSection === 'tests' && (
         <div className="space-y-4">
           <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs space-y-1">
-            <span className="font-bold block">💡 دليل اختبارات المراحل:</span>
+            <span className="font-bold block">💡 قواعد المراحل المتدرجة (نظام أوفلاين):</span>
             <p className="text-slate-700">
-              تتكون المسابقة من 5 اختبارات إلكترونية متدرجة الصعوبة + اختبار النهائي الكبير. يمكنكِ استعراض مواصفات كل اختبار، أسئلته المعتمدة، وخوضه مباشرة.
+              تبدأ بـ 6 مراحل متدرجة من البداية وحتى التاج. الأسئلة مصممة بعناية لئلا تكون بسيطة ولا معقدة، بل تحتاج لتفكير وبحث وعمق كنسي، وتشمل فوازير وأسئلة ذكاء. عند اجتيازك مرحلة، تفتح لك المرحلة التالية تلقائياً على جهازك!
             </p>
           </div>
 
@@ -96,22 +143,33 @@ export const CompetitionsHubView: React.FC<CompetitionsHubViewProps> = ({
             {stages.map((stage) => {
               const stageQuestions = allQuestions.filter((q) => q.stageId === stage.id);
               const isExpanded = expandedStageId === stage.id;
+              const unlocked = isStageUnlocked(stage.id);
 
               return (
                 <div
                   key={stage.id}
-                  className="rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden text-right transition"
+                  className={`rounded-2xl bg-white border transition shadow-sm overflow-hidden text-right ${
+                    unlocked ? 'border-slate-200' : 'border-slate-300 bg-slate-50/70'
+                  }`}
                 >
                   <div className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 text-2xl flex items-center justify-center flex-shrink-0">
-                        {stage.icon}
+                      <div className={`w-12 h-12 rounded-2xl border text-2xl flex items-center justify-center flex-shrink-0 ${
+                        unlocked ? 'bg-amber-50 border-amber-200' : 'bg-slate-200 border-slate-300 opacity-60'
+                      }`}>
+                        {unlocked ? stage.icon : '🔒'}
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <h3 className="font-bold text-base text-slate-900">{stage.title}</h3>
-                          <span className="text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
-                            {stage.badge}
+                          <h3 className={`font-bold text-base ${unlocked ? 'text-slate-900' : 'text-slate-500'}`}>
+                            {stage.title}
+                          </h3>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                            unlocked
+                              ? 'text-amber-800 bg-amber-50 border-amber-200'
+                              : 'text-slate-600 bg-slate-200 border-slate-300'
+                          }`}>
+                            {unlocked ? stage.badge : '🔒 مغفلة (أتمم السابقة)'}
                           </span>
                         </div>
                         <p className="text-xs text-slate-500 mt-0.5">{stage.subtitle}</p>
@@ -120,11 +178,24 @@ export const CompetitionsHubView: React.FC<CompetitionsHubViewProps> = ({
 
                     <div className="flex items-center gap-2 w-full sm:w-auto">
                       <button
-                        onClick={() => onStartStage(stage.id)}
-                        className="flex-1 sm:flex-none py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-600 to-indigo-800 hover:brightness-105 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer"
+                        onClick={() => handleStartAttempt(stage.id)}
+                        className={`flex-1 sm:flex-none py-2.5 px-4 rounded-xl font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                          unlocked
+                            ? 'bg-gradient-to-r from-amber-600 to-indigo-800 hover:brightness-105 text-white'
+                            : 'bg-slate-300 text-slate-700 hover:bg-slate-400'
+                        }`}
                       >
-                        <Play className="w-3.5 h-3.5 fill-white" />
-                        <span>بدء هذا الاختبار الآن</span>
+                        {unlocked ? (
+                          <>
+                            <Play className="w-3.5 h-3.5 fill-white" />
+                            <span>بدء هذه المرحلة</span>
+                          </>
+                        ) : (
+                          <>
+                            <Lock className="w-3.5 h-3.5" />
+                            <span>مغفلة</span>
+                          </>
+                        )}
                       </button>
 
                       <button

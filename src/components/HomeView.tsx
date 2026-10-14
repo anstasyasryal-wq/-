@@ -36,6 +36,8 @@ import {
   Compass,
   FileText,
   RotateCcw,
+  ShieldAlert,
+  Gamepad2,
 } from 'lucide-react';
 import { PWAInstallButton } from './PWAInstallButton';
 
@@ -62,6 +64,8 @@ interface HomeViewProps {
   onNavigateToCreativeLab?: () => void;
   onNavigateToStudyTools?: () => void;
   onNavigateToMonasticOasis?: () => void;
+  onOpenEmergencyModal?: (situation: 'distress' | 'boredom' | 'lukewarmness' | 'anger') => void;
+  onNavigateToSpiritualGames?: () => void;
 }
 
 export const HomeView: React.FC<HomeViewProps> = ({
@@ -87,6 +91,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
   onNavigateToCreativeLab,
   onNavigateToStudyTools,
   onNavigateToMonasticOasis,
+  onOpenEmergencyModal,
+  onNavigateToSpiritualGames,
 }) => {
   const currentEligibleStageId = currentUser ? currentUser.currentStageId : 1;
   const activeAnnouncement = announcements[0] || null;
@@ -141,27 +147,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
   return (
     <div className="space-y-6 pb-12 animate-fade-in text-right">
-      {/* Announcements Banner */}
-      {activeAnnouncement && (
-        <div className="rounded-2xl bg-gradient-to-r from-amber-500/10 via-indigo-500/10 to-purple-500/10 border border-amber-200/80 p-3.5 sm:p-4 text-right flex items-center justify-between gap-3 shadow-xs">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-amber-500 text-white shadow-xs flex-shrink-0 animate-pulse">
-              <Bell className="w-4 h-4" />
-            </div>
-            <div>
-              <h4 className="text-xs sm:text-sm font-bold text-slate-800">
-                {activeAnnouncement.title}
-              </h4>
-              <p className="text-[11px] sm:text-xs text-slate-600 mt-0.5 line-clamp-1">
-                {activeAnnouncement.content}
-              </p>
-            </div>
-          </div>
-          <span className="text-[10px] text-amber-700 font-semibold bg-amber-100 px-2 py-1 rounded-full whitespace-nowrap hidden sm:inline-block">
-            إعلان رسمي
-          </span>
-        </div>
-      )}
+
 
       {/* ========================================================================= */}
       {/* 1. DAILY SPIRITUAL LIFE DASHBOARD (لوحة الحياة الروحية والشخصية) */}
@@ -315,15 +301,127 @@ export const HomeView: React.FC<HomeViewProps> = ({
       </div>
 
       {/* ========================================================================= */}
+      {/* 🚨 QUICK RESCUE PLANS (خطط الإنقاذ السريعة وقت الضيق والفتور والزهق والانفعال) */}
+      {/* ========================================================================= */}
+      <div className="rounded-3xl bg-gradient-to-r from-stone-900 via-amber-950 to-stone-900 text-stone-100 p-6 sm:p-8 border border-amber-800/60 shadow-xl space-y-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-900/60 border border-amber-600/40 text-amber-300 text-xs font-semibold mb-2">
+              <ShieldAlert className="w-4 h-4 text-amber-400" />
+              <span>إسعافات ونوادر روحية عاجلة</span>
+            </div>
+            <h3 className="font-spiritual text-xl sm:text-3xl font-bold text-amber-100">
+              🚨 خطط الإنقاذ السريعة وقت الضيق والفتور
+            </h3>
+            <p className="text-xs sm:text-sm text-stone-300 mt-1">
+              ملاذات عملية وفورية مصممة خصيصاً للخدام والمكرسين لمواجهة لحظات الضيق، الزهق والملل، الفتور الروحي، والانفعال في الخدمة.
+            </p>
+          </div>
+          {onOpenEmergencyModal && (
+            <button
+              onClick={() => onOpenEmergencyModal('distress')}
+              className="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center gap-2 cursor-pointer whitespace-nowrap"
+            >
+              <span>فتح جميع خطط الطوارئ</span>
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            {
+              situation: 'distress' as const,
+              title: 'وقت الضيق والشدائد',
+              desc: 'رفع الغمم واستعادة السلام وسط العواصف والضيقات.',
+              icon: '⚓',
+              color: 'bg-rose-950/40 border-rose-800/50 hover:border-rose-500 text-rose-200',
+            },
+            {
+              situation: 'boredom' as const,
+              title: 'وقت الزهق والملل',
+              desc: 'تجديد النشاط الروحي وطرد الكسل والسآمة النفسية.',
+              icon: '⚡',
+              color: 'bg-amber-950/40 border-amber-800/50 hover:border-amber-500 text-amber-200',
+            },
+            {
+              situation: 'lukewarmness' as const,
+              title: 'وقت الفتور الروحي',
+              desc: 'إشعال نار المحبة الأولى والرجوع لمخدع التوبة.',
+              icon: '🔥',
+              color: 'bg-orange-950/40 border-orange-800/50 hover:border-orange-500 text-orange-200',
+            },
+            {
+              situation: 'anger' as const,
+              title: 'وقت الانفعال في الخدمة',
+              desc: 'قاعدة الصمت الذهبي والوداعة مع المخدومين.',
+              icon: '🕊️',
+              color: 'bg-cyan-950/40 border-cyan-800/50 hover:border-cyan-500 text-cyan-200',
+            },
+          ].map((item) => (
+            <div
+              key={item.situation}
+              onClick={() => onOpenEmergencyModal && onOpenEmergencyModal(item.situation)}
+              className={`p-5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-3 group ${item.color}`}
+            >
+              <div>
+                <span className="text-3xl mb-2 inline-block group-hover:scale-110 transition-transform">
+                  {item.icon}
+                </span>
+                <h4 className="font-spiritual text-base sm:text-lg font-bold">{item.title}</h4>
+                <p className="text-xs text-stone-300 mt-1 leading-relaxed">{item.desc}</p>
+              </div>
+
+              <div className="flex items-center gap-1.5 text-xs font-bold pt-2 border-t border-white/10 group-hover:translate-x-1 transition-transform">
+                <span>تفعيل خطة الإنقاذ</span>
+                <ChevronLeft className="w-3.5 h-3.5" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 🎮 SPIRITUAL GAMES HUB BANNER */}
+      {/* ========================================================================= */}
+      {onNavigateToSpiritualGames && (
+        <div 
+          onClick={onNavigateToSpiritualGames}
+          className="rounded-3xl bg-gradient-to-r from-amber-600 via-amber-700 to-amber-800 text-white p-6 sm:p-8 shadow-xl border border-amber-400/60 cursor-pointer hover:scale-[1.01] transition-all flex flex-col sm:flex-row items-center justify-between gap-6"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-3xl shrink-0 shadow-md">
+              🎮
+            </div>
+            <div>
+              <span className="text-xs font-bold px-3 py-1 rounded-full bg-amber-900/80 text-amber-200">
+                واحة الترفيه الروحي
+              </span>
+              <h3 className="font-spiritual text-xl sm:text-2xl font-bold mt-1 text-amber-100">
+                ألعاب ترفيهية روحية ومسابقات بستان البرية
+              </h3>
+              <p className="text-xs sm:text-sm text-amber-200/90 mt-1 max-w-xl leading-relaxed">
+                استمتع بلعبة مطابقة الفضائل، فوازير الألغاز الكنسية، وعجلة حكمة الآباء لتجديد نشاطك الروحي بأسلوب مشوق.
+              </p>
+            </div>
+          </div>
+          <button className="px-6 py-3 rounded-xl bg-white text-amber-900 font-bold text-sm shadow-lg flex items-center gap-2 shrink-0 hover:bg-amber-50 transition">
+            <span>دخول الألعاب</span>
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
       {/* 2. HERO IDENTITY & CONSECRATION BANNER */}
       {/* ========================================================================= */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-indigo-950 via-indigo-900 to-slate-900 text-white p-6 sm:p-10 shadow-xl border border-amber-400/30 text-center">
         <div className="absolute -top-24 -right-24 w-72 h-72 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-purple-500/15 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-semibold mb-4 backdrop-blur-xs">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-          <span>🟢 مسيرة المراجعة والتقييم الروحي مفتوحة لجميع الآباء والخدام</span>
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-200 text-xs font-semibold mb-4 backdrop-blur-xs">
+          <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+          <span>🕊️ واحة متكاملة للحياة الروحية والنمو التكريسي والتكوين والترفيه الهادف</span>
         </div>
 
         <h1 className="text-3xl sm:text-5xl font-black font-spiritual text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-100 to-white tracking-wide">
@@ -342,39 +440,47 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </p>
         </div>
 
-        {/* Primary Action Buttons */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 max-w-3xl mx-auto pt-2">
-          <button
-            onClick={() => onStartStage(currentEligibleStageId)}
-            className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-400 hover:to-amber-600 text-indigo-950 font-black text-sm shadow-lg shadow-amber-600/30 flex items-center justify-center gap-2 transition transform active:scale-95 cursor-pointer"
-          >
-            <Play className="w-5 h-5 fill-indigo-950" />
-            <span>▶️ ابدأ مسيرة التقييم</span>
-          </button>
+        {/* Primary Action Buttons - Focus on Spiritual Life, Formation & Games */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 max-w-4xl mx-auto pt-2">
+          {onNavigateToSpiritualGames && (
+            <button
+              onClick={onNavigateToSpiritualGames}
+              className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-indigo-950 font-black text-sm shadow-xl shadow-amber-500/30 flex items-center justify-center gap-2 transition transform active:scale-95 cursor-pointer ring-2 ring-amber-200"
+            >
+              <Gamepad2 className="w-5 h-5 fill-indigo-950" />
+              <span>🎮 الألعاب الترفيهية الروحية</span>
+            </button>
+          )}
 
-          <button
-            onClick={onOpenLogin}
-            className="w-full py-3.5 px-4 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/25 text-white font-bold text-sm backdrop-blur-md flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
-          >
-            <UserCheck className="w-4 h-4 text-amber-200" />
-            <span>👤 {currentUser ? 'تبديل الحساب' : 'تسجيل الدخول'}</span>
-          </button>
+          {onNavigateToSpiritualLife && (
+            <button
+              onClick={onNavigateToSpiritualLife}
+              className="w-full py-3.5 px-4 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/25 text-white font-bold text-sm backdrop-blur-md flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
+            >
+              <Heart className="w-4 h-4 text-rose-300" />
+              <span>🌱 الحياة الروحية والمخدع</span>
+            </button>
+          )}
 
-          <button
-            onClick={onOpenMyRank}
-            className="w-full py-3.5 px-4 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/25 text-white font-bold text-sm backdrop-blur-md flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
-          >
-            <Trophy className="w-4 h-4 text-amber-300" />
-            <span>🏆 ترتيبي</span>
-          </button>
+          {onNavigateToLibrary && (
+            <button
+              onClick={onNavigateToLibrary}
+              className="w-full py-3.5 px-4 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/25 text-white font-bold text-sm backdrop-blur-md flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
+            >
+              <BookOpen className="w-4 h-4 text-amber-300" />
+              <span>📚 المكتبة والمعرفة</span>
+            </button>
+          )}
 
-          <button
-            onClick={onOpenRules}
-            className="w-full py-3.5 px-4 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/25 text-white font-bold text-sm backdrop-blur-md flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
-          >
-            <BookOpen className="w-4 h-4 text-sky-200" />
-            <span>📜 ميثاق وقواعد المسيرة</span>
-          </button>
+          {onOpenEmergencyModal && (
+            <button
+              onClick={() => onOpenEmergencyModal('distress')}
+              className="w-full py-3.5 px-4 rounded-2xl bg-rose-950/60 hover:bg-rose-900/60 border border-rose-500/50 text-rose-200 font-bold text-sm backdrop-blur-md flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
+            >
+              <ShieldAlert className="w-4 h-4 text-rose-400" />
+              <span>🚨 خطط الإنقاذ العاجلة</span>
+            </button>
+          )}
         </div>
 
         <div className="pt-4 max-w-md mx-auto">

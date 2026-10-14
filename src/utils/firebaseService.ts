@@ -384,3 +384,90 @@ export async function postCloudAnnouncement(ann: Announcement): Promise<boolean>
     return false;
   }
 }
+
+// ==========================================
+// Reading Progress & Chapters Pagination Persistence
+// ==========================================
+
+export interface CloudReadingProgress {
+  id: string; // `${userId}_${bookId}`
+  userId: string;
+  bookId: string;
+  bookTitle: string;
+  chapterIndex: number;
+  chapterTitle: string;
+  pageIndex: number;
+  totalPagesInChapter: number;
+  overallPercent: number;
+  status: 'not_started' | 'reading' | 'completed';
+  updatedAt: string;
+  personalNotes?: string;
+}
+
+export async function saveReadingProgressToCloud(
+  userId: string,
+  bookId: string,
+  progress: Omit<CloudReadingProgress, 'id' | 'userId' | 'bookId'>
+): Promise<boolean> {
+  if (!isFirebaseConfigured || !userId || !bookId) return false;
+  try {
+    await ensureFirebaseAuth();
+    const docId = `${userId}_${bookId}`;
+    const progressRef = doc(db, 'reading_progress', docId);
+    await setDoc(
+      progressRef,
+      {
+        id: docId,
+        userId,
+        bookId,
+        ...progress,
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    );
+    return true;
+  } catch (err) {
+    console.warn('Error saving reading progress to Firestore:', err);
+    return false;
+  }
+}
+
+export async function getReadingProgressFromCloud(
+  userId: string,
+  bookId: string
+): Promise<CloudReadingProgress | null> {
+  if (!isFirebaseConfigured || !userId || !bookId) return null;
+  try {
+    const docId = `${userId}_${bookId}`;
+    const progressRef = doc(db, 'reading_progress', docId);
+    const snap = await getDoc(progressRef);
+    if (snap.exists()) {
+      return snap.data() as CloudReadingProgress;
+    }
+    return null;
+  } catch (err) {
+    console.warn('Error getting reading progress from Firestore:', err);
+    return null;
+  }
+}
+
+export async function getAllUserReadingProgressFromCloud(
+  userId: string
+): Promise<Record<string, CloudReadingProgress>> {
+  if (!isFirebaseConfigured || !userId) return {};
+  try {
+    const colRef = collection(db, 'reading_progress');
+    const q = query(colRef, where('userId', '==', userId));
+    const snap = await getDocs(q);
+    const result: Record<string, CloudReadingProgress> = {};
+    snap.forEach((d) => {
+      const data = d.data() as CloudReadingProgress;
+      result[data.bookId] = data;
+    });
+    return result;
+  } catch (err) {
+    console.warn('Error getting all reading progress from Firestore:', err);
+    return {};
+  }
+}
+
