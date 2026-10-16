@@ -18,6 +18,7 @@ import {
   Sun,
   Gamepad2,
   HelpCircle,
+  Compass,
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -51,9 +52,10 @@ export const Header: React.FC<HeaderProps> = ({
 
   const navLinks = [
     { view: 'home' as AppView, label: 'الرئيسية (العجلة)', icon: Home },
+    { view: 'monastic_oasis' as AppView, label: 'دستور المكرس', icon: Compass },
+    { view: 'spiritual_life' as AppView, label: 'الحياة الروحية', icon: Heart },
     { view: 'competitions_hub' as AppView, label: 'المسابقات والتقييم', icon: Trophy },
     { view: 'leaderboard' as AppView, label: 'لوحة الصدارة', icon: Trophy },
-    { view: 'spiritual_life' as AppView, label: 'الحياة الروحية', icon: Heart },
     { view: 'biblical_study' as AppView, label: 'الدراسة والآباء', icon: BookOpen },
     { view: 'library' as AppView, label: 'المكتبة المعرفية', icon: BookOpen },
     { view: 'workshops' as AppView, label: 'ورش العمل', icon: ScrollText },
