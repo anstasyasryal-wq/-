@@ -1,0 +1,348 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React, { useState, useEffect } from 'react';
+import { User, AppView, Stage, Announcement } from './types';
+import {
+  getCurrentUser,
+  setCurrentUser as persistCurrentUser,
+  getStoredStages,
+  getStoredAnnouncements,
+  saveStages,
+  saveAnnouncements,
+} from './utils/competitionEngine';
+import {
+  seedCloudDatabaseIfEmpty,
+  subscribeToCloudStages,
+  subscribeToCloudAnnouncements,
+  syncUserToCloud,
+} from './utils/firebaseService';
+import { Header } from './components/Header';
+import { HomeView } from './components/HomeView';
+import { StagePlayer } from './components/StagePlayer';
+import { LeaderboardView } from './components/LeaderboardView';
+import { SupervisorDashboard } from './components/SupervisorDashboard';
+import { FinalCeremonyView } from './components/FinalCeremonyView';
+import { ParticipantsListView } from './components/ParticipantsListView';
+import { CompetitionsHubView } from './components/CompetitionsHubView';
+import { RegistrationModal } from './components/RegistrationModal';
+import { RulesModal } from './components/RulesModal';
+import { SpiritualGuideModal } from './components/SpiritualGuideModal';
+import { SpiritualLifeView } from './components/SpiritualLifeView';
+import { BiblicalStudyView } from './components/BiblicalStudyView';
+import { PersonalSpaceView } from './components/PersonalSpaceView';
+import { LibraryView } from './components/LibraryView';
+import { WorkshopsView } from './components/WorkshopsView';
+import { CreativeLab } from './components/CreativeLab';
+import { StudyToolsView } from './components/StudyToolsView';
+import { MonasticOasis } from './components/MonasticOasis';
+import { SpiritualGamesHub } from './components/SpiritualGamesHub';
+import { ReadingThemeProvider, useReadingTheme } from './context/ReadingThemeContext';
+import { LanguageProvider, useLanguage } from './context/LanguageContext';
+import { EmergencyRescueModal } from './components/EmergencyRescueModal';
+import { HeavenlyMessageModal } from './components/HeavenlyMessageModal';
+
+function AppContent() {
+  const [currentView, setCurrentView] = useState<AppView>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('mokarasa_current_view') as AppView;
+      if (saved) return saved;
+    }
+    return 'home';
+  });
+  const [currentUser, setCurrentUserState] = useState<User | null>(null);
+  const [activeStageId, setActiveStageId] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('mokarasa_active_stage_id');
+      if (saved) return parseInt(saved) || 1;
+    }
+    return 1;
+  });
+  const [stages, setStages] = useState<Stage[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+
+  // Modals
+  const [showRegistrationModal, setShowRegistrationModal] = useState<boolean>(false);
+  const [showRulesModal, setShowRulesModal] = useState<boolean>(false);
+  const [showSpiritualGuideModal, setShowSpiritualGuideModal] = useState<boolean>(false);
+  const [showEmergencyModal, setShowEmergencyModal] = useState<boolean>(false);
+  const [showHeavenlyMessageModal, setShowHeavenlyMessageModal] = useState<boolean>(false);
+  const [emergencySituation, setEmergencySituation] = useState<'distress' | 'boredom' | 'lukewarmness' | 'anger'>('distress');
+
+  const { getContainerClass } = useReadingTheme();
+
+  useEffect(() => {
+    const user = getCurrentUser();
+    setCurrentUserState(user);
+    setStages(getStoredStages());
+    setAnnouncements(getStoredAnnouncements());
+  }, []);
+
+  const handleNavigate = (view: AppView) => {
+    setCurrentView(view);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('mokarasa_current_view', view);
+    }
+  };
+
+  const handleSetActiveStage = (stageId: number) => {
+    setActiveStageId(stageId);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('mokarasa_active_stage_id', String(stageId));
+    }
+  };
+
+  const handleUserUpdated = (user: User) => {
+    setCurrentUserState(user);
+    persistCurrentUser(user);
+    setStages(getStoredStages());
+  };
+
+  const handleStartStage = (stageId: number) => {
+    if (!currentUser) {
+      handleSetActiveStage(stageId);
+      setShowRegistrationModal(true);
+      return;
+    }
+    handleSetActiveStage(stageId);
+    handleNavigate('stage_player');
+  };
+
+  const handleFinishStage = (nextStageId?: number) => {
+    const updated = getCurrentUser();
+    if (updated) setCurrentUserState(updated);
+
+    if (nextStageId && nextStageId <= 6) {
+      handleSetActiveStage(nextStageId);
+      handleNavigate('stage_player');
+    } else if (nextStageId === 7 || nextStageId === undefined) {
+      handleNavigate('final_ceremony');
+    } else {
+      handleNavigate('leaderboard');
+    }
+  };
+
+  const handleOpenEmergency = (sit: 'distress' | 'boredom' | 'lukewarmness' | 'anger' = 'distress') => {
+    setEmergencySituation(sit);
+    setShowEmergencyModal(true);
+  };
+
+  return (
+    <div className={`min-h-screen ${getContainerClass()} font-sans selection:bg-amber-200 selection:text-amber-900 flex flex-col justify-between`}>
+      <div>
+        {/* Navigation Header */}
+        <Header
+          currentView={currentView}
+          currentUser={currentUser}
+          onNavigate={(view) => handleNavigate(view)}
+          onOpenLogin={() => setShowRegistrationModal(true)}
+          onOpenRules={() => setShowRulesModal(true)}
+          onOpenSpiritualGuide={() => setShowSpiritualGuideModal(true)}
+          onOpenHeavenlyMessage={() => setShowHeavenlyMessageModal(true)}
+        />
+
+        {/* Main Content Area */}
+        <main className="max-w-6xl mx-auto px-4 py-6">
+          {currentView === 'home' && (
+            <HomeView
+              currentUser={currentUser}
+              stages={stages}
+              announcements={announcements}
+              onStartStage={handleStartStage}
+              onOpenLogin={() => setShowRegistrationModal(true)}
+              onOpenMyRank={() => handleNavigate('leaderboard')}
+              onOpenRules={() => setShowRulesModal(true)}
+              onNavigateToLeaderboard={() => handleNavigate('leaderboard')}
+              onNavigateToDioceses={() => handleNavigate('dioceses')}
+              onNavigateToSupervisor={() => handleNavigate('supervisor')}
+              onNavigateToParticipants={() => handleNavigate('participants')}
+              onNavigateToCompetitions={() => handleNavigate('competitions_hub')}
+              onOpenSpiritualGuide={() => setShowSpiritualGuideModal(true)}
+              onNavigateToSpiritualLife={() => handleNavigate('spiritual_life')}
+              onNavigateToBiblicalStudy={() => handleNavigate('biblical_study')}
+              onNavigateToPersonalSpace={() => handleNavigate('personal_space')}
+              onNavigateToLibrary={() => handleNavigate('library')}
+              onNavigateToWorkshops={() => handleNavigate('workshops')}
+              onNavigateToCreativeLab={() => handleNavigate('creative_lab')}
+              onNavigateToStudyTools={() => handleNavigate('study_tools')}
+              onNavigateToMonasticOasis={() => handleNavigate('monastic_oasis')}
+              onOpenEmergencyModal={handleOpenEmergency}
+              onNavigateToSpiritualGames={() => handleNavigate('spiritual_games')}
+              onOpenHeavenlyMessage={() => setShowHeavenlyMessageModal(true)}
+            />
+          )}
+
+          {currentView === 'stage_player' && currentUser && (
+            <StagePlayer
+              key={`stage-${activeStageId}`}
+              stageId={activeStageId}
+              currentUser={currentUser}
+              onFinishStage={handleFinishStage}
+              onBackToHome={() => handleNavigate('home')}
+              onOpenLeaderboard={() => handleNavigate('leaderboard')}
+            />
+          )}
+
+          {currentView === 'competitions_hub' && (
+            <CompetitionsHubView
+              onStartStage={handleStartStage}
+              onBackToHome={() => handleNavigate('home')}
+            />
+          )}
+
+          {currentView === 'leaderboard' && (
+            <LeaderboardView
+              currentUser={currentUser}
+              onOpenRegister={() => setShowRegistrationModal(true)}
+              onStartStage={handleStartStage}
+              onBackToHome={() => handleNavigate('home')}
+            />
+          )}
+
+          {currentView === 'dioceses' && (
+            <LeaderboardView
+              currentUser={currentUser}
+              onOpenRegister={() => setShowRegistrationModal(true)}
+              onStartStage={handleStartStage}
+              onBackToHome={() => handleNavigate('home')}
+            />
+          )}
+
+          {currentView === 'spiritual_life' && (
+            <SpiritualLifeView
+              currentUser={currentUser}
+              onOpenLogin={() => setShowRegistrationModal(true)}
+              onOpenSpiritualGuide={() => setShowSpiritualGuideModal(true)}
+              onBackToHome={() => handleNavigate('home')}
+            />
+          )}
+
+          {currentView === 'biblical_study' && (
+            <BiblicalStudyView
+              currentUser={currentUser}
+              onBackToHome={() => handleNavigate('home')}
+            />
+          )}
+
+          {currentView === 'personal_space' && (
+            <PersonalSpaceView
+              currentUser={currentUser}
+              onOpenLogin={() => setShowRegistrationModal(true)}
+              onBackToHome={() => handleNavigate('home')}
+              onOpenHeavenlyMessage={() => setShowHeavenlyMessageModal(true)}
+            />
+          )}
+
+          {currentView === 'library' && (
+            <LibraryView
+              currentUser={currentUser}
+              onOpenLogin={() => setShowRegistrationModal(true)}
+              onBackToHome={() => handleNavigate('home')}
+            />
+          )}
+
+          {currentView === 'workshops' && (
+            <WorkshopsView
+              currentUser={currentUser}
+              onOpenLogin={() => setShowRegistrationModal(true)}
+              onBackToHome={() => handleNavigate('home')}
+            />
+          )}
+
+          {currentView === 'creative_lab' && (
+            <CreativeLab
+              currentUser={currentUser}
+              onBackToHome={() => handleNavigate('home')}
+            />
+          )}
+
+          {currentView === 'study_tools' && (
+            <StudyToolsView
+              currentUser={currentUser}
+              onBackToHome={() => handleNavigate('home')}
+            />
+          )}
+
+          {currentView === 'monastic_oasis' && (
+            <MonasticOasis
+              currentUser={currentUser}
+              onBackToHome={() => handleNavigate('home')}
+            />
+          )}
+
+          {currentView === 'spiritual_games' && (
+            <SpiritualGamesHub
+              currentUser={currentUser}
+              onBackToHome={() => handleNavigate('home')}
+            />
+          )}
+
+          {currentView === 'participants' && (
+            <ParticipantsListView
+              onOpenRegister={() => setShowRegistrationModal(true)}
+              onStartStage={handleStartStage}
+              onBackToHome={() => handleNavigate('home')}
+            />
+          )}
+
+          {currentView === 'supervisor' && (
+            <SupervisorDashboard
+              onTestStageAsAdmin={(stgId) => {
+                handleSetActiveStage(stgId);
+                handleNavigate('stage_player');
+              }}
+            />
+          )}
+
+          {currentView === 'final_ceremony' && (
+            <FinalCeremonyView
+              onBackToHome={() => handleNavigate('home')}
+              onOpenLeaderboard={() => handleNavigate('leaderboard')}
+            />
+          )}
+        </main>
+      </div>
+
+      {/* Modals */}
+      <RegistrationModal
+        isOpen={showRegistrationModal}
+        onClose={() => setShowRegistrationModal(false)}
+        onSuccess={handleUserUpdated}
+      />
+
+      <RulesModal
+        isOpen={showRulesModal}
+        onClose={() => setShowRulesModal(false)}
+      />
+
+      <SpiritualGuideModal
+        isOpen={showSpiritualGuideModal}
+        onClose={() => setShowSpiritualGuideModal(false)}
+      />
+
+      <EmergencyRescueModal
+        isOpen={showEmergencyModal}
+        onClose={() => setShowEmergencyModal(false)}
+        situation={emergencySituation}
+      />
+
+      <HeavenlyMessageModal
+        isOpen={showHeavenlyMessageModal}
+        onClose={() => setShowHeavenlyMessageModal(false)}
+        currentUser={currentUser}
+      />
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <LanguageProvider>
+      <ReadingThemeProvider>
+        <AppContent />
+      </ReadingThemeProvider>
+    </LanguageProvider>
+  );
+}
