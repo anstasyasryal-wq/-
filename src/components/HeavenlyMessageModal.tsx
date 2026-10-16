@@ -16,15 +16,25 @@ import {
   Layers,
   Flame,
   Check,
+  Clock,
+  ShieldCheck,
+  RefreshCw,
 } from 'lucide-react';
 import { User } from '../types';
 import {
   HeavenlyMessage,
   HEAVENLY_MESSAGES,
-  getRandomHeavenlyMessage,
-  getDailyHeavenlyMessage,
   searchHeavenlyMessages,
 } from '../data/heavenlyMessages';
+import {
+  getOrRefreshDailyMessage,
+  getFreshLuckyMessage,
+  getEligibleHeavenlyMessages,
+  formatRemainingTime,
+  getFreshStats,
+  isMessageSeenInLast24Hours,
+  recordMessageSeen,
+} from '../utils/heavenlyHistory';
 import { soundManager } from '../utils/audio';
 
 interface HeavenlyMessageModalProps {
@@ -40,10 +50,12 @@ export const HeavenlyMessageModal: React.FC<HeavenlyMessageModalProps> = ({
   currentUser,
   initialCategory,
 }) => {
-  const [activeTab, setActiveTab] = useState<'draw' | 'daily' | 'favorites' | 'browse'>('draw');
-  const [currentMessage, setCurrentMessage] = useState<HeavenlyMessage>(() =>
-    getDailyHeavenlyMessage(currentUser?.name)
-  );
+  const [activeTab, setActiveTab] = useState<'draw' | 'daily' | 'favorites' | 'browse'>('daily');
+  const [dailyInfo, setDailyInfo] = useState(() => getOrRefreshDailyMessage(false));
+  const [currentMessage, setCurrentMessage] = useState<HeavenlyMessage>(() => {
+    return getOrRefreshDailyMessage(false).message;
+  });
+  const [freshStats, setFreshStats] = useState(() => getFreshStats());
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory || 'all');
   const [isDrawing, setIsDrawing] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -65,14 +77,30 @@ export const HeavenlyMessageModal: React.FC<HeavenlyMessageModalProps> = ({
     }
   }, []);
 
-  // Sync daily message if modal opens
+  // Sync daily message and non-repeating stats when modal opens or tab changes
   useEffect(() => {
     if (isOpen) {
+      const daily = getOrRefreshDailyMessage(false);
+      setDailyInfo(daily);
+      setFreshStats(getFreshStats());
       if (activeTab === 'daily') {
-        setCurrentMessage(getDailyHeavenlyMessage(currentUser?.name));
+        setCurrentMessage(daily.message);
       }
     }
-  }, [isOpen, currentUser, activeTab]);
+  }, [isOpen, activeTab]);
+
+  // Periodic remaining time update (every minute)
+  useEffect(() => {
+    if (!isOpen) return;
+    const timer = setInterval(() => {
+      setDailyInfo((prev) => {
+        const currentDaily = getOrRefreshDailyMessage(false);
+        return currentDaily;
+      });
+      setFreshStats(getFreshStats());
+    }, 60000);
+    return () => clearInterval(timer);
+  }, [isOpen]);
 
   // Save favorites helper
   const toggleFavorite = (id: string) => {
@@ -89,25 +117,52 @@ export const HeavenlyMessageModal: React.FC<HeavenlyMessageModalProps> = ({
     });
   };
 
-  // Lucky Draw handler with shuffling animation
+  // 24-Hour Non-Repeating: Draw a fresh lucky message
   const handleLuckyDraw = (categoryFilter?: string) => {
     if (isDrawing) return;
     setIsDrawing(true);
     soundManager.playTick();
 
-    // Shuffling animation: rapid flickers for 400ms
-    let flickerCount = 0;
     const cat = categoryFilter || selectedCategory;
+    let flickerCount = 0;
     const interval = setInterval(() => {
       flickerCount++;
-      const temp = getRandomHeavenlyMessage(cat, currentMessage.id);
-      setCurrentMessage(temp);
+      const eligible = getEligibleHeavenlyMessages(cat, currentMessage.id);
+      const randomIdx = Math.floor(Math.random() * eligible.length);
+      setCurrentMessage(eligible[randomIdx] || HEAVENLY_MESSAGES[0]);
       if (flickerCount >= 6) {
         clearInterval(interval);
-        const finalMsg = getRandomHeavenlyMessage(cat, currentMessage.id);
+        // Guaranteed fresh message not seen in last 24h
+        const finalMsg = getFreshLuckyMessage(cat, currentMessage.id);
         setCurrentMessage(finalMsg);
+        setFreshStats(getFreshStats());
         setIsDrawing(false);
         soundManager.playCorrect();
+      }
+    }, 70);
+  };
+
+  // 24-Hour Non-Repeating: Request a brand new daily message
+  const handleGetNewDailyMessage = () => {
+    if (isDrawing) return;
+    setIsDrawing(true);
+    soundManager.playTick();
+
+    let flickerCount = 0;
+    const interval = setInterval(() => {
+      flickerCount++;
+      const eligible = getEligibleHeavenlyMessages();
+      const randomIdx = Math.floor(Math.random() * eligible.length);
+      setCurrentMessage(eligible[randomIdx] || HEAVENLY_MESSAGES[0]);
+      if (flickerCount >= 6) {
+        clearInterval(interval);
+        // Force new daily message that has not appeared in last 24h
+        const freshDaily = getOrRefreshDailyMessage(true);
+        setCurrentMessage(freshDaily.message);
+        setDailyInfo(freshDaily);
+        setFreshStats(getFreshStats());
+        setIsDrawing(false);
+        soundManager.playVictory();
       }
     }, 70);
   };
@@ -246,21 +301,11 @@ export const HeavenlyMessageModal: React.FC<HeavenlyMessageModalProps> = ({
         {/* Navigation Tabs */}
         <div className="flex items-center gap-1.5 p-3 bg-stone-950/60 border-b border-stone-800/80 overflow-x-auto text-xs font-bold scrollbar-none">
           <button
-            onClick={() => setActiveTab('draw')}
-            className={`px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition shrink-0 cursor-pointer ${
-              activeTab === 'draw'
-                ? 'bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-md'
-                : 'text-stone-300 hover:bg-stone-900'
-            }`}
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>سحب رسالة بالحظ</span>
-          </button>
-
-          <button
             onClick={() => {
               setActiveTab('daily');
-              setCurrentMessage(getDailyHeavenlyMessage(currentUser?.name));
+              const daily = getOrRefreshDailyMessage(false);
+              setDailyInfo(daily);
+              setCurrentMessage(daily.message);
             }}
             className={`px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition shrink-0 cursor-pointer ${
               activeTab === 'daily'
@@ -269,7 +314,19 @@ export const HeavenlyMessageModal: React.FC<HeavenlyMessageModalProps> = ({
             }`}
           >
             <Calendar className="w-3.5 h-3.5" />
-            <span>رسالة اليوم المخصصة</span>
+            <span>رسالة اليوم (تجديد كل 24 ساعة)</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('draw')}
+            className={`px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition shrink-0 cursor-pointer ${
+              activeTab === 'draw'
+                ? 'bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-md'
+                : 'text-stone-300 hover:bg-stone-900'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>سحب بالحظ (غير مكرر)</span>
           </button>
 
           <button
@@ -298,40 +355,69 @@ export const HeavenlyMessageModal: React.FC<HeavenlyMessageModalProps> = ({
         </div>
 
         {/* Modal Body */}
-        <div className="p-4 sm:p-6 max-h-[72vh] overflow-y-auto space-y-5">
+        <div className="p-4 sm:p-6 max-h-[72vh] overflow-y-auto space-y-4">
           {/* TAB 1 & 2: LUCKY DRAW OR DAILY MESSAGE */}
           {(activeTab === 'draw' || activeTab === 'daily') && (
             <>
-              {/* Category pills for lucky draw */}
+              {/* 24-Hour Non-Repeating Status Banner */}
+              {activeTab === 'daily' && (
+                <div className="bg-amber-950/40 border border-amber-500/40 rounded-2xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs animate-fade-in">
+                  <div className="flex items-center gap-2 text-amber-200">
+                    <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <div>
+                      <span className="font-bold text-amber-300">حماية عدم التكرار (24 ساعة): </span>
+                      <span className="text-stone-300">مضمون ألا تظهر لك هذه الرسالة مجدداً قبل انقضاء 24 ساعة.</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-amber-300 font-bold bg-stone-950/80 px-3 py-1.5 rounded-xl border border-amber-800/40 shrink-0 text-[11px]">
+                    <Clock className="w-3.5 h-3.5 text-amber-400" />
+                    <span>الوقت المتبقي: {formatRemainingTime(dailyInfo.timeRemainingMs)}</span>
+                  </div>
+                </div>
+              )}
+
               {activeTab === 'draw' && (
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold text-amber-300/90 flex items-center gap-1.5">
-                      <Flame className="w-3.5 h-3.5 text-amber-400" />
-                      اختر حالة قلبك أو اتركها قرعة مباركة:
-                    </span>
-                    <span className="text-[11px] text-stone-400">
-                      {HEAVENLY_MESSAGES.length} رسالة متاحة
+                <div className="space-y-3">
+                  <div className="bg-stone-900/80 border border-amber-600/30 rounded-2xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-stone-300">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
+                      <span>السحب يستبعد تلقائياً جميع الرسائل المعروضة في الـ 24 ساعة الماضية.</span>
+                    </div>
+                    <span className="text-amber-300 font-bold bg-amber-950/80 px-2.5 py-1 rounded-lg border border-amber-800/40 shrink-0 text-[11px]">
+                      {freshStats.freshCount} رسالة طازجة متوفرة
                     </span>
                   </div>
-                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-                    {categories.map((c) => (
-                      <button
-                        key={c.id}
-                        onClick={() => {
-                          setSelectedCategory(c.id);
-                          handleLuckyDraw(c.id);
-                        }}
-                        className={`px-2.5 py-1.5 rounded-lg text-xs font-medium shrink-0 transition flex items-center gap-1 cursor-pointer border ${
-                          selectedCategory === c.id
-                            ? 'bg-amber-500/20 text-amber-200 border-amber-400/50 shadow-xs'
-                            : 'bg-stone-900/80 text-stone-300 border-stone-800 hover:bg-stone-800'
-                        }`}
-                      >
-                        <span>{c.icon}</span>
-                        <span>{c.label}</span>
-                      </button>
-                    ))}
+
+                  {/* Category pills for lucky draw */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold text-amber-300/90 flex items-center gap-1.5">
+                        <Flame className="w-3.5 h-3.5 text-amber-400" />
+                        اختر حالة قلبك أو اتركها قرعة مباركة:
+                      </span>
+                      <span className="text-[11px] text-stone-400">
+                        {freshStats.freshCount} غير مكررة
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                      {categories.map((c) => (
+                        <button
+                          key={c.id}
+                          onClick={() => {
+                            setSelectedCategory(c.id);
+                            handleLuckyDraw(c.id);
+                          }}
+                          className={`px-2.5 py-1.5 rounded-lg text-xs font-medium shrink-0 transition flex items-center gap-1 cursor-pointer border ${
+                            selectedCategory === c.id
+                              ? 'bg-amber-500/20 text-amber-200 border-amber-400/50 shadow-xs'
+                              : 'bg-stone-900/80 text-stone-300 border-stone-800 hover:bg-stone-800'
+                          }`}
+                        >
+                          <span>{c.icon}</span>
+                          <span>{c.label}</span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
@@ -354,6 +440,9 @@ export const HeavenlyMessageModal: React.FC<HeavenlyMessageModalProps> = ({
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-bold">
                     <span>{currentMessage.icon || '🕊️'}</span>
                     <span>{currentMessage.categoryLabel}</span>
+                    <span className="text-[10px] text-emerald-400 font-mono border-r border-amber-500/30 pr-2">
+                      ✓ فريدة لليوم
+                    </span>
                   </div>
 
                   <div className="flex items-center gap-1">
@@ -425,17 +514,30 @@ export const HeavenlyMessageModal: React.FC<HeavenlyMessageModalProps> = ({
                 {/* Bottom Action Buttons */}
                 <div className="mt-6 pt-4 border-t border-amber-900/40 flex flex-wrap items-center justify-between gap-2.5">
                   <div className="flex items-center gap-2">
-                    {/* Lucky Draw Trigger */}
-                    <button
-                      onClick={() => handleLuckyDraw()}
-                      disabled={isDrawing}
-                      className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 hover:from-amber-500 hover:to-amber-500 text-stone-950 font-black text-xs sm:text-sm shadow-lg shadow-amber-600/30 flex items-center gap-2 transition cursor-pointer active:scale-95 disabled:opacity-50"
-                    >
-                      <RotateCcw
-                        className={`w-4 h-4 ${isDrawing ? 'animate-spin' : ''}`}
-                      />
-                      <span>{isDrawing ? 'جارٍ السحب...' : 'اسحب رسالة أخرى بالحظ'}</span>
-                    </button>
+                    {activeTab === 'daily' ? (
+                      /* Get New Daily Message Button (Guaranteed fresh, non-repeating) */
+                      <button
+                        onClick={handleGetNewDailyMessage}
+                        disabled={isDrawing}
+                        className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 hover:from-amber-500 hover:to-amber-500 text-stone-950 font-black text-xs sm:text-sm shadow-lg shadow-amber-600/30 flex items-center gap-2 transition cursor-pointer active:scale-95 disabled:opacity-50"
+                        title="الحصول على رسالة يومية جديدة مضمونة ألا تتكرر خلال 24 ساعة"
+                      >
+                        <RefreshCw className={`w-4 h-4 ${isDrawing ? 'animate-spin' : ''}`} />
+                        <span>{isDrawing ? 'جارٍ جلب رسالة جديدة...' : 'احصل على رسالة يومية جديدة (غير مكررة)'}</span>
+                      </button>
+                    ) : (
+                      /* Lucky Draw Trigger */
+                      <button
+                        onClick={() => handleLuckyDraw()}
+                        disabled={isDrawing}
+                        className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 hover:from-amber-500 hover:to-amber-500 text-stone-950 font-black text-xs sm:text-sm shadow-lg shadow-amber-600/30 flex items-center gap-2 transition cursor-pointer active:scale-95 disabled:opacity-50"
+                      >
+                        <RotateCcw
+                          className={`w-4 h-4 ${isDrawing ? 'animate-spin' : ''}`}
+                        />
+                        <span>{isDrawing ? 'جارٍ السحب...' : 'اسحب رسالة جديدة بالحظ'}</span>
+                      </button>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-2">
@@ -583,7 +685,18 @@ export const HeavenlyMessageModal: React.FC<HeavenlyMessageModalProps> = ({
                         <span className="text-[10px] text-amber-400 font-bold">
                           {msg.categoryLabel}
                         </span>
-                        <span className="text-xs">{msg.icon || '🕊️'}</span>
+                        <div className="flex items-center gap-1.5">
+                          {isMessageSeenInLast24Hours(msg.id) ? (
+                            <span className="text-[9px] text-amber-300 bg-amber-950/80 px-1.5 py-0.5 rounded border border-amber-800/40">
+                              شوهدت اليوم
+                            </span>
+                          ) : (
+                            <span className="text-[9px] text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-800/40">
+                              جديدة
+                            </span>
+                          )}
+                          <span className="text-xs">{msg.icon || '🕊️'}</span>
+                        </div>
                       </div>
                       <p className="text-xs font-medium text-stone-200 line-clamp-3 mb-2">
                         {msg.message}

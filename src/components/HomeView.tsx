@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { User, Stage, Announcement } from '../types';
 import { FortuneWheel, WheelSection } from './FortuneWheel';
-import { getDailyHeavenlyMessage } from '../data/heavenlyMessages';
-import { Sparkles, Heart } from 'lucide-react';
+import { getOrRefreshDailyMessage, formatRemainingTime } from '../utils/heavenlyHistory';
+import { Sparkles, Heart, Clock, ShieldCheck } from 'lucide-react';
 
 interface HomeViewProps {
   currentUser: User | null;
@@ -58,7 +58,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
   onOpenHeavenlyMessage,
 }) => {
   const [selectedSection, setSelectedSection] = useState<WheelSection | null>(null);
-  const dailyMessage = getDailyHeavenlyMessage(currentUser?.name);
+  const { message: dailyMessage, timeRemainingMs } = getOrRefreshDailyMessage(false);
 
   const wheelSections: WheelSection[] = [
     {
@@ -262,10 +262,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 💌
               </div>
               <div className="space-y-1.5">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <h3 className="text-base sm:text-lg font-spiritual font-black text-amber-200">
                     رسالة من أبيك السماوي (بالحظ والقرعة)
                   </h3>
+                  <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+                    <ShieldCheck className="w-3 h-3 text-emerald-400" />
+                    <span>غير مكررة لمدة 24 ساعة</span>
+                  </span>
                   <span className="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-full font-bold">
                     ٦٨+ رسالة بركة
                   </span>
@@ -273,8 +277,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 <p className="text-xs sm:text-sm text-stone-300 line-clamp-2 max-w-2xl leading-relaxed">
                   «{dailyMessage.message}»
                 </p>
-                <div className="text-[11px] text-amber-400 font-serif font-semibold">
-                  — {dailyMessage.verseRef} ({dailyMessage.categoryLabel})
+                <div className="flex flex-wrap items-center gap-3 text-[11px]">
+                  <span className="text-amber-400 font-serif font-semibold">
+                    — {dailyMessage.verseRef} ({dailyMessage.categoryLabel})
+                  </span>
+                  <span className="text-stone-400 flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-amber-400" />
+                    <span>تتجدد تلقائياً بعد: {formatRemainingTime(timeRemainingMs)}</span>
+                  </span>
                 </div>
               </div>
             </div>
