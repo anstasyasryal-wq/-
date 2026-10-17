@@ -158,6 +158,112 @@ class SoundEffectsManager {
       // Ignore
     }
   }
+
+  // Calm Church Tones for Spiritual Life Reminders
+  public playCopticBell() {
+    if (this.isMuted) return;
+    try {
+      const ctx = this.getContext();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+      // Fundamental bell tone + overtone
+      [440, 880, 1174.66, 1760].forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now);
+        const amp = 0.12 / (idx + 1);
+        gain.gain.setValueAtTime(amp, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.2);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 2.3);
+      });
+    } catch {
+      // Ignore
+    }
+  }
+
+  public playAgpeyaChime() {
+    if (this.isMuted) return;
+    try {
+      const ctx = this.getContext();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+      [523.25, 659.25, 783.99].forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.15);
+        gain.gain.setValueAtTime(0, now + idx * 0.15);
+        gain.gain.linearRampToValueAtTime(0.1, now + idx * 0.15 + 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.15 + 1.8);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + idx * 0.15);
+        osc.stop(now + idx * 0.15 + 1.9);
+      });
+    } catch {
+      // Ignore
+    }
+  }
+
+  public playPsalmodyFlute() {
+    if (this.isMuted) return;
+    try {
+      const ctx = this.getContext();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+      [349.23, 440, 523.25, 698.46].forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+        gain.gain.setValueAtTime(0, now + idx * 0.12);
+        gain.gain.linearRampToValueAtTime(0.08, now + idx * 0.12 + 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.12 + 1.6);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + idx * 0.12);
+        osc.stop(now + idx * 0.12 + 1.7);
+      });
+    } catch {
+      // Ignore
+    }
+  }
+
+  public playHarpOfDavid() {
+    if (this.isMuted) return;
+    try {
+      const ctx = this.getContext();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+      [392.00, 493.88, 587.33, 783.99, 987.77].forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.07);
+        gain.gain.setValueAtTime(0, now + idx * 0.07);
+        gain.gain.linearRampToValueAtTime(0.09, now + idx * 0.07 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.07 + 1.5);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + idx * 0.07);
+        osc.stop(now + idx * 0.07 + 1.6);
+      });
+    } catch {
+      // Ignore
+    }
+  }
+
+  public playChurchTone(toneId: string) {
+    if (toneId === 'coptic_bell') this.playCopticBell();
+    else if (toneId === 'agpeya_chime') this.playAgpeyaChime();
+    else if (toneId === 'psalmody_flute') this.playPsalmodyFlute();
+    else if (toneId === 'harp_david') this.playHarpOfDavid();
+    else this.playAgpeyaChime();
+  }
 }
 
 export const soundManager = new SoundEffectsManager();

@@ -17,7 +17,8 @@ export type AppView =
   | 'monastic_oasis'
   | 'spiritual_games'
   | 'collective_challenges'
-  | 'spiritual_calendar';
+  | 'spiritual_calendar'
+  | 'spiritual_father';
 
 export type UserRole = 'participant' | 'supervisor' | 'guest';
 

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { User, AppView } from '../types';
 import { soundManager } from '../utils/audio';
 import { useReadingTheme } from '../context/ReadingThemeContext';
+import { useHymnsAudio } from '../context/HymnsAudioContext';
 import {
   Trophy,
   Volume2,
@@ -21,6 +22,8 @@ import {
   Compass,
   Users,
   Calendar,
+  Headphones,
+  ShieldCheck,
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -46,6 +49,7 @@ export const Header: React.FC<HeaderProps> = ({
   const [isMuted, setIsMuted] = useState(soundManager.getIsMuted());
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isNightMode, toggleNightMode } = useReadingTheme();
+  const { isPlaying, openPlayerModal, currentOccasion } = useHymnsAudio();
 
   const toggleSound = () => {
     const nextState = soundManager.toggleMute();
@@ -54,6 +58,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   const navLinks = [
     { view: 'home' as AppView, label: 'الرئيسية (العجلة)', icon: Home },
+    { view: 'spiritual_father' as AppView, label: 'أبوي الروحي وإعداد الاعتراف', icon: ShieldCheck },
     { view: 'monastic_oasis' as AppView, label: 'دستور المكرس', icon: Compass },
     { view: 'spiritual_life' as AppView, label: 'الحياة الروحية', icon: Heart },
     { view: 'library' as AppView, label: 'المكتبة والآباء', icon: BookOpen },
@@ -109,6 +114,17 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Right utility buttons */}
         <div className="flex items-center gap-2">
+          {/* Spiritual Guide Button */}
+          <button
+            onClick={onOpenSpiritualGuide}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-sky-500/20 via-sky-600/30 to-sky-700/20 hover:from-sky-500/30 hover:to-sky-600/40 border border-sky-400/50 text-sky-200 text-xs font-bold shadow-sm transition cursor-pointer group"
+            title="المرشد الروحي التفاعلي"
+          >
+            <span className="text-sm group-hover:scale-125 transition-transform duration-200">🛡️</span>
+            <span className="hidden md:inline">المرشد الروحي</span>
+            <span className="md:hidden">المرشد</span>
+          </button>
+
           {/* Heavenly Message Button */}
           <button
             onClick={onOpenHeavenlyMessage}
@@ -118,6 +134,21 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="text-sm group-hover:scale-125 transition-transform duration-200">💌</span>
             <span className="hidden md:inline">رسالة من أبيك السماوي</span>
             <span className="md:hidden">رسالة اليوم</span>
+          </button>
+
+          {/* Hymns & Chants Audio Player Button */}
+          <button
+            onClick={openPlayerModal}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold shadow-xs transition cursor-pointer ${
+              isPlaying
+                ? 'bg-amber-600/30 border-amber-400 text-amber-200 animate-pulse'
+                : 'bg-stone-900 hover:bg-stone-800 border-stone-800 text-amber-400'
+            }`}
+            title="مشغل الترانيم والألحان الكنسية والتأملية"
+          >
+            <span className="text-sm">{currentOccasion.icon}</span>
+            <Headphones className="w-3.5 h-3.5 text-amber-400" />
+            <span className="hidden xl:inline">{isPlaying ? 'الترانيم تعمل ♫' : 'مشغل الترانيم'}</span>
           </button>
 
           {/* Sound Toggle */}

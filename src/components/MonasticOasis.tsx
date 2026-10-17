@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { User } from '../types';
 import { soundManager } from '../utils/audio';
 import { MonasticAudioPlayer } from './MonasticAudioPlayer';
+import confetti from 'canvas-confetti';
 import {
   Compass,
   ChevronLeft,
@@ -30,7 +31,7 @@ interface MonasticOasisProps {
 }
 
 export const MonasticOasis: React.FC<MonasticOasisProps> = ({ currentUser, onBackToHome }) => {
-  const [activeTab, setActiveTab] = useState<'pillars' | 'examen' | 'covenant' | 'dispensary' | 'virtues'>('pillars');
+  const [activeTab, setActiveTab] = useState<'pillars' | 'examen' | 'covenant' | 'dispensary' | 'virtues' | 'retreat_eval'>('pillars');
 
   // --- 1. PILLARS OF CONSECRATION ---
   const [expandedPillar, setExpandedPillar] = useState<number | null>(1);
@@ -379,6 +380,74 @@ export const MonasticOasis: React.FC<MonasticOasisProps> = ({ currentUser, onBac
 
   const activeVirtue = monasticVirtues[currentVirtueIndex];
 
+  // --- 6. RETREAT EVALUATION & PERSONAL REFLECTION ---
+  interface RetreatEvaluation {
+    id: string;
+    date: string;
+    calmnessScore: number;
+    innerGrowthScore: number;
+    prayerDepthScore: number;
+    notes: string;
+  }
+
+  const RETREAT_STORAGE_KEY = 'mokarasa_retreat_evaluations_v1';
+  const [calmnessScore, setCalmnessScore] = useState<number>(5);
+  const [innerGrowthScore, setInnerGrowthScore] = useState<number>(5);
+  const [prayerDepthScore, setPrayerDepthScore] = useState<number>(5);
+  const [retreatNotes, setRetreatNotes] = useState<string>('');
+  const [savedRetreatEvals, setSavedRetreatEvals] = useState<RetreatEvaluation[]>(() => {
+    try {
+      const saved = localStorage.getItem(RETREAT_STORAGE_KEY);
+      return saved ? JSON.parse(saved) : [
+        {
+          id: 'eval-demo',
+          date: new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }),
+          calmnessScore: 5,
+          innerGrowthScore: 5,
+          prayerDepthScore: 4,
+          notes: 'خلوة مباركة شعرت فيها بسلام عميق وتهدئة للأفكار المشتتة بفضل صلاة المخدع والهدوء.',
+        }
+      ];
+    } catch {
+      return [];
+    }
+  });
+
+  const handleSaveRetreatEval = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!retreatNotes.trim()) return;
+
+    soundManager.playCorrect();
+    const newEval: RetreatEvaluation = {
+      id: `eval_${Date.now()}`,
+      date: new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+      calmnessScore,
+      innerGrowthScore,
+      prayerDepthScore,
+      notes: retreatNotes.trim(),
+    };
+
+    const updated = [newEval, ...savedRetreatEvals];
+    setSavedRetreatEvals(updated);
+    try {
+      localStorage.setItem(RETREAT_STORAGE_KEY, JSON.stringify(updated));
+    } catch {}
+
+    setRetreatNotes('');
+    try {
+      confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 } });
+    } catch {}
+  };
+
+  const handleDeleteRetreatEval = (id: string) => {
+    soundManager.playTick();
+    const updated = savedRetreatEvals.filter((item) => item.id !== id);
+    setSavedRetreatEvals(updated);
+    try {
+      localStorage.setItem(RETREAT_STORAGE_KEY, JSON.stringify(updated));
+    } catch {}
+  };
+
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-16 animate-fade-in text-right" dir="rtl">
       {/* Top Back Navigation Bar */}
@@ -489,6 +558,21 @@ export const MonasticOasis: React.FC<MonasticOasisProps> = ({ currentUser, onBac
         >
           <Flame className="w-4 h-4 text-amber-300" />
           <span>بستان فضائل الآباء</span>
+        </button>
+
+        <button
+          onClick={() => {
+            soundManager.playTick();
+            setActiveTab('retreat_eval');
+          }}
+          className={`px-4 py-2.5 rounded-xl flex items-center gap-2 transition shrink-0 cursor-pointer ${
+            activeTab === 'retreat_eval'
+              ? 'bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-md'
+              : 'text-stone-300 hover:bg-stone-800'
+          }`}
+        >
+          <Heart className="w-4 h-4 text-amber-300" />
+          <span>تقييم الخلوة والنمو الداخلي</span>
         </button>
       </div>
 
@@ -950,6 +1034,158 @@ export const MonasticOasis: React.FC<MonasticOasisProps> = ({ currentUser, onBac
           <div className="p-4 rounded-2xl bg-stone-950 border border-emerald-600/40 space-y-1.5 text-xs">
             <span className="font-bold text-emerald-400 block">💡 التدريب العملي للمكرس:</span>
             <p className="text-stone-200 leading-relaxed">{activeVirtue.practice}</p>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB 6: RETREAT EVALUATION & PERSONAL REFLECTION */}
+      {/* ========================================================================= */}
+      {activeTab === 'retreat_eval' && (
+        <div className="p-6 sm:p-8 rounded-3xl bg-stone-900 border-2 border-amber-500/60 shadow-xl space-y-6 text-right animate-fade-in">
+          <div className="border-b border-amber-800/40 pb-3 flex items-center justify-between">
+            <div>
+              <span className="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+                <Heart className="w-4 h-4 text-amber-400" />
+                <span>تقييم تجربة الخلوة الروحية والنمو الداخلي:</span>
+              </span>
+              <h2 className="font-spiritual text-xl sm:text-2xl font-bold text-amber-100 mt-1">
+                سجل ثمار الخلوة والسكون القلبي
+              </h2>
+            </div>
+          </div>
+
+          <p className="text-xs sm:text-sm text-stone-300 leading-relaxed">
+            قيّم تجربتك الروحية اليوم من حيث الهدوء، السلام، وعمق الصلاة، واكتب ملاحظاتك الشخصية عما اكتسبته من نعمة ونمو داخلي ليظل شاهداً على عمل النعمة في حياتك.
+          </p>
+
+          <form onSubmit={handleSaveRetreatEval} className="space-y-5 bg-stone-950 p-6 rounded-3xl border border-stone-800">
+            {/* Sliders / Score Selectors */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Calmness */}
+              <div className="p-4 rounded-2xl bg-stone-900 border border-stone-800 space-y-2">
+                <div className="flex items-center justify-between text-xs font-bold text-amber-300">
+                  <span>هدوء المخدع والسكينة</span>
+                  <span className="text-amber-400 font-mono text-sm">{calmnessScore} / 5</span>
+                </div>
+                <input
+                  type="range"
+                  min="1"
+                  max="5"
+                  value={calmnessScore}
+                  onChange={(e) => setCalmnessScore(parseInt(e.target.value))}
+                  className="w-full accent-amber-500 cursor-pointer"
+                />
+                <div className="flex justify-between text-[10px] text-stone-400 font-mono">
+                  <span>مشتت</span>
+                  <span>هادئ جداً</span>
+                </div>
+              </div>
+
+              {/* Inner Growth */}
+              <div className="p-4 rounded-2xl bg-stone-900 border border-stone-800 space-y-2">
+                <div className="flex items-center justify-between text-xs font-bold text-amber-300">
+                  <span>النمو الداخلي والسلام</span>
+                  <span className="text-amber-400 font-mono text-sm">{innerGrowthScore} / 5</span>
+                </div>
+                <input
+                  type="range"
+                  min="1"
+                  max="5"
+                  value={innerGrowthScore}
+                  onChange={(e) => setInnerGrowthScore(parseInt(e.target.value))}
+                  className="w-full accent-amber-500 cursor-pointer"
+                />
+                <div className="flex justify-between text-[10px] text-stone-400 font-mono">
+                  <span>ضعيف</span>
+                  <span>عميق ومثمر</span>
+                </div>
+              </div>
+
+              {/* Prayer Depth */}
+              <div className="p-4 rounded-2xl bg-stone-900 border border-stone-800 space-y-2">
+                <div className="flex items-center justify-between text-xs font-bold text-amber-300">
+                  <span>عمق الصلاة والتأمل</span>
+                  <span className="text-amber-400 font-mono text-sm">{prayerDepthScore} / 5</span>
+                </div>
+                <input
+                  type="range"
+                  min="1"
+                  max="5"
+                  value={prayerDepthScore}
+                  onChange={(e) => setPrayerDepthScore(parseInt(e.target.value))}
+                  className="w-full accent-amber-500 cursor-pointer"
+                />
+                <div className="flex justify-between text-[10px] text-stone-400 font-mono">
+                  <span>جاف</span>
+                  <span>منسكب بحرارة</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Notes Textarea */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-stone-200 block">
+                ملاحظاتك الشخصية وثمار الخلوة (ماذا اكتسبت من هدوء ونمو داخلي اليوم؟):
+              </label>
+              <textarea
+                rows={4}
+                value={retreatNotes}
+                onChange={(e) => setRetreatNotes(e.target.value)}
+                placeholder="اكتب هنا تأملاتك، شعورك بالسلام الداخلي، الآيات التي مست قلبك، والدروس الروحية المستفادة من الخلوة..."
+                required
+                className="w-full p-4 rounded-2xl bg-stone-900 border border-stone-800 text-stone-100 text-xs focus:border-amber-400 outline-none leading-relaxed"
+              />
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                className="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 text-white font-bold text-xs shadow-lg transition cursor-pointer flex items-center gap-2"
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>حفظ تقييم وثمار الخلوة</span>
+              </button>
+            </div>
+          </form>
+
+          {/* History of Saved Evaluations */}
+          <div className="space-y-3 pt-2">
+            <h3 className="font-spiritual text-base font-bold text-amber-200">
+              📖 سجل خلواتك وتأملاتك المحفوظة ({savedRetreatEvals.length})
+            </h3>
+
+            <div className="space-y-3">
+              {savedRetreatEvals.map((item) => (
+                <div
+                  key={item.id}
+                  className="p-5 rounded-2xl bg-stone-950 border border-stone-800 space-y-3 shadow-md flex flex-col justify-between"
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-[11px] text-stone-400 font-mono border-b border-stone-800 pb-2">
+                      <span className="text-amber-400 font-bold">{item.date}</span>
+                      <div className="flex items-center gap-3">
+                        <span>الهدوء: {item.calmnessScore}/5</span>
+                        <span>النمو: {item.innerGrowthScore}/5</span>
+                        <span>الصلاة: {item.prayerDepthScore}/5</span>
+                      </div>
+                    </div>
+                    <p className="text-xs sm:text-sm text-stone-200 leading-relaxed font-spiritual">
+                      {item.notes}
+                    </p>
+                  </div>
+
+                  <div className="pt-2 flex justify-end">
+                    <button
+                      onClick={() => handleDeleteRetreatEval(item.id)}
+                      className="text-stone-500 hover:text-rose-400 text-xs transition cursor-pointer"
+                    >
+                      حذف التقييم
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}

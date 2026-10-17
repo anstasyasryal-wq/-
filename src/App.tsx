@@ -39,6 +39,9 @@ import { CreativeLab } from './components/CreativeLab';
 import { StudyToolsView } from './components/StudyToolsView';
 import { MonasticOasis } from './components/MonasticOasis';
 import { SpiritualGamesHub } from './components/SpiritualGamesHub';
+import { CollectiveChallengesView } from './components/CollectiveChallengesView';
+import { SpiritualCalendarView } from './components/SpiritualCalendarView';
+import { SpiritualFatherCompanion } from './components/SpiritualFatherCompanion';
 import { ReadingThemeProvider, useReadingTheme } from './context/ReadingThemeContext';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { EmergencyRescueModal } from './components/EmergencyRescueModal';
@@ -46,8 +49,8 @@ import { HeavenlyMessageModal } from './components/HeavenlyMessageModal';
 import { SpiritualJournal } from './components/SpiritualJournal';
 import { IconGalleryModal } from './components/IconGalleryModal';
 import { ChurchFathersAndSaintsGallery } from './components/ChurchFathersAndSaintsGallery';
-import { CollectiveChallengesView } from './components/CollectiveChallengesView';
-import { SpiritualCalendarView } from './components/SpiritualCalendarView';
+import { HymnsAudioProvider } from './context/HymnsAudioContext';
+import { SpiritualHymnsPlayer } from './components/SpiritualHymnsPlayer';
 
 function AppContent() {
   const [currentView, setCurrentView] = useState<AppView>(() => {
@@ -179,6 +182,10 @@ function AppContent() {
               onOpenEmergencyModal={handleOpenEmergency}
               onNavigateToSpiritualGames={() => handleNavigate('spiritual_games')}
               onOpenHeavenlyMessage={() => setShowHeavenlyMessageModal(true)}
+              onOpenSpiritualJournal={() => setShowSpiritualJournal(true)}
+              onOpenIconGallery={() => setShowIconGallery(true)}
+              onOpenSaintsGallery={() => setShowSaintsGallery(true)}
+              onNavigateToSpiritualFather={() => handleNavigate('spiritual_father')}
             />
           )}
 
@@ -215,6 +222,7 @@ function AppContent() {
               onOpenRegister={() => setShowRegistrationModal(true)}
               onStartStage={handleStartStage}
               onBackToHome={() => handleNavigate('home')}
+              initialTab="dioceses"
             />
           )}
 
@@ -251,22 +259,6 @@ function AppContent() {
               onBackToHome={() => handleNavigate('home')}
               onOpenIconGallery={() => setShowIconGallery(true)}
               onOpenSaintsGallery={() => setShowSaintsGallery(true)}
-            />
-          )}
-
-          {currentView === 'collective_challenges' && (
-            <CollectiveChallengesView
-              currentUser={currentUser}
-              onOpenLogin={() => setShowRegistrationModal(true)}
-              onBackToHome={() => handleNavigate('home')}
-            />
-          )}
-
-          {currentView === 'spiritual_calendar' && (
-            <SpiritualCalendarView
-              currentUser={currentUser}
-              onOpenLogin={() => setShowRegistrationModal(true)}
-              onBackToHome={() => handleNavigate('home')}
             />
           )}
 
@@ -316,6 +308,7 @@ function AppContent() {
 
           {currentView === 'supervisor' && (
             <SupervisorDashboard
+              onBackToHome={() => handleNavigate('home')}
               onTestStageAsAdmin={(stgId) => {
                 handleSetActiveStage(stgId);
                 handleNavigate('stage_player');
@@ -327,6 +320,29 @@ function AppContent() {
             <FinalCeremonyView
               onBackToHome={() => handleNavigate('home')}
               onOpenLeaderboard={() => handleNavigate('leaderboard')}
+            />
+          )}
+
+          {currentView === 'collective_challenges' && (
+            <CollectiveChallengesView
+              currentUser={currentUser}
+              onOpenLogin={() => setShowRegistrationModal(true)}
+              onBackToHome={() => handleNavigate('home')}
+            />
+          )}
+
+          {currentView === 'spiritual_calendar' && (
+            <SpiritualCalendarView
+              currentUser={currentUser}
+              onOpenLogin={() => setShowRegistrationModal(true)}
+              onBackToHome={() => handleNavigate('home')}
+            />
+          )}
+
+          {currentView === 'spiritual_father' && (
+            <SpiritualFatherCompanion
+              currentUser={currentUser}
+              onBackToHome={() => handleNavigate('home')}
             />
           )}
         </main>
@@ -378,6 +394,9 @@ function AppContent() {
         onClose={() => setShowSaintsGallery(false)}
         currentUser={currentUser}
       />
+
+      {/* Global Spiritual Hymns Audio Player */}
+      <SpiritualHymnsPlayer />
     </div>
   );
 }
@@ -386,7 +405,9 @@ export default function App() {
   return (
     <LanguageProvider>
       <ReadingThemeProvider>
-        <AppContent />
+        <HymnsAudioProvider>
+          <AppContent />
+        </HymnsAudioProvider>
       </ReadingThemeProvider>
     </LanguageProvider>
   );

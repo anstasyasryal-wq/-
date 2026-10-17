@@ -3,7 +3,7 @@ import { User, Stage, Announcement } from '../types';
 import { FortuneWheel, WheelSection } from './FortuneWheel';
 import { getOrRefreshDailyMessage, formatRemainingTime } from '../utils/heavenlyHistory';
 import { Sparkles, Heart, Clock, ShieldCheck } from 'lucide-react';
-import { QuoteOfTheDayCard } from './QuoteOfTheDayCard';
+import { useHymnsAudio } from '../context/HymnsAudioContext';
 
 interface HomeViewProps {
   currentUser: User | null;
@@ -30,6 +30,10 @@ interface HomeViewProps {
   onOpenEmergencyModal?: (situation: 'distress' | 'boredom' | 'lukewarmness' | 'anger') => void;
   onNavigateToSpiritualGames?: () => void;
   onOpenHeavenlyMessage?: () => void;
+  onOpenSpiritualJournal?: () => void;
+  onOpenIconGallery?: () => void;
+  onOpenSaintsGallery?: () => void;
+  onNavigateToSpiritualFather?: () => void;
 }
 
 export const HomeView: React.FC<HomeViewProps> = ({
@@ -57,9 +61,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
   onOpenEmergencyModal,
   onNavigateToSpiritualGames,
   onOpenHeavenlyMessage,
+  onOpenSpiritualJournal,
+  onOpenIconGallery,
+  onOpenSaintsGallery,
+  onNavigateToSpiritualFather,
 }) => {
   const [selectedSection, setSelectedSection] = useState<WheelSection | null>(null);
   const { message: dailyMessage, timeRemainingMs } = getOrRefreshDailyMessage(false);
+  const { openPlayerModal } = useHymnsAudio();
 
   const wheelSections: WheelSection[] = [
     {
@@ -70,12 +79,25 @@ export const HomeView: React.FC<HomeViewProps> = ({
       line2: 'الرسمية',
       icon: '🏆',
       color: '#9a6700',
+      badge: 'المسابقة الكبرى',
       description: 'ست مراحل إلكترونية متدرجة مع بنك أسئلة مركزي وتصنيف لحظي وتتويج شرفي.',
       verse: 'كُلُّ مَنْ يُجَاهِدُ يَضْبُطُ نَفْسَهُ فِي كُلِّ شَيْءٍ. أَمَّا أُولئِكَ فَلِكَيْ يَنَالُوا إِكْلِيلًا يَفْنَى، وَأَمَّا نَحْنُ فَإِكْلِيلًا لاَ يَفْنَى.',
       verseRef: '1 كورنثوس 9: 25',
       patristicQuote: 'إن الجهاد الروحي لا يُقاس بكثرة المجهود الظاهر، بل بنقاوة القلب والأمانة لله حتى النفس الأخير.',
       patristicSaint: 'القديس أنطونيوس الكبير',
       onOpen: () => onNavigateToCompetitions(),
+      items: [
+        {
+          title: 'المراحل الست الرسمية',
+          subtitle: 'اختبارات إلكترونية تفاعلية متدرجة الصعوبة',
+          onClick: () => onNavigateToCompetitions(),
+        },
+        {
+          title: 'لوحة الصدارة والتتويج',
+          subtitle: 'ترتيب المتسابقين والإيبارشيات لحظياً',
+          onClick: () => onNavigateToLeaderboard(),
+        },
+      ],
     },
     {
       id: 'spiritual_life',
@@ -85,12 +107,25 @@ export const HomeView: React.FC<HomeViewProps> = ({
       line2: 'الروحية',
       icon: '☀️',
       color: '#047857',
-      description: 'خطة قراءة الكتاب المقدس اليومية، مخدع الصلاة، ومسبحة صلاة يسوع.',
+      badge: 'خطة سنوية ومخدع',
+      description: 'خطة قراءة الكتاب المقدس والآباء السنوية (365 يوماً)، مخدع الصلاة، ومسبحة صلاة يسوع.',
       verse: 'وَأَمَّا أَنْتَ فَمَتَى صَلَّيْتَ فَادْخُلْ إِلَى مِخْدَعِكَ وَأَغْلِقْ بَابَكَ، وَصَلِّ إِلَى أَبِيكَ الَّذِي فِي الْخَفَاءِ.',
       verseRef: 'متى 6: 6',
       patristicQuote: 'الصلاة هي نسيم الروح وتنفس الحياة الأبدية، وبدونها يموت القلب روحياً كما يموت الجسد بلا هواء.',
       patristicSaint: 'القديس يوحنا ذهبي الفم',
       onOpen: () => onNavigateToSpiritualLife?.(),
+      items: [
+        {
+          title: 'متتبع خطة القراءة السنوية (365 يوماً)',
+          subtitle: 'متابعة بصرية سنوية مع أوسمة وتأملات مخدعية',
+          onClick: () => onNavigateToSpiritualLife?.(),
+        },
+        {
+          title: 'صلوات المخدع والأجبية',
+          subtitle: 'أوقات الصلاة والهدوء الروحي اليومي',
+          onClick: () => onNavigateToSpiritualLife?.(),
+        },
+      ],
     },
     {
       id: 'biblical_study',
@@ -106,6 +141,13 @@ export const HomeView: React.FC<HomeViewProps> = ({
       patristicQuote: 'قراءة الكتب المقدسة تُنير العقل وتطرد ظلمة الجهل، وهي السور المنيع ضد سهام الشرير.',
       patristicSaint: 'القديس أثناسيوس الرسولي',
       onOpen: () => onNavigateToBiblicalStudy?.(),
+      items: [
+        {
+          title: 'أبحاث اللاهوت وتفسير العهدين',
+          subtitle: 'دراسة النصوص مع شواهد كنسية موثقة',
+          onClick: () => onNavigateToBiblicalStudy?.(),
+        },
+      ],
     },
     {
       id: 'library',
@@ -115,12 +157,30 @@ export const HomeView: React.FC<HomeViewProps> = ({
       line2: 'المعرفية',
       icon: '📚',
       color: '#78350f',
-      description: 'مكتبة رقمية متكاملة للكتب والوثائق الكنسية مع قارئ فصول ومزامنة سحابية.',
+      badge: 'جديد ومحدث',
+      description: 'مكتبة رقمية متكاملة للكتب والوثائق الكنسية، ومعرض الأيقونات وسير قديسي الشرق والغرب.',
       verse: 'إِلَى أَنْ أَجِيءَ اعْكُفْ عَلَى الْقِرَاءَةِ وَالْوَعْظِ وَالتَّعْلِيمِ.',
       verseRef: '1 تيموثاوس 4: 13',
       patristicQuote: 'اجعل من أقوال الآباء مصباحاً لخطواتك، فالذي يسير بنورهم لا يضل في برية هذا العالم.',
       patristicSaint: 'مار إسحق السرياني',
       onOpen: () => onNavigateToLibrary?.(),
+      items: [
+        {
+          title: 'سير الآباء والقديسين (الشرق والغرب)',
+          subtitle: 'موسوعة لآباء وقديسي الكنيسة الجامعة مع أقوالهم',
+          onClick: () => onOpenSaintsGallery ? onOpenSaintsGallery() : onNavigateToLibrary?.(),
+        },
+        {
+          title: 'معرض الأيقونات الكنسية التفاعلي',
+          subtitle: 'الشرح الروحي واللاهوتي والتاريخي للأيقونات',
+          onClick: () => onOpenIconGallery ? onOpenIconGallery() : onNavigateToLibrary?.(),
+        },
+        {
+          title: 'مستودع الكتب والمراجع والأبحاث',
+          subtitle: 'تراث الكنيسة وأبحاث الوراثة والعلوم وقارئ الفصول',
+          onClick: () => onNavigateToLibrary?.(),
+        },
+      ],
     },
     {
       id: 'monastic_oasis',
@@ -130,12 +190,30 @@ export const HomeView: React.FC<HomeViewProps> = ({
       line2: 'التكريس',
       icon: '🕯️',
       color: '#b45309',
-      description: 'ركائز المكرس الـ 7، ميزان فحص الضمير اليومي، ميثاق تجديد النذر، وصيدلية الآباء للحروب الروحية.',
+      badge: 'مشغل ألحان',
+      description: 'ركائز المكرس الـ 7، مشغل ألحان وترانيم هادئة، ميزان فحص الضمير، وميثاق تجديد النذر.',
       verse: 'فِي الْهُدُوءِ وَالطُّمَأْنِينَةِ تَكُونُ قُوَّتُكُمْ.',
       verseRef: 'إشعياء 30: 15',
       patristicQuote: 'الهدوء والسكون هما مبدأ نقاوة النفس، ففيهما يصمت اللسان ليتكلم القلب مع الله في خفاء.',
       patristicSaint: 'القديس باسيليوس الكبير',
       onOpen: () => onNavigateToMonasticOasis?.(),
+      items: [
+        {
+          title: 'مشغل الترانيم والألحان الكنسية والتأملية',
+          subtitle: 'قوائم مخصصة لكل مناسبة روحية (المخدع، الصوم، القيامة، التكريس، كيهك، التعزية)',
+          onClick: () => openPlayerModal(),
+        },
+        {
+          title: 'ركائز التكريس الـ ٧ الإنجيلية',
+          subtitle: 'دستور المكرس ليكون قلبه حسب قلب الله',
+          onClick: () => onNavigateToMonasticOasis?.(),
+        },
+        {
+          title: 'ميزان فحص الضمير وصيدلية الآباء',
+          subtitle: 'محاسبة النفس وعلاج الجفاف والفتور الروحي',
+          onClick: () => onNavigateToMonasticOasis?.(),
+        },
+      ],
     },
     {
       id: 'workshops',
@@ -151,6 +229,13 @@ export const HomeView: React.FC<HomeViewProps> = ({
       patristicQuote: 'الخادم الحقيقي هو من يخدم بالقدوة الصالحة الصامتة قبل الكلمة المنطوقة، وبالمحبة الباذلة.',
       patristicSaint: 'القديس غريغوريوس الثيؤلوغوس',
       onOpen: () => onNavigateToWorkshops?.(),
+      items: [
+        {
+          title: 'ورش إعداد وتدبير الخدمة والوعظ',
+          subtitle: 'حقائب تدريبية موجهة للمكرسين والخدام',
+          onClick: () => onNavigateToWorkshops?.(),
+        },
+      ],
     },
     {
       id: 'creative_lab',
@@ -205,12 +290,25 @@ export const HomeView: React.FC<HomeViewProps> = ({
       line2: 'الإنقاذ',
       icon: '🛡️',
       color: '#b91c1c',
+      badge: 'إسعاف روحي',
       description: 'خطط تدخل سريع وشواهد تعزية في أوقات الضيقة، الفتور الروحي، وحروب التجربة.',
       verse: 'اللهُ لَنَا مَلْجَأٌ وَقُوَّةٌ، عَوْنًا فِي الضِّيقَاتِ وُجِدَ شَدِيدًا.',
       verseRef: 'مزمور 46: 1',
       patristicQuote: 'إذا هاجمتك أمواج التجربة والضيقة، لا تنظر إلى قوة الريح بل إلى يد المخلص الممدودة لتنقذك.',
       patristicSaint: 'القديس يوحنا الدرجي',
       onOpen: () => onOpenEmergencyModal?.('distress'),
+      items: [
+        {
+          title: 'خطة الإنقاذ في الضيقة والحزن',
+          subtitle: 'آيات تعزية وطمأنينة فورية للقلب المتألم',
+          onClick: () => onOpenEmergencyModal?.('distress'),
+        },
+        {
+          title: 'علاج الفتور والبرود الروحي',
+          subtitle: 'خطوات عملية لاستعادة حرارة المخدع الأولى',
+          onClick: () => onOpenEmergencyModal?.('lukewarmness'),
+        },
+      ],
     },
     {
       id: 'personal_space',
@@ -220,12 +318,58 @@ export const HomeView: React.FC<HomeViewProps> = ({
       line2: 'الشخصية',
       icon: '📝',
       color: '#0369a1',
-      description: 'مذكرات المخدع السرية، نقاط الاعتراف، وحبل صلاة يسوع لمناجاة القلب.',
+      badge: 'جديد ومحدث',
+      description: 'المجلة الروحية، صندوق رسائل أبيك السماوي (٦٨+ رسالة)، وحبل صلاة يسوع لمناجاة القلب.',
       verse: 'اخْتَبِرْنِي يَا اَللهُ وَاعْرِفْ قَلْبِي. امْتَحِنِّي وَاعْرِفْ أَفْكَارِي. وَانْظُرْ إِنْ كَانَ فِيَّ طَرِيقٌ بَاطِلٌ، وَاهْدِنِي طَرِيقًا أَبَدِيًّا.',
       verseRef: 'مزمور 139: 23-24',
       patristicQuote: 'حاسب نفسك كل مساء قبل أن يباغتك النوم، واكتب خطاياك بدموع التوبة أمام ديان المسكونة الرحيم.',
       patristicSaint: 'القديس الأنبا موسى الأسود',
       onOpen: () => onNavigateToPersonalSpace?.(),
+      items: [
+        {
+          title: 'المجلة الروحية ومذكرات المخدع',
+          subtitle: 'سجل تأملاتك وتدريباتك اليومية الشخصية للرجوع إليها',
+          onClick: () => onOpenSpiritualJournal ? onOpenSpiritualJournal() : onNavigateToPersonalSpace?.(),
+        },
+        {
+          title: 'صندوق رسائل أبيك السماوي (٦٨+ رسالة)',
+          subtitle: 'اسحب رسالتك اليومية بالحظ مع منع التكرار 24 ساعة',
+          onClick: () => onOpenHeavenlyMessage ? onOpenHeavenlyMessage() : onNavigateToPersonalSpace?.(),
+        },
+        {
+          title: 'حبل صلاة يسوع الإلكتروني (33 عقدة)',
+          subtitle: '«يا ربي يسوع المسيح، ارحمني أنا الخاطئ»',
+          onClick: () => onNavigateToPersonalSpace?.(),
+        },
+      ],
+    },
+    {
+      id: 'spiritual_father',
+      name: 'قسم أبوي الروحي وإعداد الاعتراف',
+      shortName: 'أبوي الروحي',
+      line1: 'أبوي',
+      line2: 'الروحي',
+      icon: '🛡️',
+      color: '#475569',
+      badge: 'إعداد الاعتراف',
+      description: 'سجل نقاط جلسة الاعتراف القادمة، نصائح أب الاعتراف المحفوظة، ودليل الإعداد للتوبة.',
+      verse: 'طَاعَةُ مُرْشِدِيكُمْ وَالْخُضُوعُ لَهُمْ، لأَنَّهُمْ يَسْهَرُونَ لأَجْلِ نُفُوسِكُمْ كَأَنَّهُمْ سَيُوَفُّونَ حِسَابًا.',
+      verseRef: 'عبرانيين 13: 17',
+      patristicQuote: 'من له أب روحي يستشيره في كل أموره، فقد استريح من حيل إبليس، لأن السلام يسكن في المشورة المتواضعة.',
+      patristicSaint: 'القديس قيصريوس أريلة',
+      onOpen: () => onNavigateToSpiritualFather?.(),
+      items: [
+        {
+          title: 'نقاط جلسة الاعتراف القادمة',
+          subtitle: 'سجل ما أود مناقشته وعرضه على أب الاعتراف',
+          onClick: () => onNavigateToSpiritualFather?.(),
+        },
+        {
+          title: 'نصائح وإرشادات أبوي الروحي',
+          subtitle: 'حفظ واسترجاع الوصايا والإرشادات الروحية',
+          onClick: () => onNavigateToSpiritualFather?.(),
+        },
+      ],
     },
     {
       id: 'leaderboard',
@@ -302,9 +446,6 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </div>
         </div>
       )}
-
-      {/* Quote of the Day Card */}
-      <QuoteOfTheDayCard currentUser={currentUser} />
     </div>
   );
 };

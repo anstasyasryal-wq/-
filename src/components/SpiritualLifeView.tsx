@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { User } from '../types';
 import { soundManager } from '../utils/audio';
-import { Heart, ChevronLeft, CheckCircle2, BookOpen, Flame, Sun, Moon } from 'lucide-react';
+import { Heart, ChevronLeft, CheckCircle2, Calendar, Clock, Sparkles, Award } from 'lucide-react';
+import { ScheduledPrayerReminders } from './ScheduledPrayerReminders';
+import { AnnualReadingTracker } from './AnnualReadingTracker';
+import { SpiritualMaturityTests } from './SpiritualMaturityTests';
 
 interface SpiritualLifeViewProps {
   currentUser: User | null;
@@ -16,6 +19,7 @@ export const SpiritualLifeView: React.FC<SpiritualLifeViewProps> = ({
   onOpenSpiritualGuide,
   onBackToHome,
 }) => {
+  const [activeTab, setActiveTab] = useState<'annual_plan' | 'maturity_tests' | 'scheduled_prayers' | 'starter_days'>('annual_plan');
   const [completedDays, setCompletedDays] = useState<number[]>([1, 2]);
 
   const toggleDay = (day: number) => {
@@ -67,17 +71,97 @@ export const SpiritualLifeView: React.FC<SpiritualLifeViewProps> = ({
       <div className="rounded-3xl bg-gradient-to-r from-emerald-950 via-stone-900 to-amber-950 text-stone-100 p-6 sm:p-8 border border-emerald-600/40 shadow-xl space-y-3">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-900/60 border border-emerald-600/40 text-emerald-300 text-xs font-semibold">
           <Heart className="w-3.5 h-3.5 text-emerald-400" />
-          <span>مخدع الصلاة وخطة القراءة اليومية</span>
+          <span>مخدع الصلاة وخطة القراءة اليومية والسنوية</span>
         </div>
         <h1 className="font-spiritual text-2xl sm:text-3xl font-bold text-amber-100">
           ☀️ الحياة الروحية وصلاة المخدع
         </h1>
         <p className="text-xs sm:text-sm text-stone-300 leading-relaxed max-w-2xl">
-          برنامج يومي متجدد للمكرسين والمشاركين لمتابعة قراءة الكتاب المقدس والتأملات الآبائية وحبل صلاة يسوع.
+          برنامج متكامل للمكرسين يضم خطة القراءة السنوية الشاملة (365 يوماً)، اختبارات النضج الروحي التفاعلية، ومنبهات صلوات الأجبية.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Tabs navigation */}
+      <div className="flex items-center gap-2 p-1.5 bg-stone-900/90 rounded-2xl border border-amber-800/40 overflow-x-auto text-xs font-bold scrollbar-none shadow-md">
+        <button
+          onClick={() => {
+            soundManager.playTick();
+            setActiveTab('annual_plan');
+          }}
+          className={`px-4 py-2.5 rounded-xl flex items-center gap-2 transition shrink-0 cursor-pointer ${
+            activeTab === 'annual_plan'
+              ? 'bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-md'
+              : 'text-stone-300 hover:bg-stone-800'
+          }`}
+        >
+          <Calendar className="w-4 h-4 text-emerald-300" />
+          <span>خطة القراءة السنوية (365 يوماً)</span>
+        </button>
+
+        <button
+          onClick={() => {
+            soundManager.playTick();
+            setActiveTab('maturity_tests');
+          }}
+          className={`px-4 py-2.5 rounded-xl flex items-center gap-2 transition shrink-0 cursor-pointer ${
+            activeTab === 'maturity_tests'
+              ? 'bg-gradient-to-r from-teal-600 to-cyan-700 text-white shadow-md'
+              : 'text-stone-300 hover:bg-stone-800'
+          }`}
+        >
+          <Award className="w-4 h-4 text-teal-300" />
+          <span>اختبارات النضج الروحي التفاعلية</span>
+        </button>
+
+        <button
+          onClick={() => {
+            soundManager.playTick();
+            setActiveTab('scheduled_prayers');
+          }}
+          className={`px-4 py-2.5 rounded-xl flex items-center gap-2 transition shrink-0 cursor-pointer ${
+            activeTab === 'scheduled_prayers'
+              ? 'bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-md'
+              : 'text-stone-300 hover:bg-stone-800'
+          }`}
+        >
+          <Clock className="w-4 h-4 text-amber-300" />
+          <span>منبهات صلوات الأجبية والسواعي</span>
+        </button>
+
+        <button
+          onClick={() => {
+            soundManager.playTick();
+            setActiveTab('starter_days');
+          }}
+          className={`px-4 py-2.5 rounded-xl flex items-center gap-2 transition shrink-0 cursor-pointer ${
+            activeTab === 'starter_days'
+              ? 'bg-gradient-to-r from-stone-700 to-stone-800 text-white shadow-md'
+              : 'text-stone-300 hover:bg-stone-800'
+          }`}
+        >
+          <Sparkles className="w-4 h-4 text-stone-300" />
+          <span>محطات البداية السريعة</span>
+        </button>
+      </div>
+
+      {/* Tab 1: Annual Reading Tracker */}
+      {activeTab === 'annual_plan' && (
+        <AnnualReadingTracker currentUser={currentUser} onOpenLogin={onOpenLogin} />
+      )}
+
+      {/* Tab 2: Maturity Tests */}
+      {activeTab === 'maturity_tests' && (
+        <SpiritualMaturityTests currentUser={currentUser} />
+      )}
+
+      {/* Tab 3: Scheduled Prayers */}
+      {activeTab === 'scheduled_prayers' && (
+        <ScheduledPrayerReminders currentUser={currentUser} />
+      )}
+
+      {/* Tab 4: Starter Days */}
+      {activeTab === 'starter_days' && (
+        <div className="space-y-4">
         {planDays.map((item) => {
           const isDone = completedDays.includes(item.day);
           return (
@@ -127,7 +211,8 @@ export const SpiritualLifeView: React.FC<SpiritualLifeViewProps> = ({
             </div>
           );
         })}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

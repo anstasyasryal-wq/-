@@ -29,6 +29,7 @@ export interface WheelSection {
   patristicQuote?: string;
   patristicSaint?: string;
   onOpen: () => void;
+  badge?: string;
   items?: { title: string; subtitle: string; onClick?: () => void }[];
 }
 
@@ -537,9 +538,16 @@ export const FortuneWheel: React.FC<FortuneWheelProps> = ({
               {selectedSection.icon}
             </div>
             <div className="space-y-1">
-              <h3 className="font-spiritual text-xl sm:text-2xl font-bold text-amber-100">
-                {selectedSection.name}
-              </h3>
+              <div className="flex items-center gap-2">
+                <h3 className="font-spiritual text-xl sm:text-2xl font-bold text-amber-100">
+                  {selectedSection.name}
+                </h3>
+                {selectedSection.badge && (
+                  <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                    {selectedSection.badge}
+                  </span>
+                )}
+              </div>
               <p className="text-xs sm:text-sm text-stone-300 leading-relaxed">
                 {selectedSection.description}
               </p>
@@ -581,6 +589,31 @@ export const FortuneWheel: React.FC<FortuneWheelProps> = ({
                   )}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Sub-items and Shortcuts */}
+          {selectedSection.items && selectedSection.items.length > 0 && (
+            <div className="space-y-2 pt-2 border-t border-amber-900/50">
+              <span className="text-[11px] font-bold text-amber-300 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span>الميزات والمكونات المحدثة داخل هذا القسم:</span>
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {selectedSection.items.map((sub, sIdx) => (
+                  <button
+                    key={sIdx}
+                    onClick={sub.onClick || selectedSection.onOpen}
+                    className="p-3 rounded-2xl bg-stone-950/80 hover:bg-amber-950/50 border border-stone-800 hover:border-amber-500/60 text-right transition cursor-pointer flex flex-col justify-between group shadow-xs"
+                  >
+                    <span className="text-xs font-bold text-amber-200 group-hover:text-amber-100 flex items-center justify-between">
+                      <span>{sub.title}</span>
+                      <ChevronLeft className="w-3.5 h-3.5 text-stone-500 group-hover:text-amber-400 transition transform group-hover:-translate-x-0.5" />
+                    </span>
+                    <span className="text-[10px] text-stone-400 truncate mt-1">{sub.subtitle}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
@@ -635,9 +668,16 @@ export const FortuneWheel: React.FC<FortuneWheelProps> = ({
                     {sec.shortName || sec.name}
                   </span>
                 </div>
-                {isVisited && (
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" title="تمت زيارته اليوم" />
-                )}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {sec.badge && (
+                    <span className="px-1.5 py-0.5 text-[8px] font-bold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                      {sec.badge}
+                    </span>
+                  )}
+                  {isVisited && (
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" title="تمت زيارته اليوم" />
+                  )}
+                </div>
               </button>
             );
           })}

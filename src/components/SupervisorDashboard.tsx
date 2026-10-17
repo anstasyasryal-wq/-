@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { getStoredStages, saveStages, getStoredUsers } from '../utils/competitionEngine';
-import { Shield, Play, Lock, Unlock, Trophy, Users } from 'lucide-react';
+import { Shield, Play, Lock, Unlock, Trophy, Users, ChevronLeft } from 'lucide-react';
 
 interface SupervisorDashboardProps {
   onTestStageAsAdmin: (stageId: number) => void;
+  onBackToHome?: () => void;
 }
 
 export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({
   onTestStageAsAdmin,
+  onBackToHome,
 }) => {
   const [stages, setStages] = useState(getStoredStages());
   const users = getStoredUsers();
@@ -22,6 +24,17 @@ export const SupervisorDashboard: React.FC<SupervisorDashboardProps> = ({
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-12 animate-fade-in text-right">
+      {onBackToHome && (
+        <div className="flex items-center justify-between pb-1">
+          <button
+            onClick={onBackToHome}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-bold text-xs transition cursor-pointer shadow-xs border border-amber-300"
+          >
+            <ChevronLeft className="w-4 h-4 rotate-180" />
+            <span>العودة للشاشة الرئيسية والعجلة</span>
+          </button>
+        </div>
+      )}
       <div className="rounded-3xl bg-gradient-to-r from-stone-900 via-amber-950 to-stone-900 text-stone-100 p-6 sm:p-8 border border-amber-600/40 shadow-xl space-y-3">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-900/60 border border-amber-600/40 text-amber-300 text-xs font-semibold">
           <Shield className="w-3.5 h-3.5 text-amber-400" />

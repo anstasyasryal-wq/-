@@ -1,26 +1,51 @@
 import express from 'express';
 import { fileURLToPath } from 'url';
 import path from 'path';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const isProduction = process.env.NODE_ENV === 'production';
 
 app.use(express.json());
-
-// In production, serve the built Vite files
-app.use(express.static(path.join(__dirname, 'dist')));
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', name: 'حسب قلب الله' });
 });
 
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
-});
+async function startServer() {
+  const distPath = path.join(__dirname, 'dist');
+  const distIndex = path.join(distPath, 'index.html');
 
-app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
-});
+  if (isProduction && fs.existsSync(distIndex)) {
+    app.use(express.static(distPath));
+    app.get('*', (req, res) => {
+      res.sendFile(distIndex);
+    });
+  } else {
+    try {
+      const { createServer: createViteServer } = await import('vite');
+      const vite = await createViteServer({
+        server: { middlewareMode: true },
+        appType: 'spa',
+      });
+      app.use(vite.middlewares);
+    } catch {
+      if (fs.existsSync(distIndex)) {
+        app.use(express.static(distPath));
+        app.get('*', (req, res) => {
+          res.sendFile(distIndex);
+        });
+      }
+    }
+  }
+
+  app.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}`);
+  });
+}
+
+startServer();

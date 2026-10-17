@@ -19,6 +19,7 @@ interface LeaderboardViewProps {
   onOpenRegister: () => void;
   onStartStage: (stageId: number) => void;
   onBackToHome?: () => void;
+  initialTab?: 'general' | 'dioceses';
 }
 
 export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
@@ -26,8 +27,9 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
   onOpenRegister,
   onStartStage,
   onBackToHome,
+  initialTab,
 }) => {
-  const [tab, setTab] = useState<'general' | 'dioceses'>('general');
+  const [tab, setTab] = useState<'general' | 'dioceses'>(initialTab || 'general');
   const allUsers = getStoredUsers();
   const sortedParticipants = sortParticipantsByTieBreaker(allUsers);
   const diocesesRankings = getDiocesesRankings();
