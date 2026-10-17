@@ -19,6 +19,8 @@ import {
   Gamepad2,
   HelpCircle,
   Compass,
+  Users,
+  Calendar,
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -54,12 +56,9 @@ export const Header: React.FC<HeaderProps> = ({
     { view: 'home' as AppView, label: 'الرئيسية (العجلة)', icon: Home },
     { view: 'monastic_oasis' as AppView, label: 'دستور المكرس', icon: Compass },
     { view: 'spiritual_life' as AppView, label: 'الحياة الروحية', icon: Heart },
-    { view: 'competitions_hub' as AppView, label: 'المسابقات والتقييم', icon: Trophy },
-    { view: 'leaderboard' as AppView, label: 'لوحة الصدارة', icon: Trophy },
-    { view: 'biblical_study' as AppView, label: 'الدراسة والآباء', icon: BookOpen },
-    { view: 'library' as AppView, label: 'المكتبة المعرفية', icon: BookOpen },
-    { view: 'workshops' as AppView, label: 'ورش العمل', icon: ScrollText },
-    { view: 'spiritual_games' as AppView, label: 'واحة الألعاب', icon: Gamepad2 },
+    { view: 'library' as AppView, label: 'المكتبة والآباء', icon: BookOpen },
+    { view: 'collective_challenges' as AppView, label: 'التحديات', icon: Users },
+    { view: 'spiritual_calendar' as AppView, label: 'التقويم', icon: Calendar },
   ];
 
   return (
@@ -93,7 +92,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Desktop Quick Nav */}
         <nav className="hidden lg:flex items-center gap-1">
-          {navLinks.slice(0, 5).map((l) => (
+          {navLinks.map((l) => (
             <button
               key={l.view}
               onClick={() => onNavigate(l.view)}

@@ -43,6 +43,11 @@ import { ReadingThemeProvider, useReadingTheme } from './context/ReadingThemeCon
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { EmergencyRescueModal } from './components/EmergencyRescueModal';
 import { HeavenlyMessageModal } from './components/HeavenlyMessageModal';
+import { SpiritualJournal } from './components/SpiritualJournal';
+import { IconGalleryModal } from './components/IconGalleryModal';
+import { ChurchFathersAndSaintsGallery } from './components/ChurchFathersAndSaintsGallery';
+import { CollectiveChallengesView } from './components/CollectiveChallengesView';
+import { SpiritualCalendarView } from './components/SpiritualCalendarView';
 
 function AppContent() {
   const [currentView, setCurrentView] = useState<AppView>(() => {
@@ -69,6 +74,9 @@ function AppContent() {
   const [showSpiritualGuideModal, setShowSpiritualGuideModal] = useState<boolean>(false);
   const [showEmergencyModal, setShowEmergencyModal] = useState<boolean>(false);
   const [showHeavenlyMessageModal, setShowHeavenlyMessageModal] = useState<boolean>(false);
+  const [showSpiritualJournal, setShowSpiritualJournal] = useState<boolean>(false);
+  const [showIconGallery, setShowIconGallery] = useState<boolean>(false);
+  const [showSaintsGallery, setShowSaintsGallery] = useState<boolean>(false);
   const [emergencySituation, setEmergencySituation] = useState<'distress' | 'boredom' | 'lukewarmness' | 'anger'>('distress');
 
   const { getContainerClass } = useReadingTheme();
@@ -232,11 +240,30 @@ function AppContent() {
               onOpenLogin={() => setShowRegistrationModal(true)}
               onBackToHome={() => handleNavigate('home')}
               onOpenHeavenlyMessage={() => setShowHeavenlyMessageModal(true)}
+              onOpenSpiritualJournal={() => setShowSpiritualJournal(true)}
             />
           )}
 
           {currentView === 'library' && (
             <LibraryView
+              currentUser={currentUser}
+              onOpenLogin={() => setShowRegistrationModal(true)}
+              onBackToHome={() => handleNavigate('home')}
+              onOpenIconGallery={() => setShowIconGallery(true)}
+              onOpenSaintsGallery={() => setShowSaintsGallery(true)}
+            />
+          )}
+
+          {currentView === 'collective_challenges' && (
+            <CollectiveChallengesView
+              currentUser={currentUser}
+              onOpenLogin={() => setShowRegistrationModal(true)}
+              onBackToHome={() => handleNavigate('home')}
+            />
+          )}
+
+          {currentView === 'spiritual_calendar' && (
+            <SpiritualCalendarView
               currentUser={currentUser}
               onOpenLogin={() => setShowRegistrationModal(true)}
               onBackToHome={() => handleNavigate('home')}
@@ -331,6 +358,24 @@ function AppContent() {
       <HeavenlyMessageModal
         isOpen={showHeavenlyMessageModal}
         onClose={() => setShowHeavenlyMessageModal(false)}
+        currentUser={currentUser}
+      />
+
+      <SpiritualJournal
+        isOpen={showSpiritualJournal}
+        onClose={() => setShowSpiritualJournal(false)}
+        currentUser={currentUser}
+      />
+
+      <IconGalleryModal
+        isOpen={showIconGallery}
+        onClose={() => setShowIconGallery(false)}
+        currentUser={currentUser}
+      />
+
+      <ChurchFathersAndSaintsGallery
+        isOpen={showSaintsGallery}
+        onClose={() => setShowSaintsGallery(false)}
         currentUser={currentUser}
       />
     </div>

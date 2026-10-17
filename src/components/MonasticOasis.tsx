@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '../types';
 import { soundManager } from '../utils/audio';
+import { MonasticAudioPlayer } from './MonasticAudioPlayer';
 import {
   Compass,
   ChevronLeft,
@@ -409,6 +410,9 @@ export const MonasticOasis: React.FC<MonasticOasisProps> = ({ currentUser, onBac
           المرجع الروحي الشامل لكل نفس نذرت قلبها للمسيح؛ ركائز التكريس الإنجيلي، محاسبة النفس اليومية بالميزان، ميثاق تجديد العهد، وصيدلية الآباء للحروب الروحية.
         </p>
       </div>
+
+      {/* Interactive Monastic Audio Player */}
+      <MonasticAudioPlayer />
 
       {/* Navigation Sub-Tabs */}
       <div className="flex items-center gap-1.5 p-1.5 bg-stone-900/90 rounded-2xl border border-amber-800/40 overflow-x-auto text-xs font-bold scrollbar-none shadow-md">

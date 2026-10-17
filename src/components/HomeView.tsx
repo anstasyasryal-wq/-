@@ -3,6 +3,7 @@ import { User, Stage, Announcement } from '../types';
 import { FortuneWheel, WheelSection } from './FortuneWheel';
 import { getOrRefreshDailyMessage, formatRemainingTime } from '../utils/heavenlyHistory';
 import { Sparkles, Heart, Clock, ShieldCheck } from 'lucide-react';
+import { QuoteOfTheDayCard } from './QuoteOfTheDayCard';
 
 interface HomeViewProps {
   currentUser: User | null;
@@ -301,6 +302,9 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </div>
         </div>
       )}
+
+      {/* Quote of the Day Card */}
+      <QuoteOfTheDayCard currentUser={currentUser} />
     </div>
   );
 };

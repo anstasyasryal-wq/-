@@ -1,17 +1,21 @@
 import React, { useState } from 'react';
 import { User } from '../types';
-import { BookOpen, Search, ChevronLeft, Bookmark, CheckCircle2, Cloud } from 'lucide-react';
+import { BookOpen, Search, ChevronLeft, Bookmark, CheckCircle2, Cloud, Sparkles } from 'lucide-react';
 
 interface LibraryViewProps {
   currentUser: User | null;
   onOpenLogin: () => void;
   onBackToHome: () => void;
+  onOpenIconGallery?: () => void;
+  onOpenSaintsGallery?: () => void;
 }
 
 export const LibraryView: React.FC<LibraryViewProps> = ({
   currentUser,
   onOpenLogin,
   onBackToHome,
+  onOpenIconGallery,
+  onOpenSaintsGallery,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -90,6 +94,54 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Saints Gallery Interactive Banner (East & West) */}
+      {onOpenSaintsGallery && (
+        <div className="rounded-2xl bg-gradient-to-r from-amber-950 via-stone-900 to-amber-950 border border-amber-500/50 p-4 sm:p-5 flex items-center justify-between gap-4 shadow-xl">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl sm:text-3xl">📜</span>
+            <div>
+              <h4 className="text-sm font-bold text-amber-200">
+                سير الآباء والقديسين (آباء الشرق والغرب)
+              </h4>
+              <p className="text-xs text-stone-300">
+                مرجع شامل يضم سير وتراث وعِبر عمالقة الإيمان في الكنيسة الجامعة شرقاً وغرباً.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onOpenSaintsGallery}
+            className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-md transition cursor-pointer flex items-center gap-1.5 shrink-0"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>استعرض سير الآباء</span>
+          </button>
+        </div>
+      )}
+
+      {/* Icon Gallery Interactive Banner */}
+      {onOpenIconGallery && (
+        <div className="rounded-2xl bg-gradient-to-r from-stone-900 via-amber-950/80 to-stone-900 border border-amber-500/50 p-4 sm:p-5 flex items-center justify-between gap-4 shadow-xl">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl sm:text-3xl">🖼️</span>
+            <div>
+              <h4 className="text-sm font-bold text-amber-200">
+                معرض الأيقونات الكنسية التفاعلي والشرح الروحي
+              </h4>
+              <p className="text-xs text-stone-300">
+                تأمل في دلالات الأيقونات القبطية والتقليدية والعمق اللاهوتي والتاريخي لكل أيقونة.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onOpenIconGallery}
+            className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-md transition cursor-pointer flex items-center gap-1.5 shrink-0"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>استعرض معرض الأيقونات</span>
+          </button>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filtered.map((b, i) => (

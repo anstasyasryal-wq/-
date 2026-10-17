@@ -8,6 +8,7 @@ interface PersonalSpaceViewProps {
   onOpenLogin: () => void;
   onBackToHome: () => void;
   onOpenHeavenlyMessage?: () => void;
+  onOpenSpiritualJournal?: () => void;
 }
 
 export const PersonalSpaceView: React.FC<PersonalSpaceViewProps> = ({
@@ -15,6 +16,7 @@ export const PersonalSpaceView: React.FC<PersonalSpaceViewProps> = ({
   onOpenLogin,
   onBackToHome,
   onOpenHeavenlyMessage,
+  onOpenSpiritualJournal,
 }) => {
   const [rosaryCount, setRosaryCount] = useState(0);
   const [notes, setNotes] = useState([
@@ -60,6 +62,30 @@ export const PersonalSpaceView: React.FC<PersonalSpaceViewProps> = ({
           مساحة آمنة وخاصة بك لحفظ طلبات صلاتك، وتأملاتك الفردية، وحبل صلاة يسوع الإلكتروني.
         </p>
       </div>
+
+      {/* Spiritual Journal Banner */}
+      {onOpenSpiritualJournal && (
+        <div className="rounded-2xl bg-gradient-to-r from-stone-900 via-amber-950/80 to-stone-900 border border-amber-500/50 p-4 sm:p-5 flex items-center justify-between gap-4 shadow-xl">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl sm:text-3xl">📖</span>
+            <div>
+              <h4 className="text-sm font-bold text-amber-200">
+                المجلة الروحية ومذكرات المخدع المفصلة
+              </h4>
+              <p className="text-xs text-stone-300">
+                سجل تأملاتك اليومية وتدريباتك الشخصية وحفظها في مساحتك الخاصة للرجوع إليها لاحقاً.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onOpenSpiritualJournal}
+            className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-md transition cursor-pointer flex items-center gap-1.5 shrink-0"
+          >
+            <BookOpen className="w-3.5 h-3.5" />
+            <span>افتح المجلة الروحية</span>
+          </button>
+        </div>
+      )}
 
       {/* Heavenly Father's Message Card */}
       {onOpenHeavenlyMessage && (

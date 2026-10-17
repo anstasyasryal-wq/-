@@ -15,7 +15,9 @@ export type AppView =
   | 'creative_lab'
   | 'study_tools'
   | 'monastic_oasis'
-  | 'spiritual_games';
+  | 'spiritual_games'
+  | 'collective_challenges'
+  | 'spiritual_calendar';
 
 export type UserRole = 'participant' | 'supervisor' | 'guest';
 
